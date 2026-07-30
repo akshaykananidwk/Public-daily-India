@@ -424,6 +424,14 @@ function openNewsModal(n) {
       <button class="ghost" id="btn-summarize">✨ સારાંશ</button>
       <button class="ghost" id="btn-video">🎬 વિડિયો (Reels)</button>
     </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;
+      flex-wrap:wrap">
+      <span style="font-size:13px;color:var(--muted)">⏰ શેડ્યૂલ પબ્લિશ:</span>
+      <input type="datetime-local" id="sched-at"
+        style="background:var(--bg-2);border:1px solid var(--line);
+        color:var(--ink);border-radius:8px;padding:7px">
+      <button class="ghost" id="btn-schedule">સેટ કરો</button>
+    </div>
     <div id="video-out"></div>
     ${n.source_url ? `<p style="margin-bottom:8px;font-size:12px">
       સોર્સ: <a href="${n.source_url}" target="_blank"
@@ -444,6 +452,17 @@ function openNewsModal(n) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text: $("#edit-body").value }) })).json();
     if (r.summary) $("#edit-body").value = r.summary;
+  };
+  if (n.scheduled_at) $("#sched-at").value =
+    n.scheduled_at.replace(" ", "T").slice(0, 16);
+  $("#btn-schedule").onclick = async () => {
+    const at = $("#sched-at").value;
+    if (!at) return toast("પહેલા સમય પસંદ કરો", "bad");
+    await fetch(`/api/news/${n.id}/schedule`, { method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ at }) });
+    toast("શેડ્યૂલ થઈ ગયું — સમય થાય એટલે આપોઆપ પબ્લિશ ⏰", "good");
+    $("#modal").classList.add("hidden"); loadNews();
   };
   $("#btn-video").onclick = async () => {
     $("#video-out").textContent = "વિડિયો બની રહ્યો છે... (~10-20 સે)";

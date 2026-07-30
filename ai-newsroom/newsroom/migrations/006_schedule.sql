@@ -1,0 +1,1 @@
+ALTER TABLE news ADD COLUMN scheduled_at DATETIME;

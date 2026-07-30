@@ -18,12 +18,25 @@ def _read_date(f) -> str:
 
 
 async def scheduler_loop():
-    from . import pipeline, whatsapp, reports
+    from . import pipeline, whatsapp, reports, db
     while True:
         try:
             cfg = load_config()
             now = datetime.now().strftime("%H:%M")
             today = date.today().isoformat()
+
+            # ⏰ શેડ્યૂલ થયેલા ન્યુઝ — સમય થાય એટલે આપોઆપ પબ્લિશ
+            due = db.query(
+                "SELECT id FROM news WHERE scheduled_at IS NOT NULL "
+                "AND status='approved' AND scheduled_at <= ?",
+                (datetime.now().strftime("%Y-%m-%d %H:%M:%S"),))
+            for row in due:
+                try:
+                    await pipeline.publish_news(row["id"])
+                    db.execute("UPDATE news SET scheduled_at=NULL WHERE id=?",
+                               (row["id"],))
+                except Exception:
+                    pass
 
             # રોજ સવારે ઓટો રન
             if cfg.get("auto_run_enabled"):

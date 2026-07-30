@@ -251,6 +251,26 @@ async def approve(news_id: int, _=Depends(require_admin)):
     return {"ok": True, "publish": result}
 
 
+@app.post("/api/news/{news_id}/schedule")
+async def schedule_news(news_id: int, payload: dict = Body(...)):
+    """ન્યુઝ ભવિષ્યના સમયે આપોઆપ પબ્લિશ કરવા શેડ્યૂલ કરો."""
+    at = payload.get("at", "")          # 'YYYY-MM-DDTHH:MM'
+    if not at:
+        db.execute("UPDATE news SET scheduled_at=NULL WHERE id=?", (news_id,))
+        return {"ok": True, "cleared": True}
+    db.execute("UPDATE news SET status='approved', scheduled_at=? WHERE id=?",
+               (at.replace("T", " "), news_id))
+    return {"ok": True, "at": at}
+
+
+@app.get("/api/scheduled")
+async def scheduled_list():
+    return db.query(
+        "SELECT id, title, scheduled_at, status FROM news "
+        "WHERE scheduled_at IS NOT NULL AND status!='published' "
+        "ORDER BY scheduled_at")
+
+
 @app.post("/api/news/{news_id}/reject")
 async def reject(news_id: int):
     db.execute("UPDATE news SET status='rejected', "
