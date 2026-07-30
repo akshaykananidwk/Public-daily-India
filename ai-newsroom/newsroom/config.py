@@ -28,6 +28,7 @@ DEFAULTS = {
     "facebook_page_id": "",
     "instagram_account_id": "",
     "image_ai_enabled": False,
+    "image_ai_provider": "pollinations",  # pollinations (મફત) | openai
     "image_ai_key": "",                # OpenAI API key (platform.openai.com)
     "image_ai_model": "gpt-image-1",
     "image_ai_quality": "medium",      # low | medium | high

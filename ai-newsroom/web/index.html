@@ -218,7 +218,12 @@
               સત્તાવાર API થી. Key: platform.openai.com → API keys.</p>
             <label class="check"><input name="image_ai_enabled" type="checkbox">
               AI તસવીર ચાલુ કરો</label>
-            <label>OpenAI API Key
+            <label>સર્વિસ
+              <select name="image_ai_provider">
+                <option value="pollinations">Pollinations — મફત (ટેસ્ટિંગ માટે, key ન જોઈએ)</option>
+                <option value="openai">OpenAI gpt-image-1 — શ્રેષ્ઠ ક્વોલિટી (key જોઈએ)</option>
+              </select></label>
+            <label>OpenAI API Key (ફક્ત OpenAI માટે)
               <input name="image_ai_key" type="password"
                 placeholder="sk-..."></label>
             <label>ક્વોલિટી

@@ -19,15 +19,15 @@ PROMPT_TEMPLATE = (
 
 
 def is_configured(cfg: dict) -> bool:
-    return bool(cfg.get("image_ai_enabled") and cfg.get("image_ai_key"))
+    if not cfg.get("image_ai_enabled"):
+        return False
+    provider = cfg.get("image_ai_provider", "pollinations")
+    if provider == "openai":
+        return bool(cfg.get("image_ai_key"))
+    return True  # pollinations — મફત, key વગર
 
 
-async def generate(cfg: dict, title: str) -> str | None:
-    """તસવીર બનાવીને ફાઈલ-પાથ પાછો આપે. ભૂલ પડે તો exception."""
-    if not is_configured(cfg):
-        return None
-    prompt = PROMPT_TEMPLATE.format(
-        title=title, style=cfg.get("image_ai_style", ""))
+async def _openai(cfg: dict, prompt: str) -> bytes:
     async with httpx.AsyncClient(timeout=240) as c:
         r = await c.post(
             "https://api.openai.com/v1/images/generations",
@@ -42,7 +42,35 @@ async def generate(cfg: dict, title: str) -> str | None:
         if r.status_code != 200:
             raise RuntimeError(
                 f"OpenAI ઈમેજ API ભૂલ {r.status_code}: {r.text[:200]}")
-        img = base64.b64decode(r.json()["data"][0]["b64_json"])
+        return base64.b64decode(r.json()["data"][0]["b64_json"])
+
+
+async def _pollinations(prompt: str) -> bytes:
+    """મફત સર્વિસ — ટેસ્ટિંગ માટે. કોઈ key નહીં, કોઈ ખર્ચ નહીં."""
+    from urllib.parse import quote
+    url = (f"https://image.pollinations.ai/prompt/{quote(prompt[:400])}"
+           f"?width=1536&height=1024&nologo=true")
+    async with httpx.AsyncClient(timeout=240, follow_redirects=True) as c:
+        r = await c.get(url, headers={"User-Agent": "ai-newsroom"})
+        if r.status_code != 200:
+            raise RuntimeError(
+                f"Pollinations ભૂલ {r.status_code}: {r.text[:150]}")
+        if len(r.content) < 5000:   # ઈમેજ નહીં પણ error-page આવ્યું હોય
+            raise RuntimeError("Pollinations એ ઈમેજ ન આપી")
+        return r.content
+
+
+async def generate(cfg: dict, title: str) -> str | None:
+    """તસવીર બનાવીને ફાઈલ-પાથ પાછો આપે. ભૂલ પડે તો exception."""
+    if not is_configured(cfg):
+        return None
+    prompt = PROMPT_TEMPLATE.format(
+        title=title, style=cfg.get("image_ai_style", ""))
+    provider = cfg.get("image_ai_provider", "pollinations")
+    if provider == "openai":
+        img = await _openai(cfg, prompt)
+    else:
+        img = await _pollinations(prompt)
     out = PHOTOS_DIR / f"ai_{datetime.now():%Y%m%d_%H%M%S}.png"
     out.write_bytes(img)
     return str(out)
