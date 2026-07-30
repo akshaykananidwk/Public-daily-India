@@ -183,7 +183,8 @@ async def activity_log(limit: int = 100):
 
 
 # ── સેટિંગ ──────────────────────────────────────────────────────
-MASKED_KEYS = ("update_token", "facebook_page_token", "whatsapp_api_key")
+MASKED_KEYS = ("update_token", "facebook_page_token", "whatsapp_api_key",
+               "image_ai_key")
 
 
 @app.get("/api/settings")
@@ -203,6 +204,24 @@ async def set_settings(payload: dict):
             payload.pop(key)
     save_config(payload)
     return {"ok": True}
+
+
+# ── AI તસવીર ટેસ્ટ ──────────────────────────────────────────────
+@app.post("/api/image-test")
+async def image_test():
+    from . import imagegen
+    cfg = load_config()
+    if not imagegen.is_configured(cfg):
+        return JSONResponse(
+            {"error": "પહેલા AI તસવીર ચાલુ કરી OpenAI API Key ભરી સેવ કરો"},
+            status_code=400)
+    try:
+        path = await imagegen.generate(
+            cfg, "દ્વારકાના દરિયાકિનારે સૂર્યાસ્તનું સુંદર દ્રશ્ય")
+        rel = Path(path).relative_to(STORAGE_DIR)
+        return {"ok": True, "url": "/storage/" + rel.as_posix()}
+    except Exception as e:
+        return JSONResponse({"error": str(e)[:400]}, status_code=500)
 
 
 # ── WhatsApp ટેસ્ટ ──────────────────────────────────────────────

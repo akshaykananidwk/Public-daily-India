@@ -27,6 +27,11 @@ DEFAULTS = {
     "facebook_page_token": "",
     "facebook_page_id": "",
     "instagram_account_id": "",
+    "image_ai_enabled": False,
+    "image_ai_key": "",                # OpenAI API key (platform.openai.com)
+    "image_ai_model": "gpt-image-1",
+    "image_ai_quality": "medium",      # low | medium | high
+    "image_ai_style": "",              # વધારાની સ્ટાઈલ સૂચના
     "whatsapp_api_url": "https://bulk.akdwk.in/api.php",
     "whatsapp_api_key": "",
     "whatsapp_session_id": "",

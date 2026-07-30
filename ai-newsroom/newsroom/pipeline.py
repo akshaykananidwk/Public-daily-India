@@ -4,7 +4,7 @@ from datetime import datetime, date
 
 import httpx
 
-from . import db, scout, poster, whatsapp
+from . import db, scout, poster, whatsapp, imagegen
 from .bus import BUS, run_agent
 from .config import load_config
 from .llm import LLM
@@ -100,6 +100,24 @@ async def run_day(press_note: str | None = None,
 
             category = detect_category(clean["title"], clean["body"])
             photo = item.get("photo", "")
+            image_ai = False
+
+            # 📷 ફોટો એજન્ટ — સાચો ફોટો ન હોય તો AI તસવીર બનાવે
+            # (જન્મદિવસમાં નહીં — વ્યક્તિનો AI ફોટો ન બનાવાય)
+            if (not photo and category != "birthday"
+                    and imagegen.is_configured(cfg)):
+                async def photo_fn(progress, clean=clean, idx=idx):
+                    await progress(
+                        f"ન્યુઝ #{idx} માટે AI તસવીર બની રહી છે... (~30 સે)")
+                    return await imagegen.generate(cfg, clean["title"])
+                try:
+                    p = await run_agent("photo", "ceo", photo_fn,
+                                        job_id=job_id, message="AI તસવીર")
+                    if p:
+                        photo, image_ai = p, True
+                except Exception:
+                    pass  # તસવીર ન બને તો પોસ્ટર ફોટા વગર બને — અટકવું નહીં
+
             news_id = db.execute(
                 """INSERT INTO news(job_id, title, body, category, source_title,
                    source_url, status, photo) VALUES(?,?,?,?,?,?,?,?)""",
@@ -109,7 +127,8 @@ async def run_day(press_note: str | None = None,
             db.bump_stat(today, "news_written")
 
             async def design_fn(progress, news_id=news_id, clean=clean,
-                                idx=idx, category=category, photo=photo):
+                                idx=idx, category=category, photo=photo,
+                                image_ai=image_ai):
                 from pathlib import Path
                 news = {"id": news_id, "title": clean["title"],
                         "body": clean["body"], "category": category,
@@ -119,6 +138,7 @@ async def run_day(press_note: str | None = None,
                         "editor": cfg.get("editor_name", ""),
                         "contact": cfg.get("contact_number", ""),
                         "image": Path(photo).as_uri() if photo else "",
+                        "image_ai": image_ai,
                         "date": datetime.now().strftime("%d/%m/%Y")}
                 results = []
                 for size in cfg["poster_sizes"]:

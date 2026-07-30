@@ -212,6 +212,30 @@
             <label>Facebook Page Token
               <input name="facebook_page_token" type="password"></label>
           </fieldset>
+          <fieldset class="card"><legend>🖼️ AI તસવીર (OpenAI API)</legend>
+            <p class="hint">સાચો ફોટો ન હોય ત્યારે હેડલાઈન પરથી AI તસવીર
+              આપોઆપ બને અને પોસ્ટરમાં લાગે. ChatGPT નું જ ઈમેજ એન્જિન —
+              સત્તાવાર API થી. Key: platform.openai.com → API keys.</p>
+            <label class="check"><input name="image_ai_enabled" type="checkbox">
+              AI તસવીર ચાલુ કરો</label>
+            <label>OpenAI API Key
+              <input name="image_ai_key" type="password"
+                placeholder="sk-..."></label>
+            <label>ક્વોલિટી
+              <select name="image_ai_quality">
+                <option value="low">low — સસ્તી (~₹1/તસવીર)</option>
+                <option value="medium">medium — સારી (~₹3.5/તસવીર)</option>
+                <option value="high">high — શ્રેષ્ઠ (~₹14/તસવીર)</option>
+              </select></label>
+            <label>વધારાની સ્ટાઈલ સૂચના (વૈકલ્પિક)
+              <input name="image_ai_style"
+                placeholder="દા.ત. drone view, golden hour light"></label>
+            <div class="row">
+              <button type="button" id="btn-img-test" class="ghost">
+                🧪 ટેસ્ટ તસવીર બનાવો</button>
+            </div>
+            <div id="img-info"></div>
+          </fieldset>
           <fieldset class="card"><legend>📱 WhatsApp જાણ (તમારી API)</legend>
             <label>API URL <input name="whatsapp_api_url"></label>
             <label>API Key

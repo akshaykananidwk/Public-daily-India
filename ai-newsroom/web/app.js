@@ -369,6 +369,19 @@ $("#btn-apply-update").onclick = async () => {
   $("#update-info").textContent = r.error || r.message;
   toast(r.error || r.message, r.error ? "bad" : "good");
 };
+$("#btn-img-test").onclick = async () => {
+  $("#img-info").textContent =
+    "તસવીર બની રહી છે... (~30-60 સેકન્ડ, પહેલા સેવ કરો ભૂલતા નહીં)";
+  const r = await (await fetch("/api/image-test", { method: "POST" })).json();
+  if (r.ok) {
+    $("#img-info").innerHTML =
+      `✅ બની ગઈ!<br><img src="${r.url}" style="width:100%;border-radius:10px;margin-top:8px">`;
+    toast("AI તસવીર બની ✓", "good");
+  } else {
+    $("#img-info").textContent = r.error;
+    toast("AI તસવીર ભૂલ", "bad");
+  }
+};
 $("#btn-wa-test").onclick = async () => {
   $("#wa-info").textContent = "મોકલી રહ્યો છું... (પહેલા સેવ કરો ભૂલતા નહીં)";
   const r = await (await fetch("/api/whatsapp-test", { method: "POST" })).json();
