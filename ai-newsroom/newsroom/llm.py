@@ -103,6 +103,22 @@ class LLM:
         except Exception:
             return ""
 
+    # ── સારાંશ ──────────────────────────────────────────────────
+    async def summarize(self, text: str) -> str:
+        """લાંબા લખાણનો ટૂંકો સારાંશ (2-3 વાક્ય)."""
+        text = text.strip()
+        if not await self.available():
+            # Ollama નથી — પહેલા 2 વાક્ય
+            parts = text.replace("।", ".").split(".")
+            return ". ".join(p.strip() for p in parts[:2] if p.strip()) + "."
+        try:
+            return await self.generate(
+                self.model_write,
+                "નીચેના ગુજરાતી લખાણનો 2-3 વાક્યનો ટૂંકો સારાંશ આપો. "
+                "ફક્ત સારાંશ:\n\n" + text)
+        except Exception:
+            return text[:200]
+
     # ── શુદ્ધિ: ચકાસણી ──────────────────────────────────────────
     async def proofread(self, title: str, body: str) -> dict:
         issues = []

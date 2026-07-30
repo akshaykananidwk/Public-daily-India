@@ -135,6 +135,36 @@ async def festivals():
     return fest.upcoming(3)
 
 
+@app.get("/api/trending")
+async def trending():
+    """છેલ્લા 7 દિવસના ન્યુઝ ટાઈટલમાં સૌથી વધુ વપરાયેલા શબ્દો."""
+    import re
+    from collections import Counter
+    stop = {"અને", "માટે", "પર", "થી", "ના", "ની", "નું", "છે", "કે",
+            "એક", "આ", "તથા", "સાથે", "બાદ", "થયું", "કર્યું", "થયો",
+            "news", "the", "in", "of", "-"}
+    rows = db.query(
+        "SELECT title FROM news WHERE created_at > date('now','-7 day')")
+    words = Counter()
+    for r in rows:
+        for w in re.split(r"[\s,.:;–\-|/]+", r["title"]):
+            w = w.strip()
+            if len(w) >= 3 and w.lower() not in stop:
+                words[w] += 1
+    return [{"word": w, "count": c} for w, c in words.most_common(12)]
+
+
+@app.post("/api/summarize")
+async def summarize(payload: dict = Body(...)):
+    llm = LLM(load_config())
+    text = payload.get("text", "")
+    if not text and payload.get("news_id"):
+        rows = db.query("SELECT body FROM news WHERE id=?",
+                        (payload["news_id"],))
+        text = rows[0]["body"] if rows else ""
+    return {"summary": await llm.summarize(text)}
+
+
 # ── ન્યુઝ + અપ્રુવલ + સર્ચ ────────────────────────────────────
 @app.get("/api/news")
 async def list_news(status: str = "", limit: int = 50, q: str = "",

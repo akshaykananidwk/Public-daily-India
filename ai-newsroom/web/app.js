@@ -160,16 +160,20 @@ async function refreshStatus() {
 refreshStatus();
 setInterval(refreshStatus, 10000);
 
-// તહેવાર રિમાઈન્ડર બેનર
+// તહેવાર રિમાઈન્ડર + ટ્રેન્ડિંગ બેનર
 (async function loadFestivals() {
   try {
     const f = await (await fetch("/api/festivals")).json();
-    if (f.length && $("#fest-banner")) {
-      $("#fest-banner").innerHTML = f.map(x =>
-        `<div class="card" style="padding:12px 18px;margin-bottom:12px;
-         border-left:4px solid var(--gold)">🎉 <b>${x.when}</b>: ${x.name}
-         — પોસ્ટર બનાવવાનું યાદ રાખો!</div>`).join("");
-    }
+    let html = "";
+    if (f.length) html += f.map(x =>
+      `<div class="card" style="padding:12px 18px;margin-bottom:12px;
+       border-left:4px solid var(--gold)">🎉 <b>${x.when}</b>: ${x.name}
+       — પોસ્ટર બનાવવાનું યાદ રાખો!</div>`).join("");
+    const t = await (await fetch("/api/trending")).json();
+    if (t.length) html += `<div class="card" style="padding:12px 18px;
+      margin-bottom:12px;border-left:4px solid var(--blue)">📈 <b>ટ્રેન્ડિંગ:</b> ` +
+      t.slice(0, 8).map(x => `${x.word} (${x.count})`).join(" • ") + "</div>";
+    if ($("#fest-banner")) $("#fest-banner").innerHTML = html;
   } catch {}
 })();
 

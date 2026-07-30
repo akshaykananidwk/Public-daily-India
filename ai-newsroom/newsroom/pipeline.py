@@ -16,15 +16,41 @@ _running = False
 BREAKING_WORDS = ("બ્રેકિંગ", "અકસ્માત", "મૃત્યુ", "આગ ", "ભૂકંપ", "હુમલો",
                   "હુમલા", "તાત્કાલિક", "દુર્ઘટના", "ધડાકો", "ચેતવણી")
 BIRTHDAY_WORDS = ("જન્મદિવસ", "વર્ષગાંઠ", "શુભેચ્છા", "અભિનંદન")
+TRIBUTE_WORDS = ("શ્રદ્ધાંજલિ", "નિધન", "અવસાન", "દુઃખદ અવસાન", "સ્વર્ગવાસ")
+
+# ઓટો-ટેગ — ન્યુઝ કઈ કેટેગરીનો (લેબલ માટે)
+TAG_WORDS = {
+    "રાજકારણ": ("સંસદ", "લોકસભા", "રાજ્યસભા", "ચૂંટણી", "સરકાર", "મંત્રી",
+                "ભાજપ", "કોંગ્રેસ", "વિધાનસભા", "બિલ"),
+    "ગુના": ("પોલીસ", "ધરપકડ", "ચોરી", "લૂંટ", "હત્યા", "ગુનો", "છેતરપિંડી"),
+    "રમત": ("ક્રિકેટ", "મેચ", "ટુર્નામેન્ટ", "ખેલાડી", "ગોલ", "રમત"),
+    "ધર્મ": ("મંદિર", "દર્શન", "આરતી", "ધાર્મિક", "પૂજા", "યાત્રા", "કથા"),
+    "હવામાન": ("વરસાદ", "હવામાન", "પૂર", "વાવાઝોડું", "ગરમી", "ઠંડી"),
+    "શિક્ષણ": ("શાળા", "કોલેજ", "પરીક્ષા", "વિદ્યાર્થી", "શિક્ષણ", "પરિણામ"),
+    "આરોગ્ય": ("હોસ્પિટલ", "આરોગ્ય", "દવા", "રસી", "કેમ્પ", "રોગ"),
+    "ખેતી": ("ખેડૂત", "પાક", "ખેતી", "વાવેતર", "ટેકાના ભાવ"),
+    "વિકાસ": ("લોકાર્પણ", "ઉદ્ઘાટન", "યોજના", "રસ્તો", "પુલ", "વિકાસ"),
+}
 
 
 def detect_category(title: str, body: str = "") -> str:
     text = f"{title} {body}"
     if any(w in text for w in BIRTHDAY_WORDS):
         return "birthday"
+    if any(w in text for w in TRIBUTE_WORDS):
+        return "tribute"
     if any(w in text for w in BREAKING_WORDS):
         return "breaking"
     return "general"
+
+
+def auto_tag(title: str, body: str = "") -> str:
+    """ન્યુઝનો વિષય-ટેગ (રાજકારણ/ગુના/રમત...)."""
+    text = f"{title} {body}"
+    for tag, words in TAG_WORDS.items():
+        if any(w in text for w in words):
+            return tag
+    return "સામાન્ય"
 
 
 def dedupe_body(title: str, body: str) -> str:
@@ -149,12 +175,14 @@ async def run_day(press_note: str | None = None,
                 except Exception:
                     pass  # તસવીર ન બને તો પોસ્ટર ફોટા વગર બને — અટકવું નહીં
 
+            tag = auto_tag(clean["title"], body)
             news_id = db.execute(
                 """INSERT INTO news(job_id, title, body, category, source_title,
-                   source_url, status, photo) VALUES(?,?,?,?,?,?,?,?)""",
+                   source_url, status, photo, tag)
+                   VALUES(?,?,?,?,?,?,?,?,?)""",
                 (job_id, clean["title"], body, category,
                  item.get("source", "") or item.get("title", ""),
-                 item.get("url", ""), "proofread", "|".join(photos)))
+                 item.get("url", ""), "proofread", "|".join(photos), tag))
             db.bump_stat(today, "news_written")
 
             async def design_fn(progress, news_id=news_id, clean=clean,
