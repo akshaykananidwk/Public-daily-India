@@ -25,6 +25,19 @@ function toast(msg, kind = "") {
     setTimeout(() => t.remove(), 400); }, 3800);
 }
 
+/* ── થીમ (ડાર્ક/લાઈટ) ── */
+(function initTheme() {
+  const saved = localStorage.getItem("theme") || "dark";
+  document.documentElement.setAttribute("data-theme", saved);
+})();
+if ($("#theme-toggle")) $("#theme-toggle").onclick = () => {
+  const cur = document.documentElement.getAttribute("data-theme");
+  const next = cur === "light" ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", next);
+  localStorage.setItem("theme", next);
+  $("#theme-toggle").textContent = next === "light" ? "🌞 થીમ બદલો" : "🌙 થીમ બદલો";
+};
+
 /* ── લોગિન (auth ચાલુ હોય તો) ── */
 (async function checkAuth() {
   try {
@@ -179,6 +192,20 @@ async function refreshStatus() {
 refreshStatus();
 setInterval(refreshStatus, 10000);
 
+// મલ્ટી-જિલ્લા ડ્રોપડાઉન ભરો
+(async function loadDistricts() {
+  try {
+    const cfg = await (await fetch("/api/settings")).json();
+    const ds = cfg.districts || [];
+    const sel = $("#press-district");
+    if (ds.length && sel) {
+      ds.forEach(d => { const o = document.createElement("option");
+        o.value = d.name; o.textContent = "📍 " + d.name; sel.appendChild(o); });
+      sel.style.display = "block";
+    }
+  } catch {}
+})();
+
 // તહેવાર રિમાઈન્ડર + ટ્રેન્ડિંગ બેનર
 (async function loadFestivals() {
   try {
@@ -244,6 +271,8 @@ $("#btn-press").onclick = async () => {
   if (!text && !files.length) return toast("પ્રેસ નોટનું લખાણ લખો", "bad");
   const fd = new FormData();
   fd.append("text", text);
+  const dsel = $("#press-district");
+  if (dsel && dsel.value) fd.append("district", dsel.value);
   for (const f of files) fd.append("photos", f);
   const r = await (await fetch("/api/press-note",
     { method: "POST", body: fd })).json();

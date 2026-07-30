@@ -69,7 +69,8 @@ def is_running() -> bool:
 async def run_day(press_note: str | None = None,
                   photo_path: str | None = None,
                   news_count: int | None = None,
-                  ai_limit: int | None = None):
+                  ai_limit: int | None = None,
+                  overrides: dict | None = None):
     """આખા દિવસનો રન. press_note આપો તો ફક્ત એ એક ન્યુઝ બને.
     news_count = આજે કેટલા ન્યુઝ (ખાલી તો સેટિંગ મુજબ).
     ai_limit = આજે વધુમાં વધુ કેટલી AI તસવીર (ખર્ચ કંટ્રોલ; 0 = એક પણ નહીં)."""
@@ -78,6 +79,11 @@ async def run_day(press_note: str | None = None,
         return {"error": "કામ પહેલેથી ચાલુ છે"}
     _running = True
     cfg = load_config()
+    if overrides:                       # મલ્ટી-જિલ્લા — સ્થળ/સંપર્ક બદલો
+        cfg = dict(cfg)
+        for k in ("location", "contact_number"):
+            if overrides.get(k):
+                cfg[k] = overrides[k]
     llm = LLM(cfg)
     job_id = "job_" + datetime.now().strftime("%Y%m%d_%H%M")
     today = date.today().isoformat()
@@ -209,6 +215,7 @@ async def run_day(press_note: str | None = None,
                         "theme_accent": cfg.get("theme_accent", ""),
                         "theme_red": cfg.get("theme_red", ""),
                         "logo": logo_uri, "qr": qr,
+                        "watermark": cfg.get("watermark_enabled", True),
                         "images": images,
                         "image": images[0] if images else "",
                         "image_ai": image_ai,
@@ -291,6 +298,7 @@ async def render_news_posters(news_id: int) -> list[dict]:
             "theme_accent": cfg.get("theme_accent", ""),
             "theme_red": cfg.get("theme_red", ""),
             "logo": logo_uri, "qr": qr, "images": images,
+            "watermark": cfg.get("watermark_enabled", True),
             "image": images[0] if images else "",
             "date": datetime.now().strftime("%d/%m/%Y")}
     template = ("birthday" if n["category"] == "birthday"

@@ -27,6 +27,33 @@
   --radius: 16px;
 }
 
+/* ☀️ લાઈટ થીમ */
+:root[data-theme="light"] {
+  --bg: #eef2f9; --bg-2: #ffffff; --surface: #ffffff; --surface-2: #f1f5fc;
+  --line: #d3ddee; --ink: #16223a; --ink-2: #43536e; --muted: #7c8aa3;
+}
+:root[data-theme="light"] body {
+  background: radial-gradient(80% 60% at 100% 0%, #d9e6ff55 0%, transparent 60%),
+    var(--bg);
+}
+:root[data-theme="light"] .sidebar {
+  background: linear-gradient(180deg, #ffffff, #eef3fb); }
+:root[data-theme="light"] .card,
+:root[data-theme="light"] .kpi,
+:root[data-theme="light"] fieldset.card {
+  background: #ffffff; }
+:root[data-theme="light"] .graph-wrap,
+:root[data-theme="light"] .panel { background: #ffffff; }
+:root[data-theme="light"] .node {
+  background: linear-gradient(160deg, #f3f7fe, #e7eefb); }
+:root[data-theme="light"] .node .n-ic { background: #e3ebf9; }
+:root[data-theme="light"] .brand-text b,
+:root[data-theme="light"] .topline h1 { color: #16223a; }
+:root[data-theme="light"] textarea,
+:root[data-theme="light"] .settings input,
+:root[data-theme="light"] .settings select { background: #f6f9fe; }
+:root[data-theme="light"] .side-status { background: #f1f5fc; }
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
   font-family: 'NotoGuj', 'Segoe UI', sans-serif;

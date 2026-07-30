@@ -123,6 +123,12 @@
     background: rgba(0, 0, 0, .65); color: #dbe6ff; font-size: 17px;
     padding: 5px 14px; border-radius: 999px; display: none; }
   body.image-ai .ai-tag { display: block; }
+  /* વોટરમાર્ક — ફોટા પર આછું ચેનલ નામ */
+  .watermark { display: none; position: absolute; left: 24px; bottom: 14px;
+    color: rgba(255,255,255,.7); font-family: 'AnekGuj'; font-size: 22px;
+    font-weight: 700; text-shadow: 0 2px 6px rgba(0,0,0,.6);
+    letter-spacing: 1px; z-index: 2; }
+  body.has-watermark .watermark { display: block; }
 
   .body-sec { position: relative; padding: 18px 66px 22px;
     text-align: center; }
@@ -230,6 +236,7 @@
     </div>
   </div>
 
+  <div class="watermark" id="watermark"></div>
   <div class="qr" id="qr"><img id="qr-img" alt="QR"></div>
 
   <div class="strip-red gujarati-text">
@@ -353,6 +360,14 @@
     const images = news.images && news.images.length
       ? news.images : (news.image ? [news.image] : []);
     const hasPhotos = buildPhotos(images);
+    // વોટરમાર્ક — ફોટો હોય અને ચાલુ હોય તો
+    if (hasPhotos && news.watermark) {
+      const wm = document.getElementById('watermark');
+      wm.textContent = '© ' + (news.channel || '');
+      // ફોટા-બ્લોકમાં મૂકો
+      document.getElementById('photos').appendChild(wm);
+      document.body.classList.add('has-watermark');
+    }
 
     const finish = () => {
       autoFit(document.getElementById('headline'),

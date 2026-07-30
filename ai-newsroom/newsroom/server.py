@@ -127,10 +127,17 @@ async def run_day(payload: dict = Body(default={})):
 
 
 @app.post("/api/press-note")
-async def press_note(text: str = Form(""),
+async def press_note(text: str = Form(""), district: str = Form(""),
                      photos: list[UploadFile] = File(default=[])):
     from datetime import datetime
     note = (text or "").strip()
+    overrides = {}
+    if district:
+        for d in load_config().get("districts", []):
+            if d.get("name") == district:
+                overrides = {"location": d.get("location"),
+                             "contact_number": d.get("contact")}
+                break
     photo_paths: list[str] = []
     for i, photo in enumerate(photos[:3]):     # વધુમાં વધુ 3 ફોટા
         if not photo.filename:
@@ -157,9 +164,11 @@ async def press_note(text: str = Form(""),
     if pipeline.is_running():
         return JSONResponse({"error": "કામ પહેલેથી ચાલુ છે"}, status_code=409)
     asyncio.create_task(pipeline.run_day(press_note=note,
-                                         photo_path=photo_paths))
+                                         photo_path=photo_paths,
+                                         overrides=overrides))
     return {"ok": True, "message": "પ્રેસ નોટ પર કામ શરૂ 🚀"
-            + (f" ({len(photo_paths)} ફોટા સાથે 📷)" if photo_paths else "")}
+            + (f" ({len(photo_paths)} ફોટા સાથે 📷)" if photo_paths else "")
+            + (f" — {district}" if district else "")}
 
 
 @app.get("/api/festivals")

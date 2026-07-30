@@ -32,6 +32,8 @@ DEFAULTS = {
     "website_url": "www.publicdayindia.com",
     "qr_enabled": False,               # પોસ્ટર પર QR કોડ
     "qr_data": "",                     # QR માં શું (ખાલી તો website/whatsapp)
+    "watermark_enabled": True,         # ફોટા પર ચેનલ વોટરમાર્ક
+    "districts": [],                   # મલ્ટી-જિલ્લા [{name,location,contact}]
     "hashtags": "#PublicDailyIndia #Dwarka #Gujarat #GujaratiNews",
     "keyword_filter": "",              # RSS ફિલ્ટર (અલ્પવિરામથી અલગ)
     # 📱 WhatsApp બ્રોડકાસ્ટ (અલ્પવિરામથી અલગ નંબર, 91 સાથે)
