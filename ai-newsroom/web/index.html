@@ -49,6 +49,8 @@
         <button id="btn-run" class="primary big">🚀 દિવસ શરૂ કરો</button>
       </header>
 
+      <div id="fest-banner"></div>
+
       <div class="kpi-row">
         <div class="kpi"><span class="k-ic">📥</span>
           <b id="st-collected">0</b><small>ભેગા કર્યા</small></div>
@@ -281,7 +283,14 @@
             <label>Session ID <input name="whatsapp_session_id"></label>
             <label>તમારો WhatsApp નંબર (91 સાથે)
               <input name="whatsapp_number" placeholder="દા.ત. 919978123146"></label>
-            <label>Public URL (વૈકલ્પિક — પોસ્ટર ફોટો WhatsApp માં મોકલવા)
+            <label>બ્રોડકાસ્ટ નંબર (અલ્પવિરામથી અલગ, 91 સાથે)
+              <input name="whatsapp_broadcast"
+                placeholder="919812345678, 918887776665"></label>
+            <label class="check"><input name="daily_report_enabled" type="checkbox">
+              રાત્રે 9 વાગ્યે રોજનો રિપોર્ટ મોકલો</label>
+            <label class="check"><input name="error_alert_enabled" type="checkbox">
+              ભૂલ પડે તો WhatsApp એલર્ટ</label>
+            <label>Public URL (વૈકલ્પિક — તમારી hosting)
               <input name="public_base_url"
                 placeholder="દા.ત. https://news.akdwk.in"></label>
             <div class="row">

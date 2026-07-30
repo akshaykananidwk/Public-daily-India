@@ -160,6 +160,19 @@ async function refreshStatus() {
 refreshStatus();
 setInterval(refreshStatus, 10000);
 
+// તહેવાર રિમાઈન્ડર બેનર
+(async function loadFestivals() {
+  try {
+    const f = await (await fetch("/api/festivals")).json();
+    if (f.length && $("#fest-banner")) {
+      $("#fest-banner").innerHTML = f.map(x =>
+        `<div class="card" style="padding:12px 18px;margin-bottom:12px;
+         border-left:4px solid var(--gold)">🎉 <b>${x.when}</b>: ${x.name}
+         — પોસ્ટર બનાવવાનું યાદ રાખો!</div>`).join("");
+    }
+  } catch {}
+})();
+
 /* ── રન બટન — પહેલા પૂછે: કેટલા ન્યુઝ, કેટલી AI તસવીર ── */
 const IMG_COST = { local: 0, pollinations: 0, gemini: 3, openai: 3.5 };
 let imgProvider = "pollinations", imgEnabled = false;
