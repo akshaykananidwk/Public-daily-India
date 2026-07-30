@@ -220,13 +220,17 @@
               AI તસવીર ચાલુ કરો</label>
             <label>સર્વિસ
               <select name="image_ai_provider">
-                <option value="pollinations">Pollinations — મફત (ટેસ્ટિંગ, key ન જોઈએ)</option>
-                <option value="gemini">Google Gemini — ~₹3/તસવીર (ફ્રી ટિયર પણ છે)</option>
+                <option value="local">🖥️ લોકલ (તમારા GPU પર) — કાયમ ₹0, ઈન્ટરનેટ નહીં</option>
+                <option value="pollinations">Pollinations — મફત (ઓનલાઈન, key ન જોઈએ)</option>
+                <option value="gemini">Google Gemini — ~₹3/તસવીર (ફ્રી ટિયર પણ)</option>
                 <option value="openai">OpenAI gpt-image-1 — ~₹3.5/તસવીર</option>
               </select></label>
             <label>API Key (Gemini કે OpenAI માટે)
               <input name="image_ai_key" type="password"
                 placeholder="Gemini: AIza...  |  OpenAI: sk-..."></label>
+            <label>લોકલ SD URL (ફક્ત લોકલ માટે)
+              <input name="image_ai_local_url"
+                placeholder="http://127.0.0.1:7860"></label>
             <label>ક્વોલિટી
               <select name="image_ai_quality">
                 <option value="low">low — સસ્તી (~₹1/તસવીર)</option>

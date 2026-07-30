@@ -161,7 +161,7 @@ refreshStatus();
 setInterval(refreshStatus, 10000);
 
 /* ── રન બટન — પહેલા પૂછે: કેટલા ન્યુઝ, કેટલી AI તસવીર ── */
-const IMG_COST = { pollinations: 0, gemini: 3, openai: 3.5 };
+const IMG_COST = { local: 0, pollinations: 0, gemini: 3, openai: 3.5 };
 let imgProvider = "pollinations", imgEnabled = false;
 
 async function openRunModal() {

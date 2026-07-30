@@ -24,7 +24,33 @@ def is_configured(cfg: dict) -> bool:
     provider = cfg.get("image_ai_provider", "pollinations")
     if provider in ("openai", "gemini"):
         return bool(cfg.get("image_ai_key"))
-    return True  # pollinations — મફત, key વગર
+    return True  # pollinations / local — key વગર
+
+
+async def _local_sd(cfg: dict, prompt: str) -> bytes:
+    """લોકલ Stable Diffusion (AUTOMATIC1111 / Forge / SD.Next નું API).
+    તમારા GPU પર ચાલે — કોઈ ઈન્ટરનેટ નહીં, કાયમ ₹0."""
+    base = (cfg.get("image_ai_local_url")
+            or "http://127.0.0.1:7860").rstrip("/")
+    steps = int(cfg.get("image_ai_local_steps") or 25)
+    negative = ("text, letters, words, numbers, watermark, logo, "
+                "caption, signature, blurry, distorted, low quality")
+    async with httpx.AsyncClient(timeout=300) as c:
+        r = await c.post(f"{base}/sdapi/v1/txt2img", json={
+            "prompt": prompt,
+            "negative_prompt": negative,
+            "width": 1024, "height": 704,
+            "steps": steps,
+            "cfg_scale": float(cfg.get("image_ai_local_cfg") or 6),
+            "sampler_name": cfg.get("image_ai_local_sampler") or "DPM++ 2M",
+        })
+        if r.status_code != 200:
+            raise RuntimeError(
+                f"લોકલ SD ભૂલ {r.status_code}: {r.text[:200]}")
+        data = r.json().get("images")
+        if not data:
+            raise RuntimeError("લોકલ SD એ ઈમેજ ન આપી")
+        return base64.b64decode(data[0])
 
 
 async def _openai(cfg: dict, prompt: str) -> bytes:
@@ -93,6 +119,8 @@ async def generate(cfg: dict, title: str) -> str | None:
         img = await _openai(cfg, prompt)
     elif provider == "gemini":
         img = await _gemini(cfg, prompt)
+    elif provider == "local":
+        img = await _local_sd(cfg, prompt)
     else:
         img = await _pollinations(prompt)
     out = PHOTOS_DIR / f"ai_{datetime.now():%Y%m%d_%H%M%S}.png"
