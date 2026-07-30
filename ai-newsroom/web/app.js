@@ -281,8 +281,16 @@ document.querySelectorAll("#news-filters .chip").forEach((c) =>
     loadNews();
   }));
 
+let newsSearchTimer;
+if ($("#news-search")) $("#news-search").oninput = () => {
+  clearTimeout(newsSearchTimer);
+  newsSearchTimer = setTimeout(loadNews, 350);
+};
 async function loadNews() {
-  const q = newsFilter ? `?status=${newsFilter}&limit=100` : "?limit=100";
+  const search = $("#news-search") ? $("#news-search").value.trim() : "";
+  let q = "?limit=100";
+  if (newsFilter) q += "&status=" + newsFilter;
+  if (search) q += "&q=" + encodeURIComponent(search);
   const list = await (await fetch("/api/news" + q)).json();
   const wrap = $("#news-list");
   wrap.innerHTML = list.length ? "" :

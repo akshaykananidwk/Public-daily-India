@@ -77,8 +77,13 @@ async def run_day(press_note: str | None = None,
         else:
             async def scout_fn(progress):
                 await progress("RSS ફીડ વાંચી રહ્યો છું...")
-                found = await scout.fetch_news(cfg["rss_feeds"])
-                await progress(f"{len(found)} ન્યુઝ મળ્યા",
+                # છેલ્લા 30 દિવસના ન્યુઝ — ડુપ્લિકેટ ટાળવા
+                recent = db.query(
+                    "SELECT title FROM news WHERE created_at > date('now','-30 day')")
+                seen = {scout._norm(r["title"]) for r in recent}
+                found = await scout.fetch_news(
+                    cfg["rss_feeds"], cfg.get("keyword_filter", ""), seen)
+                await progress(f"{len(found)} નવા ન્યુઝ મળ્યા",
                                detail={"found": len(found)})
                 return found
             items = await run_agent("scout", "ceo", scout_fn, job_id=job_id,

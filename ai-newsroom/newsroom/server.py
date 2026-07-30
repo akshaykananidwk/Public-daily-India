@@ -129,15 +129,31 @@ async def press_note(text: str = Form(""),
             + (f" ({len(photo_paths)} ફોટા સાથે 📷)" if photo_paths else "")}
 
 
-# ── ન્યુઝ + અપ્રુવલ ────────────────────────────────────────────
+@app.get("/api/festivals")
+async def festivals():
+    from . import festivals as fest
+    return fest.upcoming(3)
+
+
+# ── ન્યુઝ + અપ્રુવલ + સર્ચ ────────────────────────────────────
 @app.get("/api/news")
-async def list_news(status: str = "", limit: int = 50):
+async def list_news(status: str = "", limit: int = 50, q: str = "",
+                    date_from: str = "", date_to: str = ""):
+    where, params = [], []
     if status:
-        rows = db.query(
-            "SELECT * FROM news WHERE status=? ORDER BY id DESC LIMIT ?",
-            (status, limit))
-    else:
-        rows = db.query("SELECT * FROM news ORDER BY id DESC LIMIT ?", (limit,))
+        where.append("status=?"); params.append(status)
+    if q:
+        where.append("(title LIKE ? OR body LIKE ?)")
+        params += [f"%{q}%", f"%{q}%"]
+    if date_from:
+        where.append("date(created_at) >= ?"); params.append(date_from)
+    if date_to:
+        where.append("date(created_at) <= ?"); params.append(date_to)
+    sql = "SELECT * FROM news"
+    if where:
+        sql += " WHERE " + " AND ".join(where)
+    sql += " ORDER BY id DESC LIMIT ?"; params.append(limit)
+    rows = db.query(sql, tuple(params))
     for r in rows:
         posters = db.query(
             "SELECT file_path, size FROM poster_log WHERE news_id=? ORDER BY id",

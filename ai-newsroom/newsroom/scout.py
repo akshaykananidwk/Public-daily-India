@@ -27,7 +27,13 @@ def strip_source(title: str) -> tuple[str, str]:
     return title.strip(), ""
 
 
-async def fetch_news(feeds: list[str]) -> list[dict]:
+def _norm(s: str) -> str:
+    """સરખામણી માટે — જગ્યા/ચિહ્ન કાઢી નાની કરો."""
+    return "".join(ch for ch in s.lower() if ch.isalnum())
+
+
+async def fetch_news(feeds: list[str], keyword_filter: str = "",
+                     seen_titles: set | None = None) -> list[dict]:
     items = []
     for feed in feeds:
         try:
@@ -46,10 +52,19 @@ async def fetch_news(feeds: list[str]) -> list[dict]:
             continue
     if not items:
         items = [dict(d) for d in DEMO_ITEMS]
-    # ડુપ્લિકેટ કાઢો
-    seen, unique = set(), []
+
+    # કીવર્ડ ફિલ્ટર — આપેલા શબ્દોમાંથી કોઈ એક હોય તો જ રાખો
+    keywords = [k.strip() for k in keyword_filter.split(",") if k.strip()]
+    if keywords:
+        items = [it for it in items
+                 if any(k.lower() in it["title"].lower() for k in keywords)]
+
+    # ડુપ્લિકેટ કાઢો — આ રનમાં + પહેલા બનેલા ન્યુઝ સાથે (seen_titles)
+    seen = set(seen_titles or ())
+    unique = []
     for it in items:
-        if it["title"] not in seen:
-            seen.add(it["title"])
+        key = _norm(it["title"])
+        if key and key not in seen:
+            seen.add(key)
             unique.append(it)
     return unique
