@@ -47,13 +47,11 @@ def is_configured(cfg: dict) -> bool:
                 and cfg.get("whatsapp_number"))
 
 
-async def send(cfg: dict, message: str, media_url: str = "") -> dict:
-    if not is_configured(cfg):
-        return {"skipped": True,
-                "reason": "સેટિંગમાં WhatsApp API ભરેલું નથી"}
+async def _send_one(cfg: dict, number: str, message: str,
+                    media_url: str = "") -> dict:
     payload = {
         "api_key": cfg["whatsapp_api_key"],
-        "number": cfg["whatsapp_number"],
+        "number": number,
         "message": message,
         "session_id": cfg["whatsapp_session_id"],
     }
@@ -62,6 +60,31 @@ async def send(cfg: dict, message: str, media_url: str = "") -> dict:
     try:
         async with httpx.AsyncClient(timeout=30) as c:
             r = await c.post(cfg["whatsapp_api_url"], json=payload)
-        return {"status": r.status_code, "response": r.text[:300]}
+        return {"number": number, "status": r.status_code}
     except Exception as e:
-        return {"error": str(e)[:300]}
+        return {"number": number, "error": str(e)[:200]}
+
+
+async def send(cfg: dict, message: str, media_url: str = "") -> dict:
+    """મુખ્ય નંબર પર મોકલો."""
+    if not is_configured(cfg):
+        return {"skipped": True,
+                "reason": "સેટિંગમાં WhatsApp API ભરેલું નથી"}
+    return await _send_one(cfg, cfg["whatsapp_number"], message, media_url)
+
+
+async def send_broadcast(cfg: dict, message: str,
+                         media_url: str = "") -> dict:
+    """મુખ્ય નંબર + બ્રોડકાસ્ટ યાદીના બધા નંબર પર મોકલો."""
+    if not is_configured(cfg):
+        return {"skipped": True, "reason": "WhatsApp API ભરેલું નથી"}
+    numbers = [cfg["whatsapp_number"]]
+    for n in (cfg.get("whatsapp_broadcast") or "").replace("\n", ",").split(","):
+        n = n.strip()
+        if n and n not in numbers:
+            numbers.append(n)
+    results = []
+    for n in numbers:
+        results.append(await _send_one(cfg, n, message, media_url))
+    ok = sum(1 for r in results if r.get("status") == 200)
+    return {"sent": ok, "total": len(numbers), "results": results}

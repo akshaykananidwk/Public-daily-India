@@ -213,6 +213,40 @@ async def activity_log(limit: int = 100):
         "SELECT * FROM activity_log ORDER BY id DESC LIMIT ?", (limit,))
 
 
+@app.get("/api/reports/cost")
+async def report_cost(month: str = ""):
+    from . import reports
+    cfg = load_config()
+    month = month or date.today().strftime("%Y-%m")
+    provider = cfg.get("image_ai_provider", "pollinations")
+    return {"month": month, "provider": provider,
+            "cost": reports.month_cost(month, provider)}
+
+
+@app.get("/api/reports/excel")
+async def report_excel(month: str = ""):
+    from fastapi.responses import Response
+    from . import reports
+    month = month or date.today().strftime("%Y-%m")
+    data = reports.export_excel(month)
+    return Response(
+        content=data,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition":
+                 f'attachment; filename="report_{month}.xlsx"'})
+
+
+@app.post("/api/reports/whatsapp")
+async def report_whatsapp():
+    from . import reports
+    cfg = load_config()
+    if not whatsapp.is_configured(cfg):
+        return JSONResponse({"error": "WhatsApp API ભરેલું નથી"},
+                            status_code=400)
+    r = await whatsapp.send(cfg, reports.daily_text())
+    return {"ok": "error" not in r, "result": r}
+
+
 # ── સેટિંગ ──────────────────────────────────────────────────────
 MASKED_KEYS = ("update_token", "facebook_page_token", "whatsapp_api_key",
                "image_ai_key")

@@ -1,0 +1,1 @@
+ALTER TABLE daily_stats ADD COLUMN ai_images INTEGER DEFAULT 0;

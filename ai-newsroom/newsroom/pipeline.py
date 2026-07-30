@@ -142,6 +142,7 @@ async def run_day(press_note: str | None = None,
                     if p:
                         photos, image_ai = [p], True
                         ai_used += 1
+                        db.bump_stat(today, "ai_images")
                 except Exception:
                     pass  # તસવીર ન બને તો પોસ્ટર ફોટા વગર બને — અટકવું નહીં
 
@@ -218,6 +219,13 @@ async def run_day(press_note: str | None = None,
         db.bump_stat(today, "errors")
         await BUS.emit("ceo", "", "failed", job_id=job_id, status="error",
                        message=str(e)[:300], error=str(e)[:1000], log_db=True)
+        # ભૂલ-એલર્ટ WhatsApp પર
+        if cfg.get("error_alert_enabled") and whatsapp.is_configured(cfg):
+            try:
+                await whatsapp.send(
+                    cfg, f"⚠️ AI Newsroom ભૂલ:\n{str(e)[:300]}")
+            except Exception:
+                pass
         raise
     finally:
         _running = False
@@ -280,9 +288,9 @@ async def publish_news(news_id: int) -> dict:
                     # નહીંતર પોસ્ટર ફ્રી હોસ્ટ પર ચડાવી લિંક બનાવો
                     media_url = await whatsapp.upload_public(
                         posters[0]["file_path"])
-            msg = (f"✅ પબ્લિશ થઈ ગયું!\n\n📰 {news['title']}\n\n"
-                   f"{news['body'][:200]}\n\n— {cfg['channel_name']}")
-            results["whatsapp"] = await whatsapp.send(cfg, msg, media_url)
+            msg = branding.build_caption(news["title"], news["body"], cfg)
+            results["whatsapp"] = await whatsapp.send_broadcast(
+                cfg, msg, media_url)
             db.bump_stat(today, "published_wa")
         return results
 

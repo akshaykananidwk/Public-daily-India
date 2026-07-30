@@ -373,7 +373,18 @@ async function loadReports() {
       `<tr><td>${AGENT_EMOJI[a.agent] || ""} ${a.agent}</td><td>${a.runs}</td>
        <td>${a.errors}</td><td>${(a.avg_ms / 1000).toFixed(1)} સે</td></tr>`
     ).join("");
+  try {
+    const c = await (await fetch("/api/reports/cost?month=" + month)).json();
+    $("#cost-line").textContent =
+      `💰 આ મહિને AI તસવીર ખર્ચ (${c.provider}): ≈ ₹${(c.cost||0).toFixed(0)}`;
+  } catch {}
 }
+if ($("#btn-excel")) $("#btn-excel").onclick = () =>
+  window.open("/api/reports/excel?month=" + $("#report-month").value, "_blank");
+if ($("#btn-report-wa")) $("#btn-report-wa").onclick = async () => {
+  const r = await (await fetch("/api/reports/whatsapp", {method:"POST"})).json();
+  toast(r.error || "રિપોર્ટ WhatsApp પર મોકલ્યો ✓", r.error ? "bad" : "good");
+};
 
 /* ── સેટિંગ ── */
 async function loadSettings() {
