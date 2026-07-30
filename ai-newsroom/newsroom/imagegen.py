@@ -71,7 +71,7 @@ async def _pollinations(prompt: str) -> bytes:
     """મફત સર્વિસ — ટેસ્ટિંગ માટે. કોઈ key નહીં, કોઈ ખર્ચ નહીં."""
     from urllib.parse import quote
     url = (f"https://image.pollinations.ai/prompt/{quote(prompt[:400])}"
-           f"?width=1536&height=1024&nologo=true")
+           f"?width=1536&height=1024&nologo=true&model=flux&enhance=true")
     async with httpx.AsyncClient(timeout=240, follow_redirects=True) as c:
         r = await c.get(url, headers={"User-Agent": "ai-newsroom"})
         if r.status_code != 200:
