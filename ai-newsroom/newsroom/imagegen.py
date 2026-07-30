@@ -108,6 +108,18 @@ async def _pollinations(prompt: str) -> bytes:
         return r.content
 
 
+# કનેક્શન ન થાય ત્યારે સાફ ગુજરાતી સૂચના
+CONNECT_HELP = {
+    "local": ("લોકલ Stable Diffusion સાથે કનેક્ટ ન થયું — Forge/WebUI ચાલુ "
+              "છે? `--api` સાથે ચલાવ્યું છે? URL બરાબર છે "
+              "(http://127.0.0.1:7860)?"),
+    "pollinations": ("Pollinations સાથે કનેક્ટ ન થયું — ઈન્ટરનેટ ચેક કરો, "
+                     "કે થોડી વારે ફરી ટ્રાય કરો."),
+    "gemini": "Google Gemini સાથે કનેક્ટ ન થયું — ઈન્ટરનેટ ચેક કરો.",
+    "openai": "OpenAI સાથે કનેક્ટ ન થયું — ઈન્ટરનેટ ચેક કરો.",
+}
+
+
 async def generate(cfg: dict, title: str) -> str | None:
     """તસવીર બનાવીને ફાઈલ-પાથ પાછો આપે. ભૂલ પડે તો exception."""
     if not is_configured(cfg):
@@ -115,14 +127,18 @@ async def generate(cfg: dict, title: str) -> str | None:
     prompt = PROMPT_TEMPLATE.format(
         title=title, style=cfg.get("image_ai_style", ""))
     provider = cfg.get("image_ai_provider", "pollinations")
-    if provider == "openai":
-        img = await _openai(cfg, prompt)
-    elif provider == "gemini":
-        img = await _gemini(cfg, prompt)
-    elif provider == "local":
-        img = await _local_sd(cfg, prompt)
-    else:
-        img = await _pollinations(prompt)
+    try:
+        if provider == "openai":
+            img = await _openai(cfg, prompt)
+        elif provider == "gemini":
+            img = await _gemini(cfg, prompt)
+        elif provider == "local":
+            img = await _local_sd(cfg, prompt)
+        else:
+            img = await _pollinations(prompt)
+    except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout) as e:
+        raise RuntimeError(CONNECT_HELP.get(
+            provider, "કનેક્ટ ન થયું — સેટિંગ ચેક કરો.")) from e
     out = PHOTOS_DIR / f"ai_{datetime.now():%Y%m%d_%H%M%S}.png"
     out.write_bytes(img)
     return str(out)
