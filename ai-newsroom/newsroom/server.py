@@ -491,6 +491,25 @@ async def manual_backup():
     return {"ok": True, "file": updater.make_backup()}
 
 
+@app.post("/api/restart")
+async def restart_server():
+    """આખું સર્વર રીસ્ટાર્ટ — નવો કોડ/ફીચર લોડ થાય, ફોનમાં પણ."""
+    import os
+    import sys
+
+    async def do_restart():
+        await asyncio.sleep(1)          # પહેલા જવાબ જવા દો
+        from . import poster
+        try:
+            await poster.shutdown()
+        except Exception:
+            pass
+        os.execv(sys.executable, [sys.executable] + sys.argv)
+
+    asyncio.create_task(do_restart())
+    return {"ok": True, "message": "સર્વર રીસ્ટાર્ટ થઈ રહ્યું છે..."}
+
+
 # ── લોગો અપલોડ ──────────────────────────────────────────────────
 @app.post("/api/logo")
 async def upload_logo(logo: UploadFile = File(...)):

@@ -613,3 +613,18 @@ $("#btn-backup").onclick = async () => {
   $("#update-info").textContent = "બેકઅપ: " + r.file;
   toast("બેકઅપ લેવાઈ ગયો ✓", "good");
 };
+$("#btn-restart").onclick = async () => {
+  if (!confirm("સર્વર રીસ્ટાર્ટ કરવું? 5-10 સેકન્ડમાં ફરી ચાલુ થશે.")) return;
+  try { await fetch("/api/restart", { method: "POST" }); } catch {}
+  toast("સર્વર રીસ્ટાર્ટ થઈ રહ્યું છે... પેજ આપોઆપ ફરી લોડ થશે", "good");
+  // ફરી ઉપલબ્ધ થાય ત્યાં સુધી રાહ જોઈ પેજ રીલોડ કરો
+  let tries = 0;
+  const check = setInterval(async () => {
+    tries++;
+    try {
+      const r = await fetch("/api/status", { cache: "no-store" });
+      if (r.ok) { clearInterval(check); location.reload(); }
+    } catch {}
+    if (tries > 30) { clearInterval(check); location.reload(); }
+  }, 1500);
+};

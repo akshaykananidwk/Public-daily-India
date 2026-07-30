@@ -377,8 +377,8 @@ input[type="month"] { background: var(--surface); border: 1px solid var(--line);
   .app { flex-direction: column; }
   /* સાઈડબાર → નીચે ફિક્સ નેવ બાર (આઈકોન) */
   .sidebar {
-    order: 2; width: 100%; height: 62px; flex-direction: row;
-    align-items: center; padding: 0; gap: 0;
+    order: 2; width: 100%; flex-direction: row;
+    align-items: center; padding: 0 0 env(safe-area-inset-bottom) 0; gap: 0;
     position: fixed; bottom: 0; left: 0; z-index: 40;
     border-top: 1px solid var(--line); border-right: none;
     box-shadow: 0 -4px 20px rgba(0,0,0,.3);
@@ -391,7 +391,11 @@ input[type="month"] { background: var(--surface); border: 1px solid var(--line);
   .badge-count { position: absolute; top: 4px; right: 22%;
     margin: 0; padding: 0 5px; font-size: 10px; }
 
-  main { order: 1; padding: 14px 12px 78px; }
+  /* નીચે નેવ બાર માટે પૂરતી જગ્યા — કપાય નહીં (સેફ-એરિયા સાથે) */
+  main { order: 1;
+    padding: 14px 12px calc(96px + env(safe-area-inset-bottom)); }
+  /* પેનલ પૂરી દેખાય — મોબાઈલમાં ઊંચાઈ મર્યાદા ન રાખો */
+  .panel { max-height: none; }
   .topline { flex-wrap: wrap; gap: 10px; }
   .topline h1 { font-size: 21px; }
   button.primary.big { padding: 12px 18px; font-size: 15px; }
