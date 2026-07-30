@@ -6,7 +6,7 @@ Ollama ન ચાલતું હોય તો ડેમો મોડ — સિ
 import httpx
 
 DEMO_BODY = (
-    "{title}. આ સમાચારની વધુ વિગતો ટૂંક સમયમાં ઉપલબ્ધ થશે. "
+    "આ સમાચારની વધુ વિગતો ટૂંક સમયમાં ઉપલબ્ધ થશે. "
     "આપની આસપાસ બનતી ઘટના કે સમાચાર અમને મોકલો.")
 
 
@@ -59,8 +59,7 @@ class LLM:
     async def write_news(self, item: dict) -> dict:
         title = item.get("title", "")
         if not await self.available():
-            return {"title": title, "body": DEMO_BODY.format(title=title),
-                    "demo": True}
+            return {"title": title, "body": DEMO_BODY, "demo": True}
         if self.mode == "direct":
             body = await self.generate(
                 self.model_write,

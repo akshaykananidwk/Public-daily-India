@@ -3,7 +3,7 @@ import json
 from .paths import CONFIG_PATH
 
 DEFAULTS = {
-    "channel_name": "PUBLIC DAY INDIA",
+    "channel_name": "PUBLIC DAILY INDIA",
     "location": "દેવભૂમિ દ્વારકા",
     "ollama_url": "http://localhost:11434",
     "model_think": "gemma3:12b",       # CEO / રૂટિંગ / સ્કોરિંગ
@@ -21,7 +21,7 @@ DEFAULTS = {
         {"name": "portrait", "w": 1080, "h": 1350},
         {"name": "story", "w": 1080, "h": 1920},
     ],
-    "tagline": "જ્યાં સત્ય છે, ત્યાં પબ્લિક ડે ઈન્ડિયા છે.",
+    "tagline": "જ્યાં સત્ય છે, ત્યાં પબ્લિક ડેઈલી ઈન્ડિયા છે.",
     "editor_name": "",
     "contact_number": "",
     "facebook_page_token": "",

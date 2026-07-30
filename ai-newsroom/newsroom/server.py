@@ -4,7 +4,7 @@ from datetime import date
 from pathlib import Path
 
 from fastapi import (FastAPI, WebSocket, WebSocketDisconnect, UploadFile,
-                     Form, Body)
+                     Form, Body, File)
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -94,35 +94,39 @@ async def run_day(payload: dict = Body(default={})):
 
 
 @app.post("/api/press-note")
-async def press_note(text: str = Form(""), photo: UploadFile | None = None):
+async def press_note(text: str = Form(""),
+                     photos: list[UploadFile] = File(default=[])):
+    from datetime import datetime
     note = (text or "").strip()
-    photo_path = None
-    if photo and photo.filename:
-        from datetime import datetime
-        safe = f"{datetime.now():%Y%m%d_%H%M%S}_{Path(photo.filename).name}"
+    photo_paths: list[str] = []
+    for i, photo in enumerate(photos[:3]):     # વધુમાં વધુ 3 ફોટા
+        if not photo.filename:
+            continue
+        safe = (f"{datetime.now():%Y%m%d_%H%M%S}_{i}_"
+                f"{Path(photo.filename).name}")
         dest = PHOTOS_DIR / safe
         dest.write_bytes(await photo.read())
-        photo_path = str(dest)
-        if not note:
-            try:  # OCR — pytesseract હોય તો
-                import pytesseract
-                from PIL import Image
-                note = pytesseract.image_to_string(
-                    Image.open(dest), lang="guj+eng")
-            except Exception:
-                return JSONResponse(
-                    {"error": "OCR ઉપલબ્ધ નથી — લખાણ પણ સાથે મોકલો "
-                              "(pip install pytesseract pillow + Tesseract guj)"},
-                    status_code=400)
+        photo_paths.append(str(dest))
+    if not note and photo_paths:
+        try:  # OCR — pytesseract હોય તો
+            import pytesseract
+            from PIL import Image
+            note = pytesseract.image_to_string(
+                Image.open(photo_paths[0]), lang="guj+eng")
+        except Exception:
+            return JSONResponse(
+                {"error": "OCR ઉપલબ્ધ નથી — લખાણ પણ સાથે મોકલો "
+                          "(pip install pytesseract pillow + Tesseract guj)"},
+                status_code=400)
     if not note:
         return JSONResponse({"error": "પ્રેસ નોટનું લખાણ ખાલી છે"},
                             status_code=400)
     if pipeline.is_running():
         return JSONResponse({"error": "કામ પહેલેથી ચાલુ છે"}, status_code=409)
     asyncio.create_task(pipeline.run_day(press_note=note,
-                                         photo_path=photo_path))
+                                         photo_path=photo_paths))
     return {"ok": True, "message": "પ્રેસ નોટ પર કામ શરૂ 🚀"
-            + (" (ફોટા સાથે 📷)" if photo_path else "")}
+            + (f" ({len(photo_paths)} ફોટા સાથે 📷)" if photo_paths else "")}
 
 
 # ── ન્યુઝ + અપ્રુવલ ────────────────────────────────────────────

@@ -204,11 +204,11 @@ $("#btn-run-go").onclick = async () => {
 };
 $("#btn-press").onclick = async () => {
   const text = $("#press-text").value.trim();
-  const photo = $("#press-photo").files[0];
-  if (!text && !photo) return toast("પ્રેસ નોટનું લખાણ લખો", "bad");
+  const files = [...$("#press-photo").files].slice(0, 3);
+  if (!text && !files.length) return toast("પ્રેસ નોટનું લખાણ લખો", "bad");
   const fd = new FormData();
   fd.append("text", text);
-  if (photo) fd.append("photo", photo);
+  for (const f of files) fd.append("photos", f);
   const r = await (await fetch("/api/press-note",
     { method: "POST", body: fd })).json();
   toast(r.message || r.error, r.error ? "bad" : "good");

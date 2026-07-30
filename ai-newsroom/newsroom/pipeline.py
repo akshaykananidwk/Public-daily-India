@@ -25,6 +25,15 @@ def detect_category(title: str, body: str = "") -> str:
     return "general"
 
 
+def dedupe_body(title: str, body: str) -> str:
+    """હેડલાઈન બોડીમાં ફરી ન આવે (ડબલ લખાણ ફિક્સ)."""
+    t = title.strip().rstrip(".।!").strip()
+    b = (body or "").strip()
+    if t and b.startswith(t):
+        b = b[len(t):].lstrip(" .।,!-–\n")
+    return b.strip()
+
+
 def is_running() -> bool:
     return _running
 
@@ -58,9 +67,11 @@ async def run_day(press_note: str | None = None,
                 if sep in first_line:
                     first_line = first_line.split(sep)[0]
                     break
+            photos = photo_path if isinstance(photo_path, list) \
+                else ([photo_path] if photo_path else [])
             items = [{"title": first_line.strip()[:120],
                       "url": "", "press_note": press_note,
-                      "photo": photo_path or ""}]
+                      "photos": photos}]
         else:
             async def scout_fn(progress):
                 await progress("RSS ફીડ વાંચી રહ્યો છું...")
@@ -104,13 +115,14 @@ async def run_day(press_note: str | None = None,
                                     job_id=job_id, message="તપાસો")
 
             category = detect_category(clean["title"], clean["body"])
-            photo = item.get("photo", "")
+            body = dedupe_body(clean["title"], clean["body"])
+            photos = list(item.get("photos", []))
             image_ai = False
 
             # 📷 ફોટો એજન્ટ — સાચો ફોટો ન હોય તો AI તસવીર બનાવે
             # (જન્મદિવસમાં નહીં — વ્યક્તિનો AI ફોટો ન બનાવાય)
             # ai_limit થી ખર્ચ કંટ્રોલ: આજની મર્યાદા પૂરી થાય પછી નહીં
-            if (not photo and category != "birthday"
+            if (not photos and category != "birthday"
                     and imagegen.is_configured(cfg)
                     and (ai_limit is None or ai_used < ai_limit)):
                 async def photo_fn(progress, clean=clean, idx=idx):
@@ -121,7 +133,7 @@ async def run_day(press_note: str | None = None,
                     p = await run_agent("photo", "ceo", photo_fn,
                                         job_id=job_id, message="AI તસવીર")
                     if p:
-                        photo, image_ai = p, True
+                        photos, image_ai = [p], True
                         ai_used += 1
                 except Exception:
                     pass  # તસવીર ન બને તો પોસ્ટર ફોટા વગર બને — અટકવું નહીં
@@ -129,31 +141,35 @@ async def run_day(press_note: str | None = None,
             news_id = db.execute(
                 """INSERT INTO news(job_id, title, body, category, source_title,
                    source_url, status, photo) VALUES(?,?,?,?,?,?,?,?)""",
-                (job_id, clean["title"], clean["body"], category,
+                (job_id, clean["title"], body, category,
                  item.get("source", "") or item.get("title", ""),
-                 item.get("url", ""), "proofread", photo))
+                 item.get("url", ""), "proofread", "|".join(photos)))
             db.bump_stat(today, "news_written")
 
             async def design_fn(progress, news_id=news_id, clean=clean,
-                                idx=idx, category=category, photo=photo,
-                                image_ai=image_ai):
+                                idx=idx, category=category, photos=photos,
+                                image_ai=image_ai, body=body):
                 from pathlib import Path
+                images = [Path(p).as_uri() for p in photos if p]
                 news = {"id": news_id, "title": clean["title"],
-                        "body": clean["body"], "category": category,
+                        "body": body, "category": category,
                         "channel": cfg["channel_name"],
                         "location": cfg["location"],
                         "tagline": cfg.get("tagline", ""),
                         "editor": cfg.get("editor_name", ""),
                         "contact": cfg.get("contact_number", ""),
-                        "image": Path(photo).as_uri() if photo else "",
+                        "images": images,
+                        "image": images[0] if images else "",
                         "image_ai": image_ai,
                         "date": datetime.now().strftime("%d/%m/%Y")}
+                # બધા ન્યુઝ એક જ (રેફરન્સ) ડિઝાઈનમાં — ફક્ત જન્મદિવસ અલગ
+                template = "birthday" if category == "birthday" else "general"
                 results = []
                 for size in cfg["poster_sizes"]:
                     await progress(
                         f"ન્યુઝ #{idx} — {size['name']} પોસ્ટર બની રહ્યું છે...")
                     results.append(await poster.render_poster(
-                        category, news, size))
+                        template, news, size))
                     db.bump_stat(today, "posters_created")
                 return results
             await run_agent("designer", "proofreader", design_fn,
