@@ -294,13 +294,19 @@ async def run_from_pdf_file(pdf_path: str, reporter: str = ""):
     cfg = load_config()
     llm = LLM(cfg)
     await BUS.job_progress(5, "PDF ના પાનાં જોઈ રહ્યો છું (Vision AI)...", "PDF")
+
+    async def page_prog(i, total):
+        await BUS.job_progress(5 + int(i * 10 / max(total, 1)),
+                               f"પાનું {i}/{total} વાંચી રહ્યો છું...", "PDF")
     try:
-        items = await pdfnews.extract_news(pdf_path, llm)
+        items, err = await pdfnews.extract_news(pdf_path, llm, page_prog)
     except Exception as e:
         await BUS.job_progress(100, f"PDF ભૂલ: {e}", "ભૂલ")
         return
     if not items:
-        await BUS.job_progress(100, "PDF માંથી ન્યુઝ ન મળ્યા", "પૂર્ણ")
+        msg = ("PDF માંથી ન્યુઝ ન મળ્યા — " + err) if err \
+            else "PDF માંથી ન્યુઝ ન મળ્યા"
+        await BUS.job_progress(100, msg, "ભૂલ")
         return
     await BUS.job_progress(15, f"{len(items)} ન્યુઝ મળ્યા — બનાવી રહ્યો છું", "PDF")
     for i, it in enumerate(items, 1):

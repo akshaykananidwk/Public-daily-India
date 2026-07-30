@@ -128,9 +128,9 @@ class LLM:
         return {"title": new_title or title, "body": new_body, "demo": False}
 
     # ── Vision: ઈમેજ (PDF પાનું) જોઈને ન્યુઝ કાઢે ────────────────
-    async def vision_news(self, image_b64: str) -> dict:
-        """પ્રેસ નોટના ફોટા/પાનાને *જોઈને* સ્વચ્છ ગુજરાતી ન્યુઝ કાઢે
-        (કસ્ટમ ફોન્ટવાળી PDF માટે — ટેક્સ્ટ તૂટે ત્યાં). Gemini/OpenAI જોઈએ."""
+    async def vision_news(self, image_b64: str, mime: str = "image/jpeg") -> dict:
+        """પ્રેસ નોટના ફોટા/પાનાને *જોઈને* સ્વચ્છ ગુજરાતી ન્યુઝ કાઢે.
+        ભૂલ પડે તો {'error': ...} પાછું આપે (છુપાવે નહીં)."""
         prompt = (
             "આ એક પ્રેસ નોટ / સમાચાર દસ્તાવેજની તસવીર છે. તેને ધ્યાનથી વાંચો "
             "અને એમાંથી *મૌલિક* ગુજરાતી સમાચાર બનાવો (હૂબહૂ નકલ નહીં). આપો:\n"
@@ -138,32 +138,37 @@ class LLM:
             "પછી: 3-4 વાક્યનો હકીકતલક્ષી સમાચાર. ફક્ત આટલું જ.")
         try:
             if self.provider == "gemini":
-                out = await self._gemini_vision(prompt, image_b64)
+                out = await self._gemini_vision(prompt, image_b64, mime)
             elif self.provider == "openai":
                 out = await self._openai_vision(prompt, image_b64)
             else:
-                return {"title": "", "body": ""}
-        except Exception:
-            return {"title": "", "body": ""}
+                return {"error": "Vision માટે Gemini/OpenAI જોઈએ"}
+        except httpx.HTTPStatusError as e:
+            return {"error": f"AI {e.response.status_code}: "
+                             f"{e.response.text[:180]}"}
+        except Exception as e:
+            return {"error": str(e)[:180]}
         lines = [l.strip() for l in out.split("\n") if l.strip()]
         if not lines:
-            return {"title": "", "body": ""}
+            return {"error": "AI એ ખાલી જવાબ આપ્યો"}
         title = lines[0].lstrip("#*-• ").replace("હેડલાઈન:", "").strip()
         body = " ".join(lines[1:]).strip()
         return {"title": title, "body": body}
 
-    async def _gemini_vision(self, prompt, image_b64) -> str:
-        model = self.text_model or "gemini-2.0-flash"
+    async def _gemini_vision(self, prompt, image_b64, mime="image/jpeg") -> str:
+        model = self.text_model or "gemini-1.5-flash"
         url = (f"https://generativelanguage.googleapis.com/v1beta/models/"
                f"{model}:generateContent")
         body = {"contents": [{"parts": [
             {"text": prompt},
-            {"inline_data": {"mime_type": "image/png", "data": image_b64}}]}]}
+            {"inlineData": {"mimeType": mime, "data": image_b64}}]}]}
         async with httpx.AsyncClient(timeout=120) as c:
             r = await c.post(url, params={"key": self.api_key}, json=body)
             r.raise_for_status()
             data = r.json()
-        return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+        cand = (data.get("candidates") or [{}])[0]
+        parts = cand.get("content", {}).get("parts", [])
+        return "".join(p.get("text", "") for p in parts).strip()
 
     async def _openai_vision(self, prompt, image_b64) -> str:
         model = self.text_model or "gpt-4o-mini"
