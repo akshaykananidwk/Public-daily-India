@@ -60,6 +60,7 @@ DEFAULTS = {
     "update_repo": "",                 # દા.ત. akshaykananidwk/Public-daily-India
     "update_branch": "main",
     "update_token": "",
+    "auth_enabled": False,             # મલ્ટી-યુઝર લોગિન (ડિફોલ્ટ બંધ)
 }
 
 

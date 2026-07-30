@@ -299,6 +299,13 @@
             </div>
             <div id="wa-info"></div>
           </fieldset>
+          <fieldset class="card"><legend>👥 યુઝર / લોગિન</legend>
+            <label class="check"><input name="auth_enabled" type="checkbox">
+              લોગિન ફરજિયાત કરો (એડમિન + રિપોર્ટર)</label>
+            <p class="hint">ડિફોલ્ટ એડમિન: <b>admin / admin123</b> —
+              ચાલુ કર્યા પછી તરત પાસવર્ડ બદલો. રિપોર્ટર ન્યુઝ બનાવે,
+              ફક્ત એડમિન મંજૂર/પબ્લિશ કરે.</p>
+          </fieldset>
           <fieldset class="card"><legend>🔄 GitHub અપડેટ</legend>
             <label>Repository (owner/repo) <input name="update_repo"></label>
             <label>Branch <input name="update_branch"></label>
@@ -337,6 +344,23 @@
   <div class="modal-box card">
     <button class="modal-close" id="modal-close">✕</button>
     <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- લોગિન સ્ક્રીન (auth ચાલુ હોય તો) -->
+<div id="login-modal" class="modal hidden">
+  <div class="modal-box card" style="width:min(380px,92vw);text-align:center">
+    <div class="brand-logo" style="margin:0 auto 14px">PD</div>
+    <h3 style="margin-bottom:4px">AI Newsroom</h3>
+    <p class="hint" style="margin-bottom:16px">લોગિન કરો</p>
+    <input id="login-user" placeholder="યુઝરનેમ"
+      style="width:100%;background:var(--bg-2);border:1px solid var(--line);
+      color:var(--ink);border-radius:10px;padding:11px;margin-bottom:10px">
+    <input id="login-pass" type="password" placeholder="પાસવર્ડ"
+      style="width:100%;background:var(--bg-2);border:1px solid var(--line);
+      color:var(--ink);border-radius:10px;padding:11px;margin-bottom:14px">
+    <button id="btn-login" class="primary big" style="width:100%">લોગિન</button>
+    <p id="login-err" style="color:var(--bad);font-size:13px;margin-top:10px"></p>
   </div>
 </div>
 

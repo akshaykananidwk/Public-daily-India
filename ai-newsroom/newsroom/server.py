@@ -4,11 +4,11 @@ from datetime import date
 from pathlib import Path
 
 from fastapi import (FastAPI, WebSocket, WebSocketDisconnect, UploadFile,
-                     Form, Body, File)
+                     Form, Body, File, Request, Depends, HTTPException)
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import db, pipeline, updater, whatsapp
+from . import db, pipeline, updater, whatsapp, auth
 from .bus import BUS
 from .config import load_config, save_config
 from .llm import LLM
@@ -29,6 +29,39 @@ async def startup():
 async def shutdown():
     from . import poster
     await poster.shutdown()
+
+
+# ── ઓથ ─────────────────────────────────────────────────────────
+def require_admin(request: Request):
+    u = auth.current_user(request.cookies.get("session"))
+    if u.get("role") != "admin":
+        raise HTTPException(status_code=401, detail="એડમિન લોગિન જોઈએ")
+    return u
+
+
+@app.post("/api/login")
+async def login(payload: dict = Body(...)):
+    role = auth.verify(payload.get("username", ""), payload.get("password", ""))
+    if not role:
+        return JSONResponse({"error": "ખોટું નામ કે પાસવર્ડ"}, status_code=401)
+    token = auth.make_token(payload["username"], role)
+    resp = JSONResponse({"ok": True, "role": role})
+    resp.set_cookie("session", token, httponly=True, max_age=86400 * 7)
+    return resp
+
+
+@app.post("/api/logout")
+async def logout():
+    resp = JSONResponse({"ok": True})
+    resp.delete_cookie("session")
+    return resp
+
+
+@app.get("/api/me")
+async def me(request: Request):
+    u = auth.current_user(request.cookies.get("session"))
+    return {"auth_enabled": auth.enabled(),
+            "role": u.get("role", ""), "username": u.get("username", "")}
 
 
 # ── UI ──────────────────────────────────────────────────────────
@@ -199,7 +232,7 @@ async def list_news(status: str = "", limit: int = 50, q: str = "",
 
 
 @app.post("/api/news/{news_id}/approve")
-async def approve(news_id: int):
+async def approve(news_id: int, _=Depends(require_admin)):
     db.execute("UPDATE news SET status='approved', "
                "updated_at=CURRENT_TIMESTAMP WHERE id=?", (news_id,))
     db.bump_stat(date.today().isoformat(), "approved")
@@ -314,7 +347,7 @@ async def get_settings():
 
 
 @app.post("/api/settings")
-async def set_settings(payload: dict):
+async def set_settings(payload: dict, _=Depends(require_admin)):
     # માસ્ક કરેલા ટોકન પાછા ન લખાય
     for key in MASKED_KEYS:
         if payload.get(key, "").startswith("••••"):

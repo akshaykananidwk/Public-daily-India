@@ -25,6 +25,25 @@ function toast(msg, kind = "") {
     setTimeout(() => t.remove(), 400); }, 3800);
 }
 
+/* ── લોગિન (auth ચાલુ હોય તો) ── */
+(async function checkAuth() {
+  try {
+    const me = await (await fetch("/api/me")).json();
+    if (me.auth_enabled && !me.role) showLogin();
+  } catch {}
+})();
+function showLogin() {
+  $("#login-modal").classList.remove("hidden");
+}
+if ($("#btn-login")) $("#btn-login").onclick = async () => {
+  const r = await (await fetch("/api/login", { method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: $("#login-user").value,
+                           password: $("#login-pass").value }) })).json();
+  if (r.ok) { $("#login-modal").classList.add("hidden"); location.reload(); }
+  else $("#login-err").textContent = r.error || "લોગિન નિષ્ફળ";
+};
+
 /* ── ટેબ ── */
 document.querySelectorAll(".nav-btn").forEach((b) =>
   b.addEventListener("click", () => {
