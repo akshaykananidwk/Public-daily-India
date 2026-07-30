@@ -5,6 +5,22 @@ POST JSON: { api_key, number, message, session_id, media_url? }
 import httpx
 
 
+async def upload_public(file_path: str) -> str:
+    """લોકલ ફાઈલને ફ્રી હોસ્ટ પર ચડાવી જાહેર લિંક પાછી આપે (WhatsApp media માટે).
+    tmpfiles.org — ~1 કલાક રહે, WhatsApp ડિલિવરી માટે પૂરતું."""
+    try:
+        async with httpx.AsyncClient(timeout=60) as c:
+            with open(file_path, "rb") as fh:
+                r = await c.post("https://tmpfiles.org/api/v1/upload",
+                                 files={"file": fh})
+            r.raise_for_status()
+            url = r.json()["data"]["url"]
+            # ડાયરેક્ટ ડાઉનલોડ લિંક: /dl/ ઉમેરો
+            return url.replace("tmpfiles.org/", "tmpfiles.org/dl/", 1)
+    except Exception:
+        return ""
+
+
 def is_configured(cfg: dict) -> bool:
     return bool(cfg.get("whatsapp_api_url") and cfg.get("whatsapp_api_key")
                 and cfg.get("whatsapp_session_id")

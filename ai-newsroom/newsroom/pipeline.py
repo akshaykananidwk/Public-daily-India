@@ -241,21 +241,28 @@ async def publish_news(news_id: int) -> dict:
         db.execute("UPDATE news SET status='published', "
                    "updated_at=CURRENT_TIMESTAMP WHERE id=?", (news_id,))
 
-        # 📱 WhatsApp નોટિફિકેશન — પબ્લિશ થાય એટલે તમારા નંબર પર
+        # 📱 WhatsApp નોટિફિકેશન — પબ્લિશ થાય એટલે તમારા નંબર પર (પોસ્ટર સાથે)
         if whatsapp.is_configured(cfg):
-            await progress("WhatsApp પર જાણ મોકલી રહ્યો છું...")
+            await progress("WhatsApp પર પોસ્ટર મોકલી રહ્યો છું...")
             media_url = ""
             base = (cfg.get("public_base_url") or "").rstrip("/")
-            if base and posters:
+            if posters:
                 from pathlib import Path
                 from .paths import STORAGE_DIR
-                try:
-                    rel = Path(posters[0]["file_path"]).relative_to(STORAGE_DIR)
-                    media_url = f"{base}/storage/{rel.as_posix()}"
-                except ValueError:
-                    pass
+                if base:
+                    # તમારી પોતાની hosting હોય તો એ વાપરો
+                    try:
+                        rel = Path(posters[0]["file_path"]).relative_to(
+                            STORAGE_DIR)
+                        media_url = f"{base}/storage/{rel.as_posix()}"
+                    except ValueError:
+                        pass
+                if not media_url:
+                    # નહીંતર પોસ્ટર ફ્રી હોસ્ટ પર ચડાવી લિંક બનાવો
+                    media_url = await whatsapp.upload_public(
+                        posters[0]["file_path"])
             msg = (f"✅ પબ્લિશ થઈ ગયું!\n\n📰 {news['title']}\n\n"
-                   f"{news['body'][:200]}\n\n— {cfg['channel_name']} AI Newsroom")
+                   f"{news['body'][:200]}\n\n— {cfg['channel_name']}")
             results["whatsapp"] = await whatsapp.send(cfg, msg, media_url)
             db.bump_stat(today, "published_wa")
         return results

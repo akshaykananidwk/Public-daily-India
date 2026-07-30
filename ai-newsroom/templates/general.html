@@ -117,9 +117,8 @@
   body:not(.has-photo) .body-sec { flex: 1; display: flex;
     align-items: center; }
   #body-text { color: #f2f6ff; font-size: 29px; font-weight: 700;
-    display: -webkit-box; -webkit-box-orient: vertical;
-    -webkit-line-clamp: 5; overflow: hidden; }
-  body.has-photo #body-text { -webkit-line-clamp: 4; font-size: 28px; }
+    overflow: hidden; width: 100%; }
+  body.has-photo #body-text { font-size: 28px; }
   .q { position: absolute; font-family: serif; font-size: 64px;
     color: var(--yellow); line-height: 1; }
   .q1 { left: 20px; top: 10px; }
@@ -253,6 +252,16 @@
     }
   }
 
+  // લખાણ નાનું હોય તો ફોન્ટ મોટો કરી ખાનું ભરે (ખાલી જગ્યા ન લાગે)
+  function autoGrow(el, maxHeight, maxSize) {
+    let size = parseInt(getComputedStyle(el).fontSize, 10);
+    while (el.scrollHeight <= maxHeight && size < maxSize) {
+      size += 2;
+      el.style.fontSize = size + 'px';
+    }
+    if (el.scrollHeight > maxHeight) el.style.fontSize = (size - 2) + 'px';
+  }
+
   function titleCase(s) {
     return (s || '').toLowerCase().split(/\s+/)
       .map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
@@ -315,6 +324,14 @@
     const finish = () => {
       autoFit(document.getElementById('headline'),
               Math.round(window.innerHeight * (hasPhotos ? 0.16 : 0.22)), 36);
+      // બોડી: પહેલા મોટું કરી ખાનું ભરો, પછી વધુ હોય તો નાનું કરો
+      const bt = document.getElementById('body-text');
+      if (bt.textContent.trim()) {
+        const box = bt.closest('.body-sec');
+        const avail = box.clientHeight - 30;
+        autoGrow(bt, avail, hasPhotos ? 40 : 56);
+        autoFit(bt, avail, 22);
+      }
       return true;
     };
     if (hasPhotos) {
