@@ -1,0 +1,10 @@
+# 🔒 રનટાઈમ ડેટા — repo માં ન જાય
+data/
+config/
+storage/
+backups/
+logs/
+temp_update/
+__pycache__/
+*.pyc
+nohup.out

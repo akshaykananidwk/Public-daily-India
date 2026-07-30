@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Newsroom — Public Day India</title>
+<link rel="stylesheet" href="/web/style.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">🏢 AI NEWSROOM<br><small>PUBLIC DAY INDIA</small></div>
+    <nav>
+      <button class="nav-btn active" data-tab="dashboard">📺 ડેશબોર્ડ</button>
+      <button class="nav-btn" data-tab="approval">🟠 અપ્રુવલ <span id="pending-badge" class="badge-count"></span></button>
+      <button class="nav-btn" data-tab="reports">📊 રિપોર્ટ</button>
+      <button class="nav-btn" data-tab="settings">⚙️ સેટિંગ</button>
+    </nav>
+    <div class="side-status">
+      <div id="ollama-status">Ollama: ...</div>
+      <div id="version">v: ...</div>
+    </div>
+  </aside>
+
+  <main>
+    <!-- ડેશબોર્ડ -->
+    <section id="tab-dashboard" class="tab active">
+      <header class="topline">
+        <span id="live-dot" class="live">● લાઈવ</span>
+        <span id="clock"></span>
+        <span class="grow"></span>
+        <button id="btn-run" class="primary">🚀 દિવસ શરૂ કરો</button>
+      </header>
+
+      <div class="graph-wrap">
+        <svg id="edges" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="node ceo" id="node-ceo" style="left:50%;top:8%">
+          <div class="emoji">👑</div><div class="name">CEO</div>
+          <div class="state" id="state-ceo">⚪ નિષ્ક્રિય</div>
+        </div>
+        <div class="node" id="node-scout" style="left:10%;top:42%">
+          <div class="emoji">🔍</div><div class="name">સ્કાઉટ</div>
+          <div class="state" id="state-scout">⚪ નિષ્ક્રિય</div>
+        </div>
+        <div class="node" id="node-editor" style="left:30%;top:42%">
+          <div class="emoji">✍️</div><div class="name">લેખક</div>
+          <div class="state" id="state-editor">⚪ નિષ્ક્રિય</div>
+        </div>
+        <div class="node" id="node-proofreader" style="left:50%;top:42%">
+          <div class="emoji">🔤</div><div class="name">શુદ્ધિ</div>
+          <div class="state" id="state-proofreader">⚪ નિષ્ક્રિય</div>
+        </div>
+        <div class="node" id="node-designer" style="left:70%;top:42%">
+          <div class="emoji">🎨</div><div class="name">ડિઝાઈનર</div>
+          <div class="state" id="state-designer">⚪ નિષ્ક્રિય</div>
+        </div>
+        <div class="node" id="node-photo" style="left:90%;top:42%">
+          <div class="emoji">📷</div><div class="name">ફોટો</div>
+          <div class="state" id="state-photo">⚪ નિષ્ક્રિય</div>
+        </div>
+        <div class="node" id="node-publisher" style="left:23%;top:76%">
+          <div class="emoji">📤</div><div class="name">પબ્લિશર</div>
+          <div class="state" id="state-publisher">⚪ નિષ્ક્રિય</div>
+        </div>
+        <div class="node" id="node-inbox" style="left:50%;top:76%">
+          <div class="emoji">💬</div><div class="name">જવાબ</div>
+          <div class="state" id="state-inbox">⚪ નિષ્ક્રિય</div>
+        </div>
+        <div class="node" id="node-analyst" style="left:77%;top:76%">
+          <div class="emoji">📊</div><div class="name">એનાલિસ્ટ</div>
+          <div class="state" id="state-analyst">⚪ નિષ્ક્રિય</div>
+        </div>
+      </div>
+
+      <div class="bottom-panels">
+        <div class="panel">
+          <h3>📋 લાઈવ લોગ</h3>
+          <ul id="live-log"></ul>
+        </div>
+        <div class="panel">
+          <h3>📊 આજે</h3>
+          <table class="stats">
+            <tr><td>ભેગા કર્યા</td><td id="st-collected">0</td></tr>
+            <tr><td>પસંદ કર્યા</td><td id="st-selected">0</td></tr>
+            <tr><td>લખાયા</td><td id="st-written">0</td></tr>
+            <tr><td>પોસ્ટર</td><td id="st-posters">0</td></tr>
+            <tr><td>મંજૂર</td><td id="st-approved">0</td></tr>
+          </table>
+          <h3 style="margin-top:14px">📝 પ્રેસ નોટ</h3>
+          <textarea id="press-text" rows="3"
+            placeholder="પ્રેસ નોટનું લખાણ અહીં પેસ્ટ કરો..."></textarea>
+          <button id="btn-press" class="primary small">ન્યુઝ બનાવો</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- અપ્રુવલ -->
+    <section id="tab-approval" class="tab">
+      <h2>🟠 અપ્રુવલની રાહમાં</h2>
+      <div id="approval-list" class="cards"></div>
+    </section>
+
+    <!-- રિપોર્ટ -->
+    <section id="tab-reports" class="tab">
+      <h2>📊 રિપોર્ટ <input type="month" id="report-month"></h2>
+      <div id="report-totals" class="tiles"></div>
+      <h3>📅 તારીખવાર</h3>
+      <table class="report-table" id="report-days"></table>
+      <h3>🤖 એજન્ટ પરફોર્મન્સ</h3>
+      <table class="report-table" id="report-agents"></table>
+    </section>
+
+    <!-- સેટિંગ -->
+    <section id="tab-settings" class="tab">
+      <h2>⚙️ સેટિંગ</h2>
+      <form id="settings-form" class="settings">
+        <fieldset><legend>ચેનલ</legend>
+          <label>ચેનલનું નામ <input name="channel_name"></label>
+          <label>સ્થળ <input name="location"></label>
+          <label>રોજના ન્યુઝ <input name="daily_news_count" type="number" min="1" max="30"></label>
+          <label>ઓટો રન સમય <input name="auto_run_time" type="time"></label>
+          <label class="check"><input name="auto_run_enabled" type="checkbox"> રોજ ઓટો ચલાવો</label>
+        </fieldset>
+        <fieldset><legend>AI (Ollama)</legend>
+          <label>Ollama URL <input name="ollama_url"></label>
+          <label>વિચાર મોડેલ <input name="model_think"></label>
+          <label>લેખન મોડેલ <input name="model_write"></label>
+          <label>અનુવાદ મોડેલ (IndicTrans2) <input name="model_translate" placeholder="ખાલી = લેખન મોડેલ"></label>
+          <label>લેખન રીત
+            <select name="writing_mode">
+              <option value="translate">બે-પગલાં (translate) — વધુ સચોટ</option>
+              <option value="direct">સીધું ગુજરાતી (direct) — ઝડપી</option>
+            </select>
+          </label>
+        </fieldset>
+        <fieldset><legend>પબ્લિશિંગ</legend>
+          <label>Facebook Page ID <input name="facebook_page_id"></label>
+          <label>Facebook Page Token <input name="facebook_page_token" type="password"></label>
+        </fieldset>
+        <fieldset><legend>🔄 GitHub અપડેટ</legend>
+          <label>Repository (owner/repo) <input name="update_repo"></label>
+          <label>Branch <input name="update_branch"></label>
+          <label>Token <input name="update_token" type="password"></label>
+          <div class="row">
+            <button type="button" id="btn-check-update">ચેક કરો</button>
+            <button type="button" id="btn-apply-update" class="warn">🚀 Update Now</button>
+            <button type="button" id="btn-backup">💾 મેન્યુઅલ બેકઅપ</button>
+          </div>
+          <div id="update-info"></div>
+        </fieldset>
+        <button type="submit" class="primary">સેવ કરો</button>
+      </form>
+    </section>
+  </main>
+</div>
+<script src="/web/app.js"></script>
+</body>
+</html>

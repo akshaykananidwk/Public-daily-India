@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<style>
+  /* ⭐ ગુજરાતી CSS ના સોનેરી નિયમો — ફોન્ટ લોકલથી, CDN નહીં */
+  @font-face {
+    font-family: 'NotoGuj';
+    src: url('../fonts/NotoSansGujarati-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-display: block;
+  }
+  @font-face {
+    font-family: 'NotoGuj';
+    src: url('../fonts/NotoSansGujarati-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-display: block;
+  }
+  @font-face {
+    font-family: 'AnekGuj';
+    src: url('../fonts/AnekGujarati-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-display: block;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body { width: 100%; height: 100%; overflow: hidden; }
+
+  body {
+    font-family: 'NotoGuj', sans-serif;
+    background: linear-gradient(160deg, #3d0b2e 0%, #6e1d55 55%, #3d0b2e 100%);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .gujarati-text {
+    letter-spacing: normal;        /* ❌ letter-spacing જોડાક્ષર તોડે */
+    text-transform: none;
+    word-spacing: normal;
+    line-height: 1.65;             /* માત્રા કપાય નહીં */
+    padding-top: 0.15em;
+    text-rendering: optimizeLegibility;
+    -webkit-font-feature-settings: "liga" 1, "kern" 1;
+    font-variant-ligatures: common-ligatures;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    hyphens: none;
+  }
+
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 3.2% 4.5% 0 4.5%;
+  }
+  .channel {
+    font-family: 'AnekGuj', 'NotoGuj', sans-serif;
+    font-weight: 700; font-size: 34px; color: #ffd21e;
+    border: 3px solid #ffd21e; padding: 8px 22px; border-radius: 10px;
+  }
+  .date { font-size: 26px; color: #cfe0ff; }
+
+  .badge {
+    align-self: flex-start; margin: 4% 4.5% 0 4.5%;
+    background: #e11d2e; color: #fff; font-weight: 700; font-size: 30px;
+    padding: 10px 28px; border-radius: 999px;
+  }
+
+  .headline-wrap { flex: 1; display: flex; align-items: center; padding: 0 4.5%; }
+  #headline {
+    font-family: 'AnekGuj', 'NotoGuj', sans-serif;
+    font-weight: 700; font-size: 72px; color: #ffffff;
+  }
+
+  #body-text {
+    padding: 0 4.5% 3%;
+    font-size: 30px; color: #dbe7ff;
+    display: -webkit-box; -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4; overflow: hidden;
+  }
+
+  .footer {
+    background: #ffd21e; color: #0b1e3d;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.6% 4.5%; font-weight: 700; font-size: 26px;
+  }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="channel" id="channel">PUBLIC DAY INDIA</div>
+    <div class="date gujarati-text" id="date"></div>
+  </div>
+  <div class="badge gujarati-text" id="badge">સમાચાર</div>
+  <div class="headline-wrap">
+    <h1 class="gujarati-text" id="headline" lang="gu"></h1>
+  </div>
+  <p class="gujarati-text" id="body-text" lang="gu"></p>
+  <div class="footer">
+    <span class="gujarati-text" id="location">દેવભૂમિ દ્વારકા</span>
+    <span>www.publicdayindia.com</span>
+  </div>
+
+<script>
+  const BADGES = { general: 'સમાચાર', breaking: 'બ્રેકિંગ ન્યુઝ',
+                   birthday: 'જન્મદિવસની શુભેચ્છા' };
+
+  function autoFit(el, maxHeight) {
+    let size = parseInt(getComputedStyle(el).fontSize, 10);
+    while (el.scrollHeight > maxHeight && size > 32) {
+      size -= 2;
+      el.style.fontSize = size + 'px';
+    }
+  }
+
+  window.renderNews = function (news) {
+    document.getElementById('channel').textContent = news.channel || 'PUBLIC DAY INDIA';
+    document.getElementById('date').textContent = news.date || '';
+    document.getElementById('badge').textContent = BADGES[news.category] || BADGES.general;
+    document.getElementById('headline').textContent = news.title || '';
+    document.getElementById('body-text').textContent = news.body || '';
+    document.getElementById('location').textContent = news.location || 'દેવભૂમિ દ્વારકા';
+    const wrap = document.querySelector('.headline-wrap');
+    autoFit(document.getElementById('headline'), wrap.clientHeight);
+    return true;
+  };
+</script>
+</body>
+</html>

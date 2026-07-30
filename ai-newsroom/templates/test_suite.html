@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<title>ગુજરાતી રેન્ડરિંગ ટેસ્ટ</title>
+<style>
+  @font-face { font-family: 'NotoGuj';
+    src: url('../fonts/NotoSansGujarati-Bold.ttf') format('truetype');
+    font-weight: 700; font-display: block; }
+  @font-face { font-family: 'AnekGuj';
+    src: url('../fonts/AnekGujarati-Bold.ttf') format('truetype');
+    font-weight: 700; font-display: block; }
+  body { background: #fff; color: #111; padding: 40px;
+         font-family: 'NotoGuj', sans-serif; }
+  .gujarati-text {
+    letter-spacing: normal; text-transform: none; word-spacing: normal;
+    line-height: 1.65; padding-top: 0.15em;
+    text-rendering: optimizeLegibility;
+    -webkit-font-feature-settings: "liga" 1, "kern" 1;
+    font-variant-ligatures: common-ligatures;
+    word-break: keep-all; overflow-wrap: break-word; hyphens: none;
+  }
+  h2 { font-family: 'AnekGuj'; }
+  p { font-size: 34px; font-weight: 700; }
+</style>
+</head>
+<body>
+  <h2 class="gujarati-text" lang="gu">અઘરા જોડાક્ષર — બધા સાફ દેખાય તો ટેમ્પ્લેટ પાસ ✅</h2>
+  <p class="gujarati-text" lang="gu">દ્વારકાધીશ • શ્રદ્ધાંજલિ • પ્રાર્થના • કૃષ્ણ • જ્ઞાન</p>
+  <p class="gujarati-text" lang="gu">ટ્રસ્ટ • સ્વાગત • દ્વિતીય • ઋષિ • ક્ષેત્ર • જ્યોતિર્લિંગ</p>
+  <p class="gujarati-text" lang="gu">અંતર્ગત • ઉદ્ઘાટન • શુભેચ્છા • હાર્દિક • સન્માન</p>
+  <script>window.renderNews = () => true;</script>
+</body>
+</html>
