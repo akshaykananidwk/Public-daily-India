@@ -220,12 +220,13 @@
               AI તસવીર ચાલુ કરો</label>
             <label>સર્વિસ
               <select name="image_ai_provider">
-                <option value="pollinations">Pollinations — મફત (ટેસ્ટિંગ માટે, key ન જોઈએ)</option>
-                <option value="openai">OpenAI gpt-image-1 — શ્રેષ્ઠ ક્વોલિટી (key જોઈએ)</option>
+                <option value="pollinations">Pollinations — મફત (ટેસ્ટિંગ, key ન જોઈએ)</option>
+                <option value="gemini">Google Gemini — ~₹3/તસવીર (ફ્રી ટિયર પણ છે)</option>
+                <option value="openai">OpenAI gpt-image-1 — ~₹3.5/તસવીર</option>
               </select></label>
-            <label>OpenAI API Key (ફક્ત OpenAI માટે)
+            <label>API Key (Gemini કે OpenAI માટે)
               <input name="image_ai_key" type="password"
-                placeholder="sk-..."></label>
+                placeholder="Gemini: AIza...  |  OpenAI: sk-..."></label>
             <label>ક્વોલિટી
               <select name="image_ai_quality">
                 <option value="low">low — સસ્તી (~₹1/તસવીર)</option>
@@ -273,6 +274,21 @@
       </form>
     </section>
   </main>
+</div>
+
+<!-- દિવસ શરૂ કરવાનું મોડલ -->
+<div id="run-modal" class="modal hidden">
+  <div class="modal-box card" style="width:min(460px,92vw)">
+    <button class="modal-close" id="run-modal-close">✕</button>
+    <h3 style="margin-bottom:14px">🚀 આજનો દિવસ શરૂ કરીએ?</h3>
+    <label class="run-field">આજે કેટલા ન્યુઝ બનાવવા?
+      <input type="number" id="run-count" min="1" max="30" value="5"></label>
+    <label class="run-field">કેટલી AI તસવીર બનાવવી? (0 = એક પણ નહીં)
+      <input type="number" id="run-ai" min="0" max="30" value="0"></label>
+    <p id="run-cost" class="hint" style="margin:10px 0"></p>
+    <button id="btn-run-go" class="primary big" style="width:100%">
+      🚀 શરૂ કરો</button>
+  </div>
 </div>
 
 <!-- ન્યુઝ વિગત મોડલ -->

@@ -160,9 +160,46 @@ async function refreshStatus() {
 refreshStatus();
 setInterval(refreshStatus, 10000);
 
-/* ── રન બટન ── */
-$("#btn-run").onclick = async () => {
-  const r = await (await fetch("/api/run-day", { method: "POST" })).json();
+/* ── રન બટન — પહેલા પૂછે: કેટલા ન્યુઝ, કેટલી AI તસવીર ── */
+const IMG_COST = { pollinations: 0, gemini: 3, openai: 3.5 };
+let imgProvider = "pollinations", imgEnabled = false;
+
+async function openRunModal() {
+  try {
+    const cfg = await (await fetch("/api/settings")).json();
+    $("#run-count").value = cfg.daily_news_count || 5;
+    imgProvider = cfg.image_ai_provider || "pollinations";
+    imgEnabled = !!cfg.image_ai_enabled;
+    $("#run-ai").value = imgEnabled ? ($("#run-count").value) : 0;
+  } catch {}
+  updateRunCost();
+  $("#run-modal").classList.remove("hidden");
+}
+function updateRunCost() {
+  const n = +$("#run-ai").value || 0;
+  const per = IMG_COST[imgProvider] ?? 0;
+  const cost = n * per;
+  $("#run-cost").textContent = !imgEnabled && n > 0
+    ? "⚠️ સેટિંગમાં AI તસવીર બંધ છે — પહેલા ચાલુ કરો"
+    : n === 0
+      ? "AI તસવીર નહીં બને — ખર્ચ ₹0"
+      : per === 0
+        ? `${n} AI તસવીર (Pollinations — મફત) — ખર્ચ ₹0`
+        : `અંદાજિત ખર્ચ: ${n} તસવીર × ₹${per} ≈ ₹${cost.toFixed(0)}`;
+}
+$("#run-ai").oninput = updateRunCost;
+$("#btn-run").onclick = openRunModal;
+$("#run-modal-close").onclick = () => $("#run-modal").classList.add("hidden");
+$("#run-modal").addEventListener("click", (e) => {
+  if (e.target === $("#run-modal")) $("#run-modal").classList.add("hidden");
+});
+$("#btn-run-go").onclick = async () => {
+  $("#run-modal").classList.add("hidden");
+  const r = await (await fetch("/api/run-day", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ count: +$("#run-count").value || 5,
+                           ai_images: +$("#run-ai").value || 0 }),
+  })).json();
   toast(r.message || r.error, r.error ? "bad" : "good");
 };
 $("#btn-press").onclick = async () => {

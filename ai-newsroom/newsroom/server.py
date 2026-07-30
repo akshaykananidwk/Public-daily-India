@@ -3,7 +3,8 @@ import asyncio
 from datetime import date
 from pathlib import Path
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, Form
+from fastapi import (FastAPI, WebSocket, WebSocketDisconnect, UploadFile,
+                     Form, Body)
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -75,11 +76,21 @@ async def status():
 
 # ── રન ──────────────────────────────────────────────────────────
 @app.post("/api/run-day")
-async def run_day():
+async def run_day(payload: dict = Body(default={})):
     if pipeline.is_running():
         return JSONResponse({"error": "કામ પહેલેથી ચાલુ છે"}, status_code=409)
-    asyncio.create_task(pipeline.run_day())
-    return {"ok": True, "message": "દિવસ શરૂ થયો 🚀"}
+    news_count = payload.get("count")
+    ai_limit = payload.get("ai_images")
+    news_count = int(news_count) if news_count is not None else None
+    ai_limit = int(ai_limit) if ai_limit is not None else None
+    asyncio.create_task(pipeline.run_day(news_count=news_count,
+                                         ai_limit=ai_limit))
+    msg = "દિવસ શરૂ થયો 🚀"
+    if news_count:
+        msg += f" — {news_count} ન્યુઝ"
+    if ai_limit is not None:
+        msg += f", વધુમાં વધુ {ai_limit} AI તસવીર"
+    return {"ok": True, "message": msg}
 
 
 @app.post("/api/press-note")

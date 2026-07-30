@@ -325,6 +325,12 @@ input[type="month"] { background: var(--surface); border: 1px solid var(--line);
   gap: 10px; margin-top: 14px; }
 .modal-posters img { width: 100%; border-radius: 10px; }
 
+.run-field { display: block; margin: 12px 0; font-size: 14px;
+  color: var(--ink-2); }
+.run-field input { width: 100%; margin-top: 6px; background: var(--bg-2);
+  border: 1px solid var(--line); color: var(--ink); border-radius: 10px;
+  padding: 11px 12px; font-family: inherit; font-size: 16px; }
+
 /* ═══ ટોસ્ટ ═══ */
 #toasts { position: fixed; bottom: 24px; right: 24px; display: flex;
   flex-direction: column; gap: 10px; z-index: 99; }

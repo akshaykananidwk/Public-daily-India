@@ -30,9 +30,12 @@ def is_running() -> bool:
 
 
 async def run_day(press_note: str | None = None,
-                  photo_path: str | None = None):
+                  photo_path: str | None = None,
+                  news_count: int | None = None,
+                  ai_limit: int | None = None):
     """આખા દિવસનો રન. press_note આપો તો ફક્ત એ એક ન્યુઝ બને.
-    photo_path હોય તો પોસ્ટરમાં એ ફોટો પણ આવે."""
+    news_count = આજે કેટલા ન્યુઝ (ખાલી તો સેટિંગ મુજબ).
+    ai_limit = આજે વધુમાં વધુ કેટલી AI તસવીર (ખર્ચ કંટ્રોલ; 0 = એક પણ નહીં)."""
     global _running
     if _running:
         return {"error": "કામ પહેલેથી ચાલુ છે"}
@@ -70,7 +73,8 @@ async def run_day(press_note: str | None = None,
             db.bump_stat(today, "news_collected", len(items))
 
         # ── 2. CEO પસંદગી ──────────────────────────────────────
-        count = 1 if press_note else int(cfg["daily_news_count"])
+        count = 1 if press_note else int(
+            news_count or cfg["daily_news_count"])
         await BUS.emit("ceo", "", "progress", job_id=job_id, status="thinking",
                        message=f"{len(items)} માંથી {count} પસંદ કરું છું...")
         selected = await llm.score_items(items, count)
@@ -80,6 +84,7 @@ async def run_day(press_note: str | None = None,
 
         # ── 3. દરેક ન્યુઝ: લેખક → શુદ્ધિ → ડિઝાઈનર ─────────────
         done = 0
+        ai_used = 0
         for idx, item in enumerate(selected, start=1):
             async def editor_fn(progress, item=item, idx=idx):
                 await progress(f"ન્યુઝ #{idx} લખાઈ રહ્યો છે...",
@@ -104,8 +109,10 @@ async def run_day(press_note: str | None = None,
 
             # 📷 ફોટો એજન્ટ — સાચો ફોટો ન હોય તો AI તસવીર બનાવે
             # (જન્મદિવસમાં નહીં — વ્યક્તિનો AI ફોટો ન બનાવાય)
+            # ai_limit થી ખર્ચ કંટ્રોલ: આજની મર્યાદા પૂરી થાય પછી નહીં
             if (not photo and category != "birthday"
-                    and imagegen.is_configured(cfg)):
+                    and imagegen.is_configured(cfg)
+                    and (ai_limit is None or ai_used < ai_limit)):
                 async def photo_fn(progress, clean=clean, idx=idx):
                     await progress(
                         f"ન્યુઝ #{idx} માટે AI તસવીર બની રહી છે... (~30 સે)")
@@ -115,6 +122,7 @@ async def run_day(press_note: str | None = None,
                                         job_id=job_id, message="AI તસવીર")
                     if p:
                         photo, image_ai = p, True
+                        ai_used += 1
                 except Exception:
                     pass  # તસવીર ન બને તો પોસ્ટર ફોટા વગર બને — અટકવું નહીં
 
