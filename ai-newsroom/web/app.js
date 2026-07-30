@@ -419,6 +419,19 @@ $("#btn-img-test").onclick = async () => {
     toast("AI તસવીર ભૂલ", "bad");
   }
 };
+$("#btn-logo-up").onclick = async () => {
+  const f = $("#logo-file").files[0];
+  if (!f) return toast("પહેલા લોગો ફાઈલ પસંદ કરો", "bad");
+  const fd = new FormData(); fd.append("logo", f);
+  const r = await (await fetch("/api/logo", { method: "POST", body: fd })).json();
+  $("#logo-info").textContent = r.error || "લોગો સેવ થયો ✓ — હવે પોસ્ટરમાં આવશે";
+  toast(r.error || "લોગો સેવ થયો ✓", r.error ? "bad" : "good");
+};
+$("#btn-logo-rm").onclick = async () => {
+  await fetch("/api/logo/remove", { method: "POST" });
+  $("#logo-info").textContent = "લોગો કઢાયો — ફરી PD બોક્સ આવશે";
+  toast("લોગો કઢાયો");
+};
 $("#btn-wa-test").onclick = async () => {
   $("#wa-info").textContent = "મોકલી રહ્યો છું... (પહેલા સેવ કરો ભૂલતા નહીં)";
   const r = await (await fetch("/api/whatsapp-test", { method: "POST" })).json();

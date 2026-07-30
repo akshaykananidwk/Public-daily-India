@@ -270,3 +270,22 @@ async def update_apply():
 @app.post("/api/backup")
 async def manual_backup():
     return {"ok": True, "file": updater.make_backup()}
+
+
+# ── લોગો અપલોડ ──────────────────────────────────────────────────
+@app.post("/api/logo")
+async def upload_logo(logo: UploadFile = File(...)):
+    from .paths import CONFIG_DIR
+    ext = Path(logo.filename).suffix.lower() or ".png"
+    if ext not in (".png", ".jpg", ".jpeg", ".webp"):
+        return JSONResponse({"error": "ફક્ત PNG/JPG લોગો"}, status_code=400)
+    dest = CONFIG_DIR / f"logo{ext}"
+    dest.write_bytes(await logo.read())
+    save_config({"logo_path": str(dest)})
+    return {"ok": True, "path": str(dest)}
+
+
+@app.post("/api/logo/remove")
+async def remove_logo():
+    save_config({"logo_path": ""})
+    return {"ok": True}

@@ -24,6 +24,20 @@ DEFAULTS = {
     "tagline": "જ્યાં સત્ય છે, ત્યાં પબ્લિક ડેઈલી ઈન્ડિયા છે.",
     "editor_name": "",
     "contact_number": "",
+    # 🎨 બ્રાન્ડિંગ / ડિઝાઈન
+    "logo_path": "",                   # સાચો લોગો (અપલોડ થાય તો PD બોક્સ બદલે)
+    "theme_navy": "#14295e",           # પોસ્ટરનો મુખ્ય રંગ
+    "theme_accent": "#ffc400",         # પીળો accent
+    "theme_red": "#e11b22",            # લાલ પટ્ટી
+    "website_url": "www.publicdayindia.com",
+    "qr_enabled": False,               # પોસ્ટર પર QR કોડ
+    "qr_data": "",                     # QR માં શું (ખાલી તો website/whatsapp)
+    "hashtags": "#PublicDailyIndia #Dwarka #Gujarat #GujaratiNews",
+    "keyword_filter": "",              # RSS ફિલ્ટર (અલ્પવિરામથી અલગ)
+    # 📱 WhatsApp બ્રોડકાસ્ટ (અલ્પવિરામથી અલગ નંબર, 91 સાથે)
+    "whatsapp_broadcast": "",
+    "daily_report_enabled": False,     # રાત્રે રિપોર્ટ WhatsApp પર
+    "error_alert_enabled": False,      # ભૂલ પડે તો WhatsApp એલર્ટ
     "facebook_page_token": "",
     "facebook_page_id": "",
     "instagram_account_id": "",

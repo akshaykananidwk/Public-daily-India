@@ -4,7 +4,9 @@ from datetime import datetime, date
 
 import httpx
 
-from . import db, scout, poster, whatsapp, imagegen
+from pathlib import Path
+
+from . import db, scout, poster, whatsapp, imagegen, branding
 from .bus import BUS, run_agent
 from .config import load_config
 from .llm import LLM
@@ -149,8 +151,15 @@ async def run_day(press_note: str | None = None,
             async def design_fn(progress, news_id=news_id, clean=clean,
                                 idx=idx, category=category, photos=photos,
                                 image_ai=image_ai, body=body):
-                from pathlib import Path
                 images = [Path(p).as_uri() for p in photos if p]
+                logo = cfg.get("logo_path")
+                logo_uri = (Path(logo).as_uri()
+                            if logo and Path(logo).exists() else "")
+                qr = ""
+                if cfg.get("qr_enabled"):
+                    qr_data = (cfg.get("qr_data")
+                               or f"https://{cfg.get('website_url','')}")
+                    qr = branding.make_qr_datauri(qr_data)
                 news = {"id": news_id, "title": clean["title"],
                         "body": body, "category": category,
                         "channel": cfg["channel_name"],
@@ -158,6 +167,11 @@ async def run_day(press_note: str | None = None,
                         "tagline": cfg.get("tagline", ""),
                         "editor": cfg.get("editor_name", ""),
                         "contact": cfg.get("contact_number", ""),
+                        "website": cfg.get("website_url", ""),
+                        "theme_navy": cfg.get("theme_navy", ""),
+                        "theme_accent": cfg.get("theme_accent", ""),
+                        "theme_red": cfg.get("theme_red", ""),
+                        "logo": logo_uri, "qr": qr,
                         "images": images,
                         "image": images[0] if images else "",
                         "image_ai": image_ai,

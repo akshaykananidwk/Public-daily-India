@@ -193,6 +193,27 @@
             <label class="check"><input name="auto_run_enabled" type="checkbox">
               રોજ ઓટો ચલાવો</label>
           </fieldset>
+          <fieldset class="card"><legend>🎨 બ્રાન્ડિંગ / ડિઝાઈન</legend>
+            <label class="file-label">🖼️ લોગો અપલોડ (PD બોક્સને બદલે)
+              <input type="file" id="logo-file" accept="image/*"></label>
+            <div class="row">
+              <button type="button" id="btn-logo-up" class="ghost">લોગો સેવ કરો</button>
+              <button type="button" id="btn-logo-rm" class="ghost">લોગો કાઢો</button>
+            </div>
+            <div id="logo-info"></div>
+            <label>વેબસાઈટ URL <input name="website_url"></label>
+            <div class="row">
+              <label>મુખ્ય રંગ <input name="theme_navy" type="color"></label>
+              <label>Accent <input name="theme_accent" type="color"></label>
+              <label>લાલ <input name="theme_red" type="color"></label>
+            </div>
+            <label class="check"><input name="qr_enabled" type="checkbox">
+              પોસ્ટર પર QR કોડ બતાવો</label>
+            <label>QR માં શું (ખાલી = વેબસાઈટ)
+              <input name="qr_data" placeholder="https://wa.me/9198..."></label>
+            <label>હેશટેગ (સોશિયલ કેપ્શન માટે)
+              <input name="hashtags"></label>
+          </fieldset>
           <fieldset class="card"><legend>🤖 AI (Ollama)</legend>
             <label>Ollama URL <input name="ollama_url"></label>
             <label>વિચાર મોડેલ <input name="model_think"></label>
