@@ -12,6 +12,19 @@
   @font-face { font-family: 'AnekGuj';
     src: url('../fonts/AnekGujarati-Bold.ttf') format('truetype');
     font-weight: 700; font-display: block; }
+  /* વધારાના ગુજરાતી ફોન્ટ — સેટિંગમાં પસંદ કરી શકાય */
+  @font-face { font-family: 'MuktaVaani';
+    src: url('../fonts/MuktaVaani-Bold.ttf') format('truetype');
+    font-weight: 700; font-display: block; }
+  @font-face { font-family: 'HindVadodara';
+    src: url('../fonts/HindVadodara-Bold.ttf') format('truetype');
+    font-weight: 700; font-display: block; }
+  @font-face { font-family: 'BalooBhai2';
+    src: url('../fonts/BalooBhai2-Bold.ttf') format('truetype');
+    font-weight: 700; font-display: block; }
+  @font-face { font-family: 'Farsan';
+    src: url('../fonts/Farsan-Regular.ttf') format('truetype');
+    font-weight: 400; font-display: block; }
 
   :root {
     --navy: #14295e;
@@ -100,7 +113,7 @@
 
   /* ═══ હેડલાઈન (સફેદ પર ઘેરો વાદળી) ═══ */
   .headline-strip { background: #fff; padding: 18px 34px 10px; }
-  #headline { font-family: 'AnekGuj', 'NotoGuj', sans-serif;
+  #headline { font-family: var(--poster-font, 'AnekGuj'), 'NotoGuj', sans-serif;
     font-weight: 700; font-size: 55px; color: var(--navy);
     text-align: center; line-height: 1.45; }
 
@@ -313,8 +326,9 @@
   }
 
   window.renderNews = function (news) {
-    // થીમ રંગ
+    // થીમ રંગ + ફોન્ટ
     const rs = document.documentElement.style;
+    if (news.font) rs.setProperty('--poster-font', "'" + news.font + "'");
     if (news.theme_navy) rs.setProperty('--navy', news.theme_navy);
     if (news.theme_accent) rs.setProperty('--yellow', news.theme_accent);
     if (news.theme_red) rs.setProperty('--red', news.theme_red);

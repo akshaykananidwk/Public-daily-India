@@ -35,6 +35,7 @@ DEFAULTS = {
     "website_url": "www.publicdayindia.com",
     "qr_enabled": False,               # પોસ્ટર પર QR કોડ
     "qr_data": "",                     # QR માં શું (ખાલી તો website/whatsapp)
+    "poster_font": "AnekGuj",          # પોસ્ટર ફોન્ટ (નીચે યાદી)
     "watermark_enabled": True,         # ફોટા પર ચેનલ વોટરમાર્ક
     "districts": [],                   # મલ્ટી-જિલ્લા [{name,location,contact}]
     "hashtags": "#PublicDailyIndia #Dwarka #Gujarat #GujaratiNews",
