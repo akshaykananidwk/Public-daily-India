@@ -288,37 +288,29 @@ async def run_day(press_note: str | None = None,
         _running = False
 
 
-async def run_from_pdf(pdf_text: str, reporter: str = ""):
-    """PDF/લાંબી પ્રેસ નોટ → AI થી અલગ ન્યુઝમાં વહેંચી બધા બનાવો."""
+async def run_from_pdf_file(pdf_path: str, reporter: str = ""):
+    """PDF ફાઈલ → Vision AI થી દરેક પાનું જોઈ સ્વચ્છ ન્યુઝ કાઢી બધા બનાવો."""
+    from . import pdfnews
     cfg = load_config()
     llm = LLM(cfg)
-    await BUS.job_progress(5, "PDF લખાણ વાંચી રહ્યો છું...", "PDF")
-
-    segments = []
-    if await llm.available():
-        try:
-            out = await llm.generate(
-                cfg["model_think"],
-                "નીચે એક પ્રેસ નોટ/દસ્તાવેજ છે જેમાં કદાચ એકથી વધુ સમાચાર છે. "
-                "દરેક અલગ સમાચારને '===' થી અલગ કરી, ફક્ત સમાચારલાયક ભાગ જ "
-                "પાછો આપો (જાહેરાત/નકામું કાઢી નાખો):\n\n" + pdf_text[:6000])
-            segments = [s.strip() for s in out.split("===") if len(s.strip()) > 40]
-        except Exception:
-            segments = []
-    if not segments:
-        # AI ન હોય તો ફકરા પ્રમાણે
-        segments = [p.strip() for p in pdf_text.split("\n\n")
-                    if len(p.strip()) > 60]
-    segments = segments[:15]
-    await BUS.job_progress(15, f"{len(segments)} સંભવિત ન્યુઝ મળ્યા", "PDF")
-
-    for i, seg in enumerate(segments, 1):
-        first = seg.split("\n")[0][:120]
-        await run_day(press_note=seg, reporter=reporter)
+    await BUS.job_progress(5, "PDF ના પાનાં જોઈ રહ્યો છું (Vision AI)...", "PDF")
+    try:
+        items = await pdfnews.extract_news(pdf_path, llm)
+    except Exception as e:
+        await BUS.job_progress(100, f"PDF ભૂલ: {e}", "ભૂલ")
+        return
+    if not items:
+        await BUS.job_progress(100, "PDF માંથી ન્યુઝ ન મળ્યા", "પૂર્ણ")
+        return
+    await BUS.job_progress(15, f"{len(items)} ન્યુઝ મળ્યા — બનાવી રહ્યો છું", "PDF")
+    for i, it in enumerate(items, 1):
+        # Vision એ પહેલેથી સ્વચ્છ ન્યુઝ આપ્યો — એ જ પ્રેસ નોટ તરીકે
+        note = it["title"] + "\n" + it.get("body", "")
+        await run_day(press_note=note, reporter=reporter)
         await BUS.job_progress(
-            15 + int(i * 80 / len(segments)),
-            f"PDF ન્યુઝ {i}/{len(segments)} બન્યો", "PDF")
-    await BUS.job_progress(100, f"PDF માંથી {len(segments)} ન્યુઝ તૈયાર", "પૂર્ણ")
+            15 + int(i * 80 / len(items)),
+            f"PDF ન્યુઝ {i}/{len(items)} બન્યો", "PDF")
+    await BUS.job_progress(100, f"PDF માંથી {len(items)} ન્યુઝ તૈયાર", "પૂર્ણ")
 
 
 async def render_news_posters(news_id: int) -> list[dict]:

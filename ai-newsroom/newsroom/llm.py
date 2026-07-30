@@ -127,6 +127,56 @@ class LLM:
             new_body, new_title = new_title, title
         return {"title": new_title or title, "body": new_body, "demo": False}
 
+    # ── Vision: ઈમેજ (PDF પાનું) જોઈને ન્યુઝ કાઢે ────────────────
+    async def vision_news(self, image_b64: str) -> dict:
+        """પ્રેસ નોટના ફોટા/પાનાને *જોઈને* સ્વચ્છ ગુજરાતી ન્યુઝ કાઢે
+        (કસ્ટમ ફોન્ટવાળી PDF માટે — ટેક્સ્ટ તૂટે ત્યાં). Gemini/OpenAI જોઈએ."""
+        prompt = (
+            "આ એક પ્રેસ નોટ / સમાચાર દસ્તાવેજની તસવીર છે. તેને ધ્યાનથી વાંચો "
+            "અને એમાંથી *મૌલિક* ગુજરાતી સમાચાર બનાવો (હૂબહૂ નકલ નહીં). આપો:\n"
+            "લાઈન 1: આકર્ષક હેડલાઈન\n"
+            "પછી: 3-4 વાક્યનો હકીકતલક્ષી સમાચાર. ફક્ત આટલું જ.")
+        try:
+            if self.provider == "gemini":
+                out = await self._gemini_vision(prompt, image_b64)
+            elif self.provider == "openai":
+                out = await self._openai_vision(prompt, image_b64)
+            else:
+                return {"title": "", "body": ""}
+        except Exception:
+            return {"title": "", "body": ""}
+        lines = [l.strip() for l in out.split("\n") if l.strip()]
+        if not lines:
+            return {"title": "", "body": ""}
+        title = lines[0].lstrip("#*-• ").replace("હેડલાઈન:", "").strip()
+        body = " ".join(lines[1:]).strip()
+        return {"title": title, "body": body}
+
+    async def _gemini_vision(self, prompt, image_b64) -> str:
+        model = self.text_model or "gemini-2.0-flash"
+        url = (f"https://generativelanguage.googleapis.com/v1beta/models/"
+               f"{model}:generateContent")
+        body = {"contents": [{"parts": [
+            {"text": prompt},
+            {"inline_data": {"mime_type": "image/png", "data": image_b64}}]}]}
+        async with httpx.AsyncClient(timeout=120) as c:
+            r = await c.post(url, params={"key": self.api_key}, json=body)
+            r.raise_for_status()
+            data = r.json()
+        return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+
+    async def _openai_vision(self, prompt, image_b64) -> str:
+        model = self.text_model or "gpt-4o-mini"
+        async with httpx.AsyncClient(timeout=120) as c:
+            r = await c.post("https://api.openai.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {self.api_key}"},
+                json={"model": model, "messages": [{"role": "user",
+                    "content": [{"type": "text", "text": prompt},
+                        {"type": "image_url", "image_url": {
+                            "url": f"data:image/png;base64,{image_b64}"}}]}]})
+            r.raise_for_status()
+            return r.json()["choices"][0]["message"]["content"].strip()
+
     # ── ફોટો એજન્ટ: ન્યુઝ પરથી અંગ્રેજી દ્રશ્ય-વર્ણન ─────────────
     async def image_scene(self, title: str) -> str:
         if not await self.available():

@@ -345,28 +345,28 @@ async def accountant_view(month: str = ""):
 
 @app.post("/api/press-pdf")
 async def press_pdf(pdf: UploadFile = File(...), reporter: str = Form("")):
-    """PDF પ્રેસ નોટ → લખાણ કાઢી, AI થી અલગ-અલગ ન્યુઝમાં વહેંચી, બધા બનાવો."""
+    """PDF પ્રેસ નોટ → Vision AI થી દરેક પાનું જોઈ ન્યુઝ કાઢી બધા બનાવો."""
     from datetime import datetime
     if pipeline.is_running():
         return JSONResponse({"error": "કામ પહેલેથી ચાલુ છે"}, status_code=409)
+    try:
+        import fitz  # noqa
+    except Exception:
+        return JSONResponse(
+            {"error": "PDF માટે PyMuPDF જોઈએ — pip install PyMuPDF"},
+            status_code=400)
+    cfg = load_config()
+    if LLM(cfg).provider not in ("gemini", "openai") or not cfg.get("text_api_key"):
+        return JSONResponse(
+            {"error": "ઈમેજવાળી PDF વાંચવા Gemini/OpenAI key જોઈએ — "
+                      "સેટિંગ → ન્યુઝ લેખન AI માં Gemini સેટ કરો"},
+            status_code=400)
     data = await pdf.read()
     tmp = PHOTOS_DIR.parent / f"pressnote_{datetime.now():%Y%m%d_%H%M%S}.pdf"
     tmp.write_bytes(data)
-    try:
-        from pypdf import PdfReader
-        text = "\n".join((p.extract_text() or "")
-                         for p in PdfReader(str(tmp)).pages)
-    except Exception as e:
-        return JSONResponse(
-            {"error": f"PDF વાંચી ન શકાયું ({e}). "
-                      f"pip install pypdf કરો."}, status_code=400)
-    if len(text.strip()) < 20:
-        return JSONResponse(
-            {"error": "PDF માંથી લખાણ ન મળ્યું (સ્કેન કરેલું હોય તો OCR જોઈએ)"},
-            status_code=400)
-    asyncio.create_task(pipeline.run_from_pdf(text, reporter))
-    return {"ok": True, "message": "PDF વંચાઈ ગયું — ન્યુઝ બની રહ્યા છે 🚀",
-            "chars": len(text)}
+    asyncio.create_task(pipeline.run_from_pdf_file(str(tmp), reporter))
+    return {"ok": True,
+            "message": "PDF ના પાનાં જોઈ ન્યુઝ કાઢી રહ્યો છું 🚀 (Vision AI)"}
 
 
 @app.get("/api/reports/cost")

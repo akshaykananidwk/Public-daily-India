@@ -372,6 +372,60 @@ input[type="month"] { background: var(--surface); border: 1px solid var(--line);
 @keyframes slidein { from { transform: translateX(30px); opacity: 0; }
   to { transform: none; opacity: 1; } }
 
+/* ═══ 📱 મોબાઈલ (768px થી નાનું) ═══ */
+@media (max-width: 768px) {
+  .app { flex-direction: column; }
+  /* સાઈડબાર → નીચે ફિક્સ નેવ બાર (આઈકોન) */
+  .sidebar {
+    order: 2; width: 100%; height: 62px; flex-direction: row;
+    align-items: center; padding: 0; gap: 0;
+    position: fixed; bottom: 0; left: 0; z-index: 40;
+    border-top: 1px solid var(--line); border-right: none;
+    box-shadow: 0 -4px 20px rgba(0,0,0,.3);
+  }
+  .brand-card, .side-status { display: none; }
+  .sidebar nav { flex-direction: row; width: 100%; gap: 0; }
+  .nav-btn { flex: 1; flex-direction: column; gap: 2px; padding: 8px 2px;
+    font-size: 10.5px; text-align: center; border-radius: 0; }
+  .nav-btn .ic { width: auto; font-size: 18px; }
+  .badge-count { position: absolute; top: 4px; right: 22%;
+    margin: 0; padding: 0 5px; font-size: 10px; }
+
+  main { order: 1; padding: 14px 12px 78px; }
+  .topline { flex-wrap: wrap; gap: 10px; }
+  .topline h1 { font-size: 21px; }
+  button.primary.big { padding: 12px 18px; font-size: 15px; }
+
+  /* KPI — 3 કોલમ */
+  .kpi-row { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .kpi { padding: 10px 12px; }
+  .kpi b { font-size: 21px; }
+  .kpi small { font-size: 10.5px; }
+
+  /* એજન્ટ ગ્રાફ — આડું સ્ક્રોલ */
+  .graph-wrap { height: 340px; min-width: 620px; }
+  .graph-card { overflow-x: auto; }
+
+  /* પેનલ / બે-કોલમ → એક ઉપર એક */
+  .bottom-panels, .two-col { grid-template-columns: 1fr; }
+  .cards { grid-template-columns: 1fr; }
+  .news-rows .n-row { flex-wrap: wrap; }
+  .n-info { min-width: 60%; }
+
+  /* સેટિંગ — એક કોલમ */
+  .settings .two-col { grid-template-columns: 1fr; }
+  .modal-box { width: 94vw; max-height: 82vh; }
+  .modal-posters { grid-template-columns: 1fr 1fr; }
+  .filter-row { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+  .chip { white-space: nowrap; }
+  #toasts { left: 12px; right: 12px; bottom: 74px; }
+  .toast { min-width: 0; }
+}
+@media (max-width: 420px) {
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .topline h1 { font-size: 19px; }
+}
+
 /* સ્ક્રોલબાર */
 ::-webkit-scrollbar { width: 9px; height: 9px; }
 ::-webkit-scrollbar-thumb { background: #223a68; border-radius: 99px; }
