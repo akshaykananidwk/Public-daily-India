@@ -158,6 +158,19 @@ function connectWS() {
   ws = new WebSocket(`ws://${location.host}/ws`);
   ws.onmessage = (m) => {
     const ev = JSON.parse(m.data);
+    if (ev.type === "job:progress") {
+      const w = $("#progress-wrap");
+      if (w) {
+        w.style.display = ev.percent >= 100 ? "none" : "block";
+        if (ev.percent >= 100) setTimeout(() => w.style.display = "none", 3000);
+        w.style.display = "block";
+        $("#progress-bar").style.width = ev.percent + "%";
+        $("#progress-pct").textContent = ev.percent + "%";
+        $("#progress-msg").textContent =
+          (ev.stage ? ev.stage + " — " : "") + ev.message;
+      }
+      return;
+    }
     if (ev.type !== "agent:event") return;
     if (ev.event === "dispatch" && ev.detail?.to) {
       runDot(ev.agent, ev.detail.to);

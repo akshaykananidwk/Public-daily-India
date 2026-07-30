@@ -10,6 +10,9 @@ DEFAULTS = {
     "model_write": "gemma3:27b",       # ગુજરાતી લેખન
     "model_translate": "",             # IndicTrans2 (ખાલી હોય તો model_write વાપરે)
     "writing_mode": "translate",       # direct | translate (બે-પગલાં)
+    "text_provider": "ollama",         # ollama | gemini | openai (ન્યુઝ લખવા)
+    "text_api_key": "",                # Gemini/OpenAI key (ટેક્સ્ટ માટે)
+    "text_model": "",                  # ખાલી = gemini-2.0-flash / gpt-4o-mini
     "daily_news_count": 12,
     "auto_run_time": "05:00",          # રોજ સવારે ઓટો રન
     "auto_run_enabled": False,

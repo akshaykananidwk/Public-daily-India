@@ -53,6 +53,17 @@
 
       <div id="fest-banner"></div>
 
+      <div id="progress-wrap" class="card" style="display:none;padding:14px 18px;
+        margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;
+          margin-bottom:8px"><span id="progress-msg">...</span>
+          <b id="progress-pct" style="color:var(--gold)">0%</b></div>
+        <div style="height:10px;background:var(--bg-2);border-radius:99px;
+          overflow:hidden"><div id="progress-bar" style="height:100%;width:0%;
+          background:linear-gradient(90deg,var(--gold),var(--gold-2));
+          border-radius:99px;transition:width .4s"></div></div>
+      </div>
+
       <div class="kpi-row">
         <div class="kpi"><span class="k-ic">📥</span>
           <b id="st-collected">0</b><small>ભેગા કર્યા</small></div>
@@ -232,17 +243,24 @@
             <label>હેશટેગ (સોશિયલ કેપ્શન માટે)
               <input name="hashtags"></label>
           </fieldset>
-          <fieldset class="card"><legend>🤖 AI (Ollama)</legend>
-            <label>Ollama URL <input name="ollama_url"></label>
-            <label>વિચાર મોડેલ <input name="model_think"></label>
-            <label>લેખન મોડેલ <input name="model_write"></label>
-            <label>અનુવાદ મોડેલ (IndicTrans2)
-              <input name="model_translate" placeholder="ખાલી = લેખન મોડેલ"></label>
-            <label>લેખન રીત
-              <select name="writing_mode">
-                <option value="translate">બે-પગલાં (વધુ સચોટ)</option>
-                <option value="direct">સીધું ગુજરાતી (ઝડપી)</option>
+          <fieldset class="card"><legend>✍️ ન્યુઝ લેખન AI (રિરાઈટ)</legend>
+            <p class="hint">દરેક ન્યુઝ મૌલિક રીતે રિરાઈટ થાય — કોપીરાઈટ ટાળવા.
+              Ollama ન હોય તો Gemini વાપરો (તમારી key).</p>
+            <label>સર્વિસ
+              <select name="text_provider">
+                <option value="ollama">Ollama — લોકલ (તમારા GPU પર)</option>
+                <option value="gemini">Google Gemini — તમારી key</option>
+                <option value="openai">OpenAI — તમારી key</option>
               </select></label>
+            <label>API Key (Gemini/OpenAI માટે)
+              <input name="text_api_key" type="password"
+                placeholder="Gemini: AIza...  |  OpenAI: sk-..."></label>
+            <label>મોડેલ (ખાલી = ડિફોલ્ટ)
+              <input name="text_model"
+                placeholder="gemini-2.0-flash / gpt-4o-mini"></label>
+            <label>Ollama URL <input name="ollama_url"></label>
+            <label>Ollama વિચાર મોડેલ <input name="model_think"></label>
+            <label>Ollama લેખન મોડેલ <input name="model_write"></label>
           </fieldset>
         </div>
         <div class="two-col">

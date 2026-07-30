@@ -62,6 +62,22 @@ class EventBus:
                  duration_ms, message, error))
 
 
+    async def job_progress(self, percent: int, message: str, stage: str = ""):
+        """આખા દિવસનું પ્રગતિ ટકા — ડેશબોર્ડ પ્રોગ્રેસ બાર માટે."""
+        payload = {"type": "job:progress",
+                   "percent": max(0, min(100, int(percent))),
+                   "message": message, "stage": stage,
+                   "ts": datetime.now().isoformat(timespec="seconds")}
+        self.recent.append(payload)
+        self.recent = self.recent[-200:]
+        text = json.dumps(payload, ensure_ascii=False)
+        for ws in list(self.clients):
+            try:
+                await ws.send_text(text)
+            except Exception:
+                self.disconnect(ws)
+
+
 BUS = EventBus()
 
 

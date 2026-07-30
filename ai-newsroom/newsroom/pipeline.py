@@ -93,6 +93,7 @@ async def run_day(press_note: str | None = None,
     try:
         await BUS.emit("ceo", "", "started", job_id=job_id, status="thinking",
                        message="દિવસ શરૂ — કામ વહેંચી રહ્યો છું...", log_db=True)
+        await BUS.job_progress(3, "દિવસ શરૂ થયો", "શરૂ")
 
         # ── 1. સ્કાઉટ / પ્રેસ નોટ ──────────────────────────────
         if press_note:
@@ -130,6 +131,7 @@ async def run_day(press_note: str | None = None,
                        message=f"{len(items)} માંથી {count} પસંદ કરું છું...")
         selected = await llm.score_items(items, count)
         db.bump_stat(today, "news_selected", len(selected))
+        await BUS.job_progress(15, f"{len(selected)} ન્યુઝ પસંદ થયા", "પસંદગી")
         await BUS.emit("ceo", "", "progress", job_id=job_id, status="working",
                        message=f"લેખકને {len(selected)} ન્યુઝ સોંપ્યા")
 
@@ -137,13 +139,15 @@ async def run_day(press_note: str | None = None,
         done = 0
         ai_used = 0
         for idx, item in enumerate(selected, start=1):
+            await BUS.job_progress(
+                15 + int((idx - 1) * 80 / len(selected)),
+                f"ન્યુઝ {idx}/{len(selected)} — રિરાઈટ થઈ રહ્યો છે...")
+
             async def editor_fn(progress, item=item, idx=idx):
-                await progress(f"ન્યુઝ #{idx} લખાઈ રહ્યો છે...",
+                await progress(f"ન્યુઝ #{idx} મૌલિક રીતે લખાઈ રહ્યો છે...",
                                pct=int(idx * 100 / len(selected)),
                                detail={"current": idx, "total": len(selected)})
-                if item.get("press_note"):
-                    return await llm.proofread(item["title"],
-                                               item["press_note"]) | {"demo": False}
+                # RSS હોય કે પ્રેસ નોટ — બંને રિરાઈટ થાય (કોપીરાઈટ ટાળવા)
                 return await llm.write_news(item)
             written = await run_agent("editor", "ceo", editor_fn,
                                       job_id=job_id, message="ન્યુઝ લખો")
@@ -252,6 +256,7 @@ async def run_day(press_note: str | None = None,
         await run_agent("analyst", "ceo", analyst_fn, job_id=job_id,
                         message="આંકડા")
 
+        await BUS.job_progress(100, f"{done} ન્યુઝ તૈયાર — અપ્રુવલ બાકી", "પૂર્ણ")
         await BUS.emit("ceo", "", "completed", job_id=job_id, status="done",
                        message=f"દિવસ પૂરો — {done} ન્યુઝ અપ્રુવલ માટે તૈયાર ✅",
                        log_db=True)
