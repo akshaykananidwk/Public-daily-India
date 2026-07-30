@@ -279,11 +279,24 @@ $("#btn-run-go").onclick = async () => {
   toast(r.message || r.error, r.error ? "bad" : "good");
 };
 $("#btn-press").onclick = async () => {
+  const reporter = $("#press-reporter") ? $("#press-reporter").value.trim() : "";
+  const pdf = $("#press-pdf") && $("#press-pdf").files[0];
+  // PDF હોય તો એ રસ્તે
+  if (pdf) {
+    const fd = new FormData(); fd.append("pdf", pdf);
+    if (reporter) fd.append("reporter", reporter);
+    const r = await (await fetch("/api/press-pdf",
+      { method: "POST", body: fd })).json();
+    toast(r.message || r.error, r.error ? "bad" : "good");
+    if (r.ok) $("#press-pdf").value = "";
+    return;
+  }
   const text = $("#press-text").value.trim();
   const files = [...$("#press-photo").files].slice(0, 3);
   if (!text && !files.length) return toast("પ્રેસ નોટનું લખાણ લખો", "bad");
   const fd = new FormData();
   fd.append("text", text);
+  if (reporter) fd.append("reporter", reporter);
   const dsel = $("#press-district");
   if (dsel && dsel.value) fd.append("district", dsel.value);
   for (const f of files) fd.append("photos", f);
@@ -493,6 +506,17 @@ async function loadReports() {
     const c = await (await fetch("/api/reports/cost?month=" + month)).json();
     $("#cost-line").textContent =
       `💰 આ મહિને AI તસવીર ખર્ચ (${c.provider}): ≈ ₹${(c.cost||0).toFixed(0)}`;
+  } catch {}
+  try {
+    const a = await (await fetch("/api/accountant?month=" + month)).json();
+    $("#acc-total").textContent = `કુલ ખર્ચ: ₹${(a.total||0).toFixed(2)}`;
+    $("#acc-table").innerHTML =
+      "<tr><th>પ્રકાર</th><th>સર્વિસ</th><th>સંખ્યા</th><th>ખર્ચ ₹</th></tr>" +
+      (a.breakdown||[]).map(b =>
+        `<tr><td>${b.kind==='image'?'🖼️ તસવીર':'✍️ લખાણ'}</td>
+         <td>${b.provider}</td><td>${b.n}</td>
+         <td>₹${(b.total||0).toFixed(2)}</td></tr>`).join("") ||
+      "<tr><td colspan=4 style='color:var(--muted)'>આ મહિને ખર્ચ નથી</td></tr>";
   } catch {}
 }
 if ($("#btn-excel")) $("#btn-excel").onclick = () =>

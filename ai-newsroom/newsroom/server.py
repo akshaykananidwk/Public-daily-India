@@ -128,6 +128,7 @@ async def run_day(payload: dict = Body(default={})):
 
 @app.post("/api/press-note")
 async def press_note(text: str = Form(""), district: str = Form(""),
+                     reporter: str = Form(""),
                      photos: list[UploadFile] = File(default=[])):
     from datetime import datetime
     note = (text or "").strip()
@@ -165,7 +166,8 @@ async def press_note(text: str = Form(""), district: str = Form(""),
         return JSONResponse({"error": "કામ પહેલેથી ચાલુ છે"}, status_code=409)
     asyncio.create_task(pipeline.run_day(press_note=note,
                                          photo_path=photo_paths,
-                                         overrides=overrides))
+                                         overrides=overrides,
+                                         reporter=reporter))
     return {"ok": True, "message": "પ્રેસ નોટ પર કામ શરૂ 🚀"
             + (f" ({len(photo_paths)} ફોટા સાથે 📷)" if photo_paths else "")
             + (f" — {district}" if district else "")}
@@ -333,6 +335,38 @@ async def reports(month: str = ""):
 async def activity_log(limit: int = 100):
     return db.query(
         "SELECT * FROM activity_log ORDER BY id DESC LIMIT ?", (limit,))
+
+
+@app.get("/api/accountant")
+async def accountant_view(month: str = ""):
+    from . import accountant
+    return accountant.summary(month or None)
+
+
+@app.post("/api/press-pdf")
+async def press_pdf(pdf: UploadFile = File(...), reporter: str = Form("")):
+    """PDF પ્રેસ નોટ → લખાણ કાઢી, AI થી અલગ-અલગ ન્યુઝમાં વહેંચી, બધા બનાવો."""
+    from datetime import datetime
+    if pipeline.is_running():
+        return JSONResponse({"error": "કામ પહેલેથી ચાલુ છે"}, status_code=409)
+    data = await pdf.read()
+    tmp = PHOTOS_DIR.parent / f"pressnote_{datetime.now():%Y%m%d_%H%M%S}.pdf"
+    tmp.write_bytes(data)
+    try:
+        from pypdf import PdfReader
+        text = "\n".join((p.extract_text() or "")
+                         for p in PdfReader(str(tmp)).pages)
+    except Exception as e:
+        return JSONResponse(
+            {"error": f"PDF વાંચી ન શકાયું ({e}). "
+                      f"pip install pypdf કરો."}, status_code=400)
+    if len(text.strip()) < 20:
+        return JSONResponse(
+            {"error": "PDF માંથી લખાણ ન મળ્યું (સ્કેન કરેલું હોય તો OCR જોઈએ)"},
+            status_code=400)
+    asyncio.create_task(pipeline.run_from_pdf(text, reporter))
+    return {"ok": True, "message": "PDF વંચાઈ ગયું — ન્યુઝ બની રહ્યા છે 🚀",
+            "chars": len(text)}
 
 
 @app.get("/api/reports/cost")

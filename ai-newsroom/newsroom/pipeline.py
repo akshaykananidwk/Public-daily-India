@@ -7,7 +7,7 @@ import httpx
 from pathlib import Path
 
 from . import (db, scout, poster, whatsapp, imagegen, branding, telegram,
-               instagram)
+               instagram, accountant)
 from .bus import BUS, run_agent
 from .config import load_config
 from .llm import LLM
@@ -71,7 +71,8 @@ async def run_day(press_note: str | None = None,
                   photo_path: str | None = None,
                   news_count: int | None = None,
                   ai_limit: int | None = None,
-                  overrides: dict | None = None):
+                  overrides: dict | None = None,
+                  reporter: str = ""):
     """આખા દિવસનો રન. press_note આપો તો ફક્ત એ એક ન્યુઝ બને.
     news_count = આજે કેટલા ન્યુઝ (ખાલી તો સેટિંગ મુજબ).
     ai_limit = આજે વધુમાં વધુ કેટલી AI તસવીર (ખર્ચ કંટ્રોલ; 0 = એક પણ નહીં)."""
@@ -151,6 +152,9 @@ async def run_day(press_note: str | None = None,
                 return await llm.write_news(item)
             written = await run_agent("editor", "ceo", editor_fn,
                                       job_id=job_id, message="ન્યુઝ લખો")
+            if not written.get("demo"):     # ટેક્સ્ટ AI ખર્ચ નોંધો
+                accountant.record("text", cfg.get("text_provider", "ollama"),
+                                  written.get("title", "")[:40])
 
             async def proof_fn(progress, written=written, idx=idx):
                 await progress(f"ન્યુઝ #{idx} તપાસાઈ રહ્યો છે...")
@@ -183,17 +187,21 @@ async def run_day(press_note: str | None = None,
                         photos, image_ai = [p], True
                         ai_used += 1
                         db.bump_stat(today, "ai_images")
+                        accountant.record(
+                            "image", cfg.get("image_ai_provider", ""),
+                            clean["title"][:40])
                 except Exception:
                     pass  # તસવીર ન બને તો પોસ્ટર ફોટા વગર બને — અટકવું નહીં
 
             tag = auto_tag(clean["title"], body)
             news_id = db.execute(
                 """INSERT INTO news(job_id, title, body, category, source_title,
-                   source_url, status, photo, tag)
-                   VALUES(?,?,?,?,?,?,?,?,?)""",
+                   source_url, status, photo, tag, reporter)
+                   VALUES(?,?,?,?,?,?,?,?,?,?)""",
                 (job_id, clean["title"], body, category,
                  item.get("source", "") or item.get("title", ""),
-                 item.get("url", ""), "proofread", "|".join(photos), tag))
+                 item.get("url", ""), "proofread", "|".join(photos), tag,
+                 reporter))
             db.bump_stat(today, "news_written")
 
             async def design_fn(progress, news_id=news_id, clean=clean,
@@ -214,6 +222,7 @@ async def run_day(press_note: str | None = None,
                         "location": cfg["location"],
                         "tagline": cfg.get("tagline", ""),
                         "editor": cfg.get("editor_name", ""),
+                        "reporter": reporter,
                         "contact": cfg.get("contact_number", ""),
                         "website": cfg.get("website_url", ""),
                         "theme_navy": cfg.get("theme_navy", ""),
@@ -277,6 +286,39 @@ async def run_day(press_note: str | None = None,
         _running = False
 
 
+async def run_from_pdf(pdf_text: str, reporter: str = ""):
+    """PDF/લાંબી પ્રેસ નોટ → AI થી અલગ ન્યુઝમાં વહેંચી બધા બનાવો."""
+    cfg = load_config()
+    llm = LLM(cfg)
+    await BUS.job_progress(5, "PDF લખાણ વાંચી રહ્યો છું...", "PDF")
+
+    segments = []
+    if await llm.available():
+        try:
+            out = await llm.generate(
+                cfg["model_think"],
+                "નીચે એક પ્રેસ નોટ/દસ્તાવેજ છે જેમાં કદાચ એકથી વધુ સમાચાર છે. "
+                "દરેક અલગ સમાચારને '===' થી અલગ કરી, ફક્ત સમાચારલાયક ભાગ જ "
+                "પાછો આપો (જાહેરાત/નકામું કાઢી નાખો):\n\n" + pdf_text[:6000])
+            segments = [s.strip() for s in out.split("===") if len(s.strip()) > 40]
+        except Exception:
+            segments = []
+    if not segments:
+        # AI ન હોય તો ફકરા પ્રમાણે
+        segments = [p.strip() for p in pdf_text.split("\n\n")
+                    if len(p.strip()) > 60]
+    segments = segments[:15]
+    await BUS.job_progress(15, f"{len(segments)} સંભવિત ન્યુઝ મળ્યા", "PDF")
+
+    for i, seg in enumerate(segments, 1):
+        first = seg.split("\n")[0][:120]
+        await run_day(press_note=seg, reporter=reporter)
+        await BUS.job_progress(
+            15 + int(i * 80 / len(segments)),
+            f"PDF ન્યુઝ {i}/{len(segments)} બન્યો", "PDF")
+    await BUS.job_progress(100, f"PDF માંથી {len(segments)} ન્યુઝ તૈયાર", "પૂર્ણ")
+
+
 async def render_news_posters(news_id: int) -> list[dict]:
     """એક ન્યુઝના પોસ્ટર (ફરી) બનાવે — એડિટ/ફરી-બનાવો માટે."""
     cfg = load_config()
@@ -298,6 +340,7 @@ async def render_news_posters(news_id: int) -> list[dict]:
             "category": n["category"], "channel": cfg["channel_name"],
             "location": cfg["location"], "tagline": cfg.get("tagline", ""),
             "editor": cfg.get("editor_name", ""),
+            "reporter": n.get("reporter", ""),
             "contact": cfg.get("contact_number", ""),
             "website": cfg.get("website_url", ""),
             "theme_navy": cfg.get("theme_navy", ""),

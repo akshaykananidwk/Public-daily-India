@@ -128,10 +128,16 @@
           <h3>📝 પ્રેસ નોટ</h3>
           <p class="hint">પ્રેસ નોટ પેસ્ટ કરો — AI ન્યુઝ લખી, પોસ્ટર બનાવી
             અપ્રુવલમાં મૂકશે.</p>
-          <textarea id="press-text" rows="5"
+          <input id="press-reporter" placeholder="✍️ રિપોર્ટરનું નામ (પોસ્ટરમાં આવશે)"
+            style="width:100%;margin-bottom:8px;background:var(--bg-2);
+            border:1px solid var(--line);color:var(--ink);border-radius:10px;
+            padding:9px">
+          <textarea id="press-text" rows="4"
             placeholder="પ્રેસ નોટનું લખાણ અહીં પેસ્ટ કરો..."></textarea>
           <label class="file-label">📷 ફોટા જોડો — 3 સુધી (પોસ્ટરમાં કોલાજ બનશે)
             <input type="file" id="press-photo" accept="image/*" multiple></label>
+          <label class="file-label">📄 PDF પ્રેસ નોટ (આખી PDF માંથી બધા ન્યુઝ)
+            <input type="file" id="press-pdf" accept="application/pdf"></label>
           <select id="press-district" style="width:100%;margin-bottom:8px;
             background:var(--bg-2);border:1px solid var(--line);color:var(--ink);
             border-radius:10px;padding:8px;display:none">
@@ -181,6 +187,12 @@
         <button type="button" id="btn-report-wa" class="ghost">📱 WhatsApp રિપોર્ટ</button>
       </header>
       <div id="cost-line" class="hint" style="margin-bottom:10px"></div>
+      <div class="card panel" id="accountant" style="margin-bottom:16px">
+        <h3>💰 એકાઉન્ટન્ટ — આ મહિનાનો ખર્ચ</h3>
+        <div id="acc-total" style="font-size:26px;font-family:'AnekGuj';
+          color:var(--gold);margin:6px 0"></div>
+        <table class="report-table" id="acc-table"></table>
+      </div>
       <div id="report-totals" class="kpi-row"></div>
       <div class="card panel">
         <h3>📈 રોજના ન્યુઝ</h3>

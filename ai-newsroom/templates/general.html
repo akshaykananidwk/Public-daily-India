@@ -215,7 +215,7 @@
       <div class="breaking"><span class="brk">BREAKING</span>
         <span class="nws">NEWS</span></div>
       <div class="meta-row">
-        <div class="editor gujarati-text">તંત્રી : - <span id="editor"></span></div>
+        <div class="editor gujarati-text">તંત્રી : - <span id="editor"></span><span id="reporter-line"></span></div>
         <div class="date-badge">📅 <span id="date"></span></div>
       </div>
     </div>
@@ -346,6 +346,9 @@
     }
     document.getElementById('editor').textContent =
       news.editor || 'તંત્રી';
+    if (news.reporter)
+      document.getElementById('reporter-line').textContent =
+        '   |   રિપોર્ટર : ' + news.reporter;
     document.getElementById('date').textContent =
       (news.date || '').replaceAll('/', '-');
     document.getElementById('headline').textContent = news.title || '';
