@@ -167,13 +167,15 @@ $("#btn-run").onclick = async () => {
 };
 $("#btn-press").onclick = async () => {
   const text = $("#press-text").value.trim();
-  if (!text) return toast("પ્રેસ નોટનું લખાણ લખો", "bad");
+  const photo = $("#press-photo").files[0];
+  if (!text && !photo) return toast("પ્રેસ નોટનું લખાણ લખો", "bad");
   const fd = new FormData();
   fd.append("text", text);
+  if (photo) fd.append("photo", photo);
   const r = await (await fetch("/api/press-note",
     { method: "POST", body: fd })).json();
   toast(r.message || r.error, r.error ? "bad" : "good");
-  if (r.ok) $("#press-text").value = "";
+  if (r.ok) { $("#press-text").value = ""; $("#press-photo").value = ""; }
 };
 
 /* ── અપ્રુવલ ── */
@@ -366,6 +368,15 @@ $("#btn-apply-update").onclick = async () => {
   const r = await (await fetch("/api/update/apply", { method: "POST" })).json();
   $("#update-info").textContent = r.error || r.message;
   toast(r.error || r.message, r.error ? "bad" : "good");
+};
+$("#btn-wa-test").onclick = async () => {
+  $("#wa-info").textContent = "મોકલી રહ્યો છું... (પહેલા સેવ કરો ભૂલતા નહીં)";
+  const r = await (await fetch("/api/whatsapp-test", { method: "POST" })).json();
+  $("#wa-info").textContent = r.error ||
+    (r.ok ? "✅ મોકલાઈ ગયું — તમારો WhatsApp ચેક કરો! " : "❌ ") +
+    JSON.stringify(r.result || "");
+  toast(r.error || (r.ok ? "WhatsApp ટેસ્ટ મોકલાયો ✓" : "WhatsApp ભૂલ"),
+    r.ok ? "good" : "bad");
 };
 $("#btn-backup").onclick = async () => {
   const r = await (await fetch("/api/backup", { method: "POST" })).json();

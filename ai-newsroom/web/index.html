@@ -113,8 +113,10 @@
           <h3>📝 પ્રેસ નોટ</h3>
           <p class="hint">પ્રેસ નોટ પેસ્ટ કરો — AI ન્યુઝ લખી, પોસ્ટર બનાવી
             અપ્રુવલમાં મૂકશે.</p>
-          <textarea id="press-text" rows="6"
+          <textarea id="press-text" rows="5"
             placeholder="પ્રેસ નોટનું લખાણ અહીં પેસ્ટ કરો..."></textarea>
+          <label class="file-label">📷 ફોટો જોડો (પોસ્ટરમાં આવશે)
+            <input type="file" id="press-photo" accept="image/*"></label>
           <button id="btn-press" class="primary">ન્યુઝ બનાવો →</button>
         </div>
       </div>
@@ -178,6 +180,12 @@
         <div class="two-col">
           <fieldset class="card"><legend>📺 ચેનલ</legend>
             <label>ચેનલનું નામ <input name="channel_name"></label>
+            <label>ટેગલાઈન (પોસ્ટરમાં ઉપર આવે)
+              <input name="tagline"></label>
+            <label>તંત્રીનું નામ <input name="editor_name"
+              placeholder="દા.ત. શ્રી અક્ષયભાઈ કાનાણી"></label>
+            <label>સંપર્ક નંબર (પોસ્ટરમાં "ઘટના મોકલો" સ્ટ્રીપ)
+              <input name="contact_number" placeholder="દા.ત. 9978123146"></label>
             <label>સ્થળ <input name="location"></label>
             <label>રોજના ન્યુઝ
               <input name="daily_news_count" type="number" min="1" max="30"></label>
@@ -203,6 +211,22 @@
             <label>Facebook Page ID <input name="facebook_page_id"></label>
             <label>Facebook Page Token
               <input name="facebook_page_token" type="password"></label>
+          </fieldset>
+          <fieldset class="card"><legend>📱 WhatsApp જાણ (તમારી API)</legend>
+            <label>API URL <input name="whatsapp_api_url"></label>
+            <label>API Key
+              <input name="whatsapp_api_key" type="password"></label>
+            <label>Session ID <input name="whatsapp_session_id"></label>
+            <label>તમારો WhatsApp નંબર (91 સાથે)
+              <input name="whatsapp_number" placeholder="દા.ત. 919978123146"></label>
+            <label>Public URL (વૈકલ્પિક — પોસ્ટર ફોટો WhatsApp માં મોકલવા)
+              <input name="public_base_url"
+                placeholder="દા.ત. https://news.akdwk.in"></label>
+            <div class="row">
+              <button type="button" id="btn-wa-test" class="ghost">
+                🧪 ટેસ્ટ મેસેજ મોકલો</button>
+            </div>
+            <div id="wa-info"></div>
           </fieldset>
           <fieldset class="card"><legend>🔄 GitHub અપડેટ</legend>
             <label>Repository (owner/repo) <input name="update_repo"></label>

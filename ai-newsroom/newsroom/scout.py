@@ -15,6 +15,18 @@ DEMO_ITEMS = [
 ]
 
 
+def strip_source(title: str) -> tuple[str, str]:
+    """Google News હેડલાઈન પાછળ '- ABP Asmita' જેવું સોર્સ નામ આવે છે —
+    એ કાઢી નાખો (પોસ્ટરમાં બીજી ચેનલનું નામ ન દેખાય)."""
+    for sep in (" - ", " – ", " | "):
+        if sep in title:
+            head, _, tail = title.rpartition(sep)
+            # પાછળનો ભાગ ટૂંકો હોય તો જ એ સોર્સ નામ ગણાય
+            if head and len(tail) <= 40:
+                return head.strip(), tail.strip()
+    return title.strip(), ""
+
+
 async def fetch_news(feeds: list[str]) -> list[dict]:
     items = []
     for feed in feeds:
@@ -24,10 +36,12 @@ async def fetch_news(feeds: list[str]) -> list[dict]:
                 r.raise_for_status()
             root = ET.fromstring(r.content)
             for it in root.iter("item"):
-                title = (it.findtext("title") or "").strip()
+                raw = (it.findtext("title") or "").strip()
                 link = (it.findtext("link") or "").strip()
-                if title:
-                    items.append({"title": title, "url": link})
+                if raw:
+                    title, source = strip_source(raw)
+                    items.append({"title": title, "url": link,
+                                  "source": source})
         except Exception:
             continue
     if not items:

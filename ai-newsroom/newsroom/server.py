@@ -7,7 +7,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, Form
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import db, pipeline, updater
+from . import db, pipeline, updater, whatsapp
 from .bus import BUS
 from .config import load_config, save_config
 from .llm import LLM
@@ -85,9 +85,13 @@ async def run_day():
 @app.post("/api/press-note")
 async def press_note(text: str = Form(""), photo: UploadFile | None = None):
     note = (text or "").strip()
+    photo_path = None
     if photo and photo.filename:
-        dest = PHOTOS_DIR / photo.filename
+        from datetime import datetime
+        safe = f"{datetime.now():%Y%m%d_%H%M%S}_{Path(photo.filename).name}"
+        dest = PHOTOS_DIR / safe
         dest.write_bytes(await photo.read())
+        photo_path = str(dest)
         if not note:
             try:  # OCR — pytesseract હોય તો
                 import pytesseract
@@ -104,8 +108,10 @@ async def press_note(text: str = Form(""), photo: UploadFile | None = None):
                             status_code=400)
     if pipeline.is_running():
         return JSONResponse({"error": "કામ પહેલેથી ચાલુ છે"}, status_code=409)
-    asyncio.create_task(pipeline.run_day(press_note=note))
-    return {"ok": True, "message": "પ્રેસ નોટ પર કામ શરૂ 🚀"}
+    asyncio.create_task(pipeline.run_day(press_note=note,
+                                         photo_path=photo_path))
+    return {"ok": True, "message": "પ્રેસ નોટ પર કામ શરૂ 🚀"
+            + (" (ફોટા સાથે 📷)" if photo_path else "")}
 
 
 # ── ન્યુઝ + અપ્રુવલ ────────────────────────────────────────────
@@ -177,24 +183,40 @@ async def activity_log(limit: int = 100):
 
 
 # ── સેટિંગ ──────────────────────────────────────────────────────
+MASKED_KEYS = ("update_token", "facebook_page_token", "whatsapp_api_key")
+
+
 @app.get("/api/settings")
 async def get_settings():
     cfg = load_config()
-    if cfg.get("update_token"):
-        cfg["update_token"] = "••••" + cfg["update_token"][-4:]
-    if cfg.get("facebook_page_token"):
-        cfg["facebook_page_token"] = "••••" + cfg["facebook_page_token"][-4:]
+    for key in MASKED_KEYS:
+        if cfg.get(key):
+            cfg[key] = "••••" + cfg[key][-4:]
     return cfg
 
 
 @app.post("/api/settings")
 async def set_settings(payload: dict):
     # માસ્ક કરેલા ટોકન પાછા ન લખાય
-    for key in ("update_token", "facebook_page_token"):
+    for key in MASKED_KEYS:
         if payload.get(key, "").startswith("••••"):
             payload.pop(key)
     save_config(payload)
     return {"ok": True}
+
+
+# ── WhatsApp ટેસ્ટ ──────────────────────────────────────────────
+@app.post("/api/whatsapp-test")
+async def whatsapp_test():
+    cfg = load_config()
+    if not whatsapp.is_configured(cfg):
+        return JSONResponse(
+            {"error": "પહેલા WhatsApp API સેટિંગ ભરીને સેવ કરો"},
+            status_code=400)
+    result = await whatsapp.send(
+        cfg, f"🧪 ટેસ્ટ મેસેજ — {cfg['channel_name']} AI Newsroom ચાલુ છે! "
+             f"પબ્લિશ થાય એટલે અહીં જ જાણ આવશે. ✅")
+    return {"ok": "error" not in result, "result": result}
 
 
 # ── અપડેટ ───────────────────────────────────────────────────────

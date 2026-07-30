@@ -68,10 +68,17 @@
     word-break: keep-all; overflow-wrap: break-word; hyphens: none;
   }
 
+  /* ── ટેગલાઈન ── */
+  .tagline {
+    text-align: center; padding: 18px 52px 0;
+    font-size: 25px; font-weight: 700; color: #ffe27a;
+  }
+  .tagline:empty { display: none; }
+
   /* ── માસ્ટહેડ ── */
   .masthead {
     display: flex; align-items: center; gap: 22px;
-    padding: 42px 52px 0;
+    padding: 28px 52px 0;
   }
   .logo-badge {
     width: 92px; height: 92px; border-radius: 26px; flex: none;
@@ -115,6 +122,32 @@
   }
   .ribbon > span { display: inline-block; transform: skewX(6deg); }
 
+  /* ── ફોટો ── */
+  .photo-wrap {
+    display: none; margin: 30px 52px 0;
+    border-radius: 22px; overflow: hidden;
+    border: 3px solid rgba(255, 210, 30, .55);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, .45);
+  }
+  body.has-photo .photo-wrap { display: block; flex: 1 1 0;
+    min-height: 24%; margin-top: 22px; }
+  .photo-wrap img { width: 100%; height: 100%; object-fit: cover;
+    display: block; }
+  body.has-photo .tagline { padding-top: 14px; font-size: 23px; }
+  body.has-photo .masthead { padding-top: 20px; }
+  body.has-photo .ribbon-row { padding-top: 24px; }
+  body.has-photo .headline-wrap { flex: none; padding: 20px 52px 4px; }
+  body.has-photo #headline { font-size: 48px; }
+  body.has-photo .body-card { margin-bottom: 22px; padding: 20px 30px; }
+  body.has-photo #body-text { -webkit-line-clamp: 2; font-size: 26px; }
+  body.has-photo .contact-strip { margin-bottom: 20px; padding: 13px 26px;
+    font-size: 24px; }
+  body.has-photo .contact-strip b { font-size: 27px; }
+  body.has-photo .rays, body.has-photo .ring { display: none; }
+  body.story.has-photo .photo-wrap { min-height: 32%; }
+  body.story.has-photo #headline { font-size: 64px; }
+  body.story.has-photo #body-text { -webkit-line-clamp: 4; font-size: 30px; }
+
   /* ── હેડલાઈન ── */
   .headline-wrap {
     flex: 1; display: flex; align-items: center; padding: 20px 52px;
@@ -146,6 +179,17 @@
     display: -webkit-box; -webkit-box-orient: vertical;
     -webkit-line-clamp: 4; overflow: hidden;
   }
+
+  /* ── કોન્ટેક્ટ સ્ટ્રીપ ── */
+  .contact-strip {
+    display: none; margin: 0 52px 24px;
+    background: linear-gradient(100deg, #d40f2c, #a10b21);
+    border-radius: 16px; padding: 16px 28px;
+    text-align: center; font-weight: 700; font-size: 26px;
+    box-shadow: 0 10px 30px rgba(212, 15, 44, .4);
+  }
+  .contact-strip b { color: #ffd21e; font-size: 30px; }
+  body.has-contact .contact-strip { display: block; }
 
   /* ── ફૂટર ── */
   .footer {
@@ -184,11 +228,13 @@
   </div>
 
   <div class="content">
+    <div class="tagline gujarati-text" id="tagline"></div>
+
     <div class="masthead">
       <div class="logo-badge"><span>PD</span></div>
       <div class="brand">
-        <div class="l1">PUBLIC DAY</div>
-        <div class="l2">INDIA</div>
+        <div class="l1" id="brand-l1">PUBLIC DAY</div>
+        <div class="l2" id="brand-l2">INDIA</div>
       </div>
       <div class="spacer"></div>
       <div class="date-chip" id="date"></div>
@@ -197,6 +243,8 @@
     <div class="ribbon-row">
       <div class="ribbon"><span class="gujarati-text" id="badge">સમાચાર</span></div>
     </div>
+
+    <div class="photo-wrap"><img id="photo" alt=""></div>
 
     <div class="headline-wrap">
       <div class="headline-inner">
@@ -207,6 +255,11 @@
 
     <div class="body-card">
       <p class="gujarati-text" id="body-text" lang="gu"></p>
+    </div>
+
+    <div class="contact-strip gujarati-text">
+      📣 તમારી આસપાસ બનતી કોઈપણ ઘટના, સમાચાર
+      <b id="contact-num"></b> પર મોકલો
     </div>
 
     <div class="footer">
@@ -237,14 +290,44 @@
     }
   }
 
+  function setBrand(channel) {
+    if (!channel) return;
+    const words = channel.trim().split(/\s+/);
+    document.getElementById('brand-l1').textContent =
+      words.slice(0, -1).join(' ') || channel;
+    document.getElementById('brand-l2').textContent =
+      words.length > 1 ? words[words.length - 1] : '';
+  }
+
   window.renderNews = function (news) {
+    setBrand(news.channel);
+    document.getElementById('tagline').textContent =
+      news.tagline ? '“ ' + news.tagline + ' ”' : '';
     document.getElementById('date').textContent = news.date || '';
     document.getElementById('badge').textContent = BADGES[news.category] || BADGES.general;
     document.getElementById('headline').textContent = news.title || '';
     document.getElementById('body-text').textContent = news.body || '';
-    document.getElementById('location').textContent = news.location || 'દેવભૂમિ દ્વારકા';
-    autoFit(document.getElementById('headline'),
-            document.querySelector('.headline-wrap').clientHeight);
+    let loc = news.location || 'દેવભૂમિ દ્વારકા';
+    if (news.editor) loc += ' • તંત્રી: ' + news.editor;
+    document.getElementById('location').textContent = loc;
+    if (news.contact) {
+      document.getElementById('contact-num').textContent = news.contact;
+      document.body.classList.add('has-contact');
+    }
+    if (news.image) {
+      document.getElementById('photo').src = news.image;
+      document.body.classList.add('has-photo');
+    }
+    const fit = () => autoFit(document.getElementById('headline'),
+            document.querySelector('.headline-wrap').clientHeight || 400);
+    if (news.image) {
+      return new Promise((res) => {
+        const img = document.getElementById('photo');
+        img.onload = img.onerror = () => { fit(); res(true); };
+        if (img.complete) { fit(); res(true); }
+      });
+    }
+    fit();
     return true;
   };
 </script>

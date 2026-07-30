@@ -4,7 +4,7 @@ from datetime import datetime, date
 
 import httpx
 
-from . import db, scout, poster
+from . import db, scout, poster, whatsapp
 from .bus import BUS, run_agent
 from .config import load_config
 from .llm import LLM
@@ -29,8 +29,10 @@ def is_running() -> bool:
     return _running
 
 
-async def run_day(press_note: str | None = None):
-    """આખા દિવસનો રન. press_note આપો તો ફક્ત એ એક ન્યુઝ બને."""
+async def run_day(press_note: str | None = None,
+                  photo_path: str | None = None):
+    """આખા દિવસનો રન. press_note આપો તો ફક્ત એ એક ન્યુઝ બને.
+    photo_path હોય તો પોસ્ટરમાં એ ફોટો પણ આવે."""
     global _running
     if _running:
         return {"error": "કામ પહેલેથી ચાલુ છે"}
@@ -54,7 +56,8 @@ async def run_day(press_note: str | None = None):
                     first_line = first_line.split(sep)[0]
                     break
             items = [{"title": first_line.strip()[:120],
-                      "url": "", "press_note": press_note}]
+                      "url": "", "press_note": press_note,
+                      "photo": photo_path or ""}]
         else:
             async def scout_fn(progress):
                 await progress("RSS ફીડ વાંચી રહ્યો છું...")
@@ -96,19 +99,26 @@ async def run_day(press_note: str | None = None):
                                     job_id=job_id, message="તપાસો")
 
             category = detect_category(clean["title"], clean["body"])
+            photo = item.get("photo", "")
             news_id = db.execute(
                 """INSERT INTO news(job_id, title, body, category, source_title,
-                   source_url, status) VALUES(?,?,?,?,?,?,?)""",
+                   source_url, status, photo) VALUES(?,?,?,?,?,?,?,?)""",
                 (job_id, clean["title"], clean["body"], category,
-                 item.get("title", ""), item.get("url", ""), "proofread"))
+                 item.get("source", "") or item.get("title", ""),
+                 item.get("url", ""), "proofread", photo))
             db.bump_stat(today, "news_written")
 
             async def design_fn(progress, news_id=news_id, clean=clean,
-                                idx=idx, category=category):
+                                idx=idx, category=category, photo=photo):
+                from pathlib import Path
                 news = {"id": news_id, "title": clean["title"],
                         "body": clean["body"], "category": category,
                         "channel": cfg["channel_name"],
                         "location": cfg["location"],
+                        "tagline": cfg.get("tagline", ""),
+                        "editor": cfg.get("editor_name", ""),
+                        "contact": cfg.get("contact_number", ""),
+                        "image": Path(photo).as_uri() if photo else "",
                         "date": datetime.now().strftime("%d/%m/%Y")}
                 results = []
                 for size in cfg["poster_sizes"]:
@@ -186,6 +196,24 @@ async def publish_news(news_id: int) -> dict:
             db.bump_stat(today, "published_fb")
         db.execute("UPDATE news SET status='published', "
                    "updated_at=CURRENT_TIMESTAMP WHERE id=?", (news_id,))
+
+        # 📱 WhatsApp નોટિફિકેશન — પબ્લિશ થાય એટલે તમારા નંબર પર
+        if whatsapp.is_configured(cfg):
+            await progress("WhatsApp પર જાણ મોકલી રહ્યો છું...")
+            media_url = ""
+            base = (cfg.get("public_base_url") or "").rstrip("/")
+            if base and posters:
+                from pathlib import Path
+                from .paths import STORAGE_DIR
+                try:
+                    rel = Path(posters[0]["file_path"]).relative_to(STORAGE_DIR)
+                    media_url = f"{base}/storage/{rel.as_posix()}"
+                except ValueError:
+                    pass
+            msg = (f"✅ પબ્લિશ થઈ ગયું!\n\n📰 {news['title']}\n\n"
+                   f"{news['body'][:200]}\n\n— {cfg['channel_name']} AI Newsroom")
+            results["whatsapp"] = await whatsapp.send(cfg, msg, media_url)
+            db.bump_stat(today, "published_wa")
         return results
 
     return await run_agent("publisher", "ceo", publish_fn,

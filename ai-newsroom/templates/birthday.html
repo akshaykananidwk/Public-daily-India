@@ -80,6 +80,23 @@
     padding: 11px 24px; border-radius: 999px;
   }
 
+  /* ── ટેગલાઈન ── */
+  .tagline { text-align: center; padding: 16px 52px 0;
+    font-size: 24px; font-weight: 700; color: #ffe27a; }
+  .tagline:empty { display: none; }
+
+  /* ── ફોટો (ગોળ) ── */
+  .photo-round { display: none; margin: 30px auto 0;
+    width: 340px; height: 340px; border-radius: 50%;
+    overflow: hidden; border: 6px solid #ffd21e;
+    box-shadow: 0 0 50px rgba(255, 210, 30, .45); }
+  body.has-photo .photo-round { display: block; }
+  .photo-round img { width: 100%; height: 100%; object-fit: cover; }
+  body.has-photo .headline-wrap { padding: 16px 60px; }
+  body.has-photo #headline { font-size: 62px; }
+  body.has-photo .frame { padding: 30px 40px; }
+  body.has-photo #body-text { -webkit-line-clamp: 3; }
+
   /* ── શુભેચ્છા હેડર ── */
   .greet-row { text-align: center; padding: 46px 52px 0; }
   .greet {
@@ -152,11 +169,13 @@
   </div>
 
   <div class="content">
+    <div class="tagline gujarati-text" id="tagline"></div>
+
     <div class="masthead">
       <div class="logo-badge"><span>PD</span></div>
       <div class="brand">
-        <div class="l1">PUBLIC DAY</div>
-        <div class="l2">INDIA</div>
+        <div class="l1" id="brand-l1">PUBLIC DAY</div>
+        <div class="l2" id="brand-l2">INDIA</div>
       </div>
       <div class="spacer"></div>
       <div class="date-chip" id="date"></div>
@@ -169,6 +188,8 @@
         <span class="cake">🎉</span>
       </div>
     </div>
+
+    <div class="photo-round"><img id="photo" alt=""></div>
 
     <div class="headline-wrap">
       <div class="frame">
@@ -200,13 +221,39 @@
     }
   }
 
+  function setBrand(channel) {
+    if (!channel) return;
+    const words = channel.trim().split(/\s+/);
+    document.getElementById('brand-l1').textContent =
+      words.slice(0, -1).join(' ') || channel;
+    document.getElementById('brand-l2').textContent =
+      words.length > 1 ? words[words.length - 1] : '';
+  }
+
   window.renderNews = function (news) {
+    setBrand(news.channel);
+    document.getElementById('tagline').textContent =
+      news.tagline ? '“ ' + news.tagline + ' ”' : '';
     document.getElementById('date').textContent = news.date || '';
     document.getElementById('headline').textContent = news.title || '';
     document.getElementById('body-text').textContent = news.body || '';
-    document.getElementById('location').textContent = news.location || 'દેવભૂમિ દ્વારકા';
-    autoFit(document.getElementById('headline'),
-            document.querySelector('.headline-wrap').clientHeight - 100);
+    let loc = news.location || 'દેવભૂમિ દ્વારકા';
+    if (news.editor) loc += ' • તંત્રી: ' + news.editor;
+    document.getElementById('location').textContent = loc;
+    if (news.image) {
+      document.getElementById('photo').src = news.image;
+      document.body.classList.add('has-photo');
+    }
+    const fit = () => autoFit(document.getElementById('headline'),
+            (document.querySelector('.headline-wrap').clientHeight || 400) - 100);
+    if (news.image) {
+      return new Promise((res) => {
+        const img = document.getElementById('photo');
+        img.onload = img.onerror = () => { fit(); res(true); };
+        if (img.complete) { fit(); res(true); }
+      });
+    }
+    fit();
     return true;
   };
 </script>
