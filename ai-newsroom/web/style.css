@@ -236,6 +236,7 @@ textarea:focus, input:focus, select:focus { outline: none;
 .cat-general { background: #1c3f7d; color: #bcd6ff; }
 .cat-breaking { background: #6e1220; color: #ffc4cc; }
 .cat-birthday { background: #4d1a5e; color: #eec8ff; }
+.cat-tribute { background: #3a3a2a; color: #e7d9a8; }
 .a-card .row { display: flex; gap: 10px; margin-top: 2px; }
 .approve { flex: 1.4; background: linear-gradient(120deg, #35d07f, #1f9d5c);
   border: none; color: #04240f; padding: 11px; border-radius: 11px;

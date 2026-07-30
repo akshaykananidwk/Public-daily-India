@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<style>
+  @font-face { font-family: 'NotoGuj';
+    src: url('../fonts/NotoSansGujarati-Regular.ttf') format('truetype');
+    font-weight: 400; font-display: block; }
+  @font-face { font-family: 'NotoGuj';
+    src: url('../fonts/NotoSansGujarati-Bold.ttf') format('truetype');
+    font-weight: 700; font-display: block; }
+  @font-face { font-family: 'AnekGuj';
+    src: url('../fonts/AnekGujarati-Bold.ttf') format('truetype');
+    font-weight: 700; font-display: block; }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; }
+  body { font-family: 'NotoGuj', sans-serif; color: #f0f0f0;
+    background: #14161a; position: relative;
+    display: flex; flex-direction: column; }
+
+  .bg { position: absolute; inset: 0; z-index: 0; }
+  .bg .grad { position: absolute; inset: 0;
+    background: radial-gradient(120% 80% at 50% 0%, #2a2f38 0%, transparent 55%),
+      linear-gradient(160deg, #1c2028 0%, #101216 100%); }
+  .bg .glow { position: absolute; width: 60%; aspect-ratio: 1; left: 20%; top: 22%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,190,90,.10), transparent 60%); }
+
+  .content { position: relative; z-index: 1; display: flex;
+    flex-direction: column; height: 100%; }
+
+  .gujarati-text { letter-spacing: normal; text-transform: none;
+    word-spacing: normal; line-height: 1.6; padding-top: 0.12em;
+    text-rendering: optimizeLegibility;
+    -webkit-font-feature-settings: "liga" 1, "kern" 1;
+    font-variant-ligatures: common-ligatures;
+    word-break: keep-all; overflow-wrap: break-word; hyphens: none; }
+
+  .masthead { display: flex; align-items: center; gap: 20px;
+    padding: 40px 52px 0; }
+  .logo-badge { width: 82px; height: 82px; border-radius: 22px; flex: none;
+    background: linear-gradient(140deg, #6b7280, #374151);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'AnekGuj'; font-size: 36px; color: #fff; }
+  .brand .l1 { font-family: 'AnekGuj'; font-size: 40px; color: #fff; line-height: 1.05; }
+  .brand .l2 { font-family: 'AnekGuj'; font-size: 25px; color: #cbb26b;
+    letter-spacing: 8px; }
+  .spacer { flex: 1; }
+  .date-chip { background: rgba(255,255,255,.08);
+    border: 1.4px solid rgba(203,178,107,.5); color: #d9c78a;
+    font-weight: 700; font-size: 24px; padding: 10px 22px; border-radius: 999px; }
+
+  .banner { text-align: center; padding: 40px 52px 0; }
+  .banner .diya { font-size: 60px; }
+  .banner .txt { font-family: 'AnekGuj'; font-size: 46px; font-weight: 700;
+    color: #e7d9a8; margin-top: 8px; letter-spacing: 1px; }
+
+  .photo-round { display: none; margin: 26px auto 0; width: 320px; height: 320px;
+    border-radius: 50%; overflow: hidden; border: 5px solid #cbb26b;
+    filter: grayscale(100%); box-shadow: 0 0 40px rgba(203,178,107,.25); }
+  body.has-photo .photo-round { display: block; }
+  .photo-round img { width: 100%; height: 100%; object-fit: cover; }
+
+  .headline-wrap { flex: 1; display: flex; align-items: center;
+    justify-content: center; padding: 24px 60px; }
+  #headline { font-family: 'AnekGuj', 'NotoGuj', sans-serif; font-weight: 700;
+    font-size: 68px; color: #fff; text-align: center; }
+  body.has-photo #headline { font-size: 58px; }
+
+  .body-sec { text-align: center; padding: 0 66px 30px; }
+  #body-text { color: #d7d7d7; font-size: 30px;
+    display: -webkit-box; -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4; overflow: hidden; }
+  #body-text:empty { display: none; }
+
+  .footer { background: linear-gradient(90deg, #cbb26b, #a8904e);
+    color: #1a1a1a; padding: 22px 52px 26px;
+    display: flex; align-items: center; gap: 22px; font-weight: 700;
+    clip-path: polygon(0 20px, 100% 0, 100% 100%, 0 100%); }
+  .footer .loc { font-size: 25px; }
+  .footer .web { font-size: 24px; margin-left: auto; }
+
+  body.story .banner .txt { font-size: 54px; }
+  body.story #headline { font-size: 82px; }
+  body.story #body-text { -webkit-line-clamp: 6; font-size: 34px; }
+</style>
+</head>
+<body>
+  <div class="bg"><div class="grad"></div><div class="glow"></div></div>
+  <div class="content">
+    <div class="masthead">
+      <div class="logo-badge">PD</div>
+      <div class="brand">
+        <div class="l1" id="brand-l1">PUBLIC DAILY</div>
+        <div class="l2" id="brand-l2">INDIA</div>
+      </div>
+      <div class="spacer"></div>
+      <div class="date-chip" id="date"></div>
+    </div>
+
+    <div class="banner">
+      <div class="diya">🪔</div>
+      <div class="txt gujarati-text">ભાવપૂર્ણ શ્રદ્ધાંજલિ</div>
+    </div>
+
+    <div class="photo-round"><img id="photo" alt=""></div>
+
+    <div class="headline-wrap">
+      <h1 class="gujarati-text" id="headline" lang="gu"></h1>
+    </div>
+    <div class="body-sec">
+      <p class="gujarati-text" id="body-text" lang="gu"></p>
+    </div>
+
+    <div class="footer">
+      <div class="loc gujarati-text">📍 <span id="location">દેવભૂમિ દ્વારકા</span></div>
+      <div class="web"><span class="web-url">www.publicdayindia.com</span></div>
+    </div>
+  </div>
+
+<script>
+  (function sizeClass() {
+    const r = window.innerHeight / window.innerWidth;
+    document.body.classList.add(r > 1.5 ? 'story' : r > 1.1 ? 'portrait' : 'square');
+  })();
+  function autoFit(el, maxHeight) {
+    let size = parseInt(getComputedStyle(el).fontSize, 10);
+    while (el.scrollHeight > maxHeight && size > 34) { size -= 2;
+      el.style.fontSize = size + 'px'; }
+  }
+  window.renderNews = function (news) {
+    if (news.channel) {
+      const w = news.channel.trim().toUpperCase().split(/\s+/);
+      document.getElementById('brand-l1').textContent = w.slice(0, 2).join(' ');
+      document.getElementById('brand-l2').textContent = w.slice(2).join(' ') || 'INDIA';
+    }
+    if (news.website) document.querySelectorAll('.web-url')
+      .forEach(e => e.textContent = news.website);
+    document.getElementById('date').textContent = (news.date || '').replaceAll('/', '-');
+    document.getElementById('headline').textContent = news.title || '';
+    document.getElementById('body-text').textContent = news.body || '';
+    document.getElementById('location').textContent = news.location || 'દેવભૂમિ દ્વારકા';
+    const images = news.images && news.images.length ? news.images
+      : (news.image ? [news.image] : []);
+    const fit = () => { autoFit(document.getElementById('headline'),
+      document.querySelector('.headline-wrap').clientHeight - 20); return true; };
+    if (images.length) {
+      document.getElementById('photo').src = images[0];
+      document.body.classList.add('has-photo');
+      return new Promise(res => { const i = document.getElementById('photo');
+        i.onload = i.onerror = () => { fit(); res(true); };
+        if (i.complete) { fit(); res(true); } });
+    }
+    return fit();
+  };
+</script>
+</body>
+</html>

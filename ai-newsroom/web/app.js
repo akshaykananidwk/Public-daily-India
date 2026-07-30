@@ -10,7 +10,7 @@ const STATUS_LABEL = {
   draft: "ડ્રાફ્ટ",
 };
 const CAT_LABEL = { general: "સમાચાર", breaking: "બ્રેકિંગ",
-  birthday: "જન્મદિવસ" };
+  birthday: "જન્મદિવસ", tribute: "શ્રદ્ધાંજલિ" };
 const AGENT_EMOJI = { ceo: "👑", scout: "🔍", editor: "✍️",
   proofreader: "🔤", designer: "🎨", photo: "📷", publisher: "📤",
   inbox: "💬", analyst: "📊", updater: "🔄" };
@@ -337,13 +337,38 @@ function openNewsModal(n) {
     <div class="meta" style="margin-bottom:8px">
       <span class="cat-chip cat-${n.category}">${CAT_LABEL[n.category] || ""}</span>
       <span class="st-chip st-${n.status}">${STATUS_LABEL[n.status] || ""}</span>
+      ${n.tag ? `<span class="cat-chip" style="background:#23304f;color:#aabbdd">${n.tag}</span>` : ""}
     </div>
-    <h3 style="margin-bottom:10px">${n.title}</h3>
-    <p style="color:var(--ink-2);font-size:14px">${n.body}</p>
-    ${n.source_url ? `<p style="margin-top:10px;font-size:12px">
+    <label style="font-size:12px;color:var(--muted)">હેડલાઈન</label>
+    <input id="edit-title" value="${(n.title||'').replace(/"/g,'&quot;')}"
+      style="width:100%;background:var(--bg-2);border:1px solid var(--line);
+      color:var(--ink);border-radius:10px;padding:9px;margin:4px 0 10px">
+    <label style="font-size:12px;color:var(--muted)">લખાણ</label>
+    <textarea id="edit-body" rows="4">${n.body || ""}</textarea>
+    <div class="row" style="display:flex;gap:10px;margin-bottom:12px">
+      <button class="primary small" id="btn-edit-save">💾 સેવ + પોસ્ટર ફરી બનાવો</button>
+      <button class="ghost" id="btn-summarize">✨ સારાંશ</button>
+    </div>
+    ${n.source_url ? `<p style="margin-bottom:8px;font-size:12px">
       સોર્સ: <a href="${n.source_url}" target="_blank"
       style="color:var(--blue)">${n.source_title || n.source_url}</a></p>` : ""}
     <div class="modal-posters">${posters}</div>`;
+  $("#btn-edit-save").onclick = async () => {
+    $("#btn-edit-save").textContent = "બની રહ્યું છે...";
+    await fetch(`/api/news/${n.id}/edit`, { method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: $("#edit-title").value,
+                             body: $("#edit-body").value }) });
+    toast("પોસ્ટર ફરી બન્યું ✓", "good");
+    $("#modal").classList.add("hidden");
+    loadNews();
+  };
+  $("#btn-summarize").onclick = async () => {
+    const r = await (await fetch("/api/summarize", { method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: $("#edit-body").value }) })).json();
+    if (r.summary) $("#edit-body").value = r.summary;
+  };
   $("#modal").classList.remove("hidden");
 }
 $("#modal-close").onclick = () => $("#modal").classList.add("hidden");

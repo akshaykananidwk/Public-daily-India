@@ -215,6 +215,28 @@ async def reject(news_id: int):
     return {"ok": True}
 
 
+@app.post("/api/news/{news_id}/edit")
+async def edit_news(news_id: int, payload: dict = Body(...)):
+    """હેડલાઈન/લખાણ સુધારો અને પોસ્ટર ફરી બનાવો."""
+    fields, params = [], []
+    for k in ("title", "body"):
+        if k in payload:
+            fields.append(f"{k}=?"); params.append(payload[k])
+    if fields:
+        params.append(news_id)
+        db.execute(f"UPDATE news SET {','.join(fields)}, "
+                   "updated_at=CURRENT_TIMESTAMP WHERE id=?", tuple(params))
+    posters = await pipeline.render_news_posters(news_id)
+    return {"ok": True, "posters": len(posters)}
+
+
+@app.post("/api/news/{news_id}/regenerate")
+async def regenerate_news(news_id: int):
+    """પોસ્ટર ફરી બનાવો (થીમ/લોગો બદલ્યા પછી)."""
+    posters = await pipeline.render_news_posters(news_id)
+    return {"ok": True, "posters": len(posters)}
+
+
 # ── રિપોર્ટ ─────────────────────────────────────────────────────
 @app.get("/api/reports")
 async def reports(month: str = ""):

@@ -213,8 +213,10 @@ async def run_day(press_note: str | None = None,
                         "image": images[0] if images else "",
                         "image_ai": image_ai,
                         "date": datetime.now().strftime("%d/%m/%Y")}
-                # બધા ન્યુઝ એક જ (રેફરન્સ) ડિઝાઈનમાં — ફક્ત જન્મદિવસ અલગ
-                template = "birthday" if category == "birthday" else "general"
+                # મુખ્ય રેફરન્સ ડિઝાઈન — જન્મદિવસ અને શ્રદ્ધાંજલિ અલગ
+                template = ("birthday" if category == "birthday"
+                           else "tribute" if category == "tribute"
+                           else "general")
                 results = []
                 for size in cfg["poster_sizes"]:
                     await progress(
@@ -260,6 +262,43 @@ async def run_day(press_note: str | None = None,
         raise
     finally:
         _running = False
+
+
+async def render_news_posters(news_id: int) -> list[dict]:
+    """એક ન્યુઝના પોસ્ટર (ફરી) બનાવે — એડિટ/ફરી-બનાવો માટે."""
+    cfg = load_config()
+    rows = db.query("SELECT * FROM news WHERE id=?", (news_id,))
+    if not rows:
+        return []
+    n = rows[0]
+    # જૂના પોસ્ટર રેકોર્ડ કાઢો
+    db.execute("DELETE FROM poster_log WHERE news_id=?", (news_id,))
+    photos = [p for p in (n.get("photo") or "").split("|") if p]
+    images = [Path(p).as_uri() for p in photos if Path(p).exists()]
+    logo = cfg.get("logo_path")
+    logo_uri = Path(logo).as_uri() if logo and Path(logo).exists() else ""
+    qr = ""
+    if cfg.get("qr_enabled"):
+        qr = branding.make_qr_datauri(
+            cfg.get("qr_data") or f"https://{cfg.get('website_url','')}")
+    news = {"id": news_id, "title": n["title"], "body": n["body"],
+            "category": n["category"], "channel": cfg["channel_name"],
+            "location": cfg["location"], "tagline": cfg.get("tagline", ""),
+            "editor": cfg.get("editor_name", ""),
+            "contact": cfg.get("contact_number", ""),
+            "website": cfg.get("website_url", ""),
+            "theme_navy": cfg.get("theme_navy", ""),
+            "theme_accent": cfg.get("theme_accent", ""),
+            "theme_red": cfg.get("theme_red", ""),
+            "logo": logo_uri, "qr": qr, "images": images,
+            "image": images[0] if images else "",
+            "date": datetime.now().strftime("%d/%m/%Y")}
+    template = ("birthday" if n["category"] == "birthday"
+                else "tribute" if n["category"] == "tribute" else "general")
+    results = []
+    for size in cfg["poster_sizes"]:
+        results.append(await poster.render_poster(template, news, size))
+    return results
 
 
 # ── પબ્લિશર ─────────────────────────────────────────────────────
