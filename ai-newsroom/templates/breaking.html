@@ -3,125 +3,214 @@
 <head>
 <meta charset="UTF-8">
 <style>
-  /* ⭐ ગુજરાતી CSS ના સોનેરી નિયમો — ફોન્ટ લોકલથી, CDN નહીં */
-  @font-face {
-    font-family: 'NotoGuj';
-    src: url('../fonts/NotoSansGujarati-Bold.ttf') format('truetype');
-    font-weight: 700;
-    font-display: block;
-  }
-  @font-face {
-    font-family: 'NotoGuj';
+  @font-face { font-family: 'NotoGuj';
     src: url('../fonts/NotoSansGujarati-Regular.ttf') format('truetype');
-    font-weight: 400;
-    font-display: block;
-  }
-  @font-face {
-    font-family: 'AnekGuj';
+    font-weight: 400; font-display: block; }
+  @font-face { font-family: 'NotoGuj';
+    src: url('../fonts/NotoSansGujarati-Bold.ttf') format('truetype');
+    font-weight: 700; font-display: block; }
+  @font-face { font-family: 'AnekGuj';
     src: url('../fonts/AnekGujarati-Bold.ttf') format('truetype');
-    font-weight: 700;
-    font-display: block;
-  }
+    font-weight: 700; font-display: block; }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   html, body { width: 100%; height: 100%; overflow: hidden; }
 
   body {
-    font-family: 'NotoGuj', sans-serif;
-    background: linear-gradient(160deg, #4a0308 0%, #8a0f1a 55%, #4a0308 100%);
-    color: #fff;
-    display: flex;
-    flex-direction: column;
+    font-family: 'NotoGuj', sans-serif; color: #fff;
+    background: #16050a; position: relative;
+    display: flex; flex-direction: column;
   }
 
+  /* ── બેકગ્રાઉન્ડ ── */
+  .bg { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+  .bg .grad {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(130% 90% at 90% -15%, #a3122b 0%, transparent 55%),
+      radial-gradient(120% 100% at -10% 115%, #5e0a1c 0%, transparent 60%),
+      linear-gradient(155deg, #250510 0%, #47091c 50%, #16050a 100%);
+  }
+  .bg .pulse {
+    position: absolute; width: 90%; aspect-ratio: 1; right: -35%; top: -40%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 61, 85, .28), transparent 62%);
+  }
+  .bg .stripes-top {
+    position: absolute; top: 0; left: 0; right: 0; height: 26px;
+    background: repeating-linear-gradient(-45deg,
+      #ffd21e 0 26px, #1a1a1a 26px 52px);
+  }
+  .bg .grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+    background-size: 72px 72px;
+  }
+
+  .content { position: relative; z-index: 1; display: flex;
+    flex-direction: column; height: 100%; }
+
   .gujarati-text {
-    letter-spacing: normal;        /* ❌ letter-spacing જોડાક્ષર તોડે */
-    text-transform: none;
-    word-spacing: normal;
-    line-height: 1.65;             /* માત્રા કપાય નહીં */
-    padding-top: 0.15em;
+    letter-spacing: normal; text-transform: none; word-spacing: normal;
+    line-height: 1.6; padding-top: 0.12em;
     text-rendering: optimizeLegibility;
     -webkit-font-feature-settings: "liga" 1, "kern" 1;
     font-variant-ligatures: common-ligatures;
-    word-break: keep-all;
-    overflow-wrap: break-word;
-    hyphens: none;
+    word-break: keep-all; overflow-wrap: break-word; hyphens: none;
   }
 
-  .topbar {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 3.2% 4.5% 0 4.5%;
+  /* ── માસ્ટહેડ ── */
+  .masthead { display: flex; align-items: center; gap: 22px;
+    padding: 64px 52px 0; }
+  .logo-badge {
+    width: 86px; height: 86px; border-radius: 24px; flex: none;
+    background: linear-gradient(140deg, #ffd21e, #ff9d00);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 10px 30px rgba(255, 170, 20, .4);
   }
-  .channel {
-    font-family: 'AnekGuj', 'NotoGuj', sans-serif;
-    font-weight: 700; font-size: 34px; color: #ffd21e;
-    border: 3px solid #ffd21e; padding: 8px 22px; border-radius: 10px;
+  .logo-badge span { font-family: 'AnekGuj'; font-size: 40px; color: #47091c; }
+  .brand .l1 { font-family: 'AnekGuj'; font-size: 42px; color: #fff; line-height: 1.05; }
+  .brand .l2 { font-family: 'AnekGuj'; font-size: 27px; color: #ffd21e;
+    letter-spacing: 9px; }
+  .spacer { flex: 1; }
+  .date-chip {
+    background: rgba(0,0,0,.35); border: 1.6px solid rgba(255,255,255,.35);
+    color: #ffe1e6; font-weight: 700; font-size: 25px;
+    padding: 11px 24px; border-radius: 999px;
   }
-  .date { font-size: 26px; color: #cfe0ff; }
 
-  .badge {
-    align-self: flex-start; margin: 4% 4.5% 0 4.5%;
-    background: #ffd21e; color: #7a0d16; color: #fff; font-weight: 700; font-size: 30px;
-    padding: 10px 28px; border-radius: 999px;
+  /* ── બ્રેકિંગ બેનર ── */
+  .breaking-banner {
+    margin: 44px 52px 0; display: flex; align-items: center; gap: 20px;
+    background: linear-gradient(100deg, #ff2442, #b00b26 70%);
+    border-radius: 18px; padding: 20px 30px;
+    box-shadow: 0 16px 40px rgba(255, 36, 66, .45),
+                inset 0 2px 0 rgba(255,255,255,.25);
   }
+  .bolt {
+    width: 62px; height: 62px; border-radius: 50%; flex: none;
+    background: #ffd21e; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 26px rgba(255, 210, 30, .8);
+  }
+  .bolt svg { width: 34px; height: 34px; }
+  .breaking-banner .txt {
+    font-family: 'AnekGuj'; font-size: 44px; font-weight: 700;
+    letter-spacing: 1px; text-shadow: 0 3px 12px rgba(0,0,0,.4);
+  }
+  .live-dot { margin-left: auto; display: flex; align-items: center; gap: 10px;
+    font-size: 26px; font-weight: 700; color: #ffd21e; }
+  .live-dot i { width: 18px; height: 18px; border-radius: 50%; background: #ffd21e;
+    box-shadow: 0 0 18px #ffd21e; }
 
-  .headline-wrap { flex: 1; display: flex; align-items: center; padding: 0 4.5%; }
+  /* ── હેડલાઈન ── */
+  .headline-wrap { flex: 1; display: flex; align-items: center; padding: 16px 52px; }
+  .headline-inner { display: flex; gap: 28px; width: 100%; }
+  .accent-bar { width: 14px; border-radius: 999px; flex: none;
+    background: linear-gradient(180deg, #ff2442, #ffd21e);
+    box-shadow: 0 0 26px rgba(255, 36, 66, .7); }
   #headline {
-    font-family: 'AnekGuj', 'NotoGuj', sans-serif;
-    font-weight: 700; font-size: 72px; color: #ffffff;
+    font-family: 'AnekGuj', 'NotoGuj', sans-serif; font-weight: 700;
+    font-size: 80px; color: #fff;
+    text-shadow: 0 5px 30px rgba(0, 0, 0, .55);
   }
 
-  #body-text {
-    padding: 0 4.5% 3%;
-    font-size: 30px; color: #dbe7ff;
+  /* ── બોડી ── */
+  .body-card {
+    margin: 0 52px 30px;
+    background: rgba(0, 0, 0, .32);
+    border: 1.6px solid rgba(255, 120, 140, .35);
+    border-left: 8px solid #ff2442;
+    border-radius: 22px; padding: 26px 34px;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, .45);
+  }
+  #body-text { font-size: 31px; color: #ffe4e9;
     display: -webkit-box; -webkit-box-orient: vertical;
-    -webkit-line-clamp: 4; overflow: hidden;
-  }
+    -webkit-line-clamp: 4; overflow: hidden; }
 
+  /* ── ફૂટર ── */
   .footer {
-    background: #ffd21e; color: #0b1e3d;
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 1.6% 4.5%; font-weight: 700; font-size: 26px;
+    background: linear-gradient(90deg, #ffd21e, #ffb400);
+    color: #3d0712; padding: 26px 52px 30px;
+    display: flex; align-items: center; gap: 26px; font-weight: 700;
+    clip-path: polygon(0 22px, 100% 0, 100% 100%, 0 100%);
   }
+  .footer .loc { font-size: 27px; }
+  .footer .web { font-size: 26px; margin-left: auto; }
+
+  body.story .masthead { padding-top: 90px; }
+  body.story #headline { font-size: 96px; }
+  body.story #body-text { -webkit-line-clamp: 7; font-size: 36px; }
+  body.story .breaking-banner .txt { font-size: 52px; }
+  body.portrait #body-text { -webkit-line-clamp: 5; }
 </style>
 </head>
 <body>
-  <div class="topbar">
-    <div class="channel" id="channel">PUBLIC DAY INDIA</div>
-    <div class="date gujarati-text" id="date"></div>
+  <div class="bg">
+    <div class="grad"></div>
+    <div class="pulse"></div>
+    <div class="grid"></div>
+    <div class="stripes-top"></div>
   </div>
-  <div class="badge gujarati-text" id="badge">સમાચાર</div>
-  <div class="headline-wrap">
-    <h1 class="gujarati-text" id="headline" lang="gu"></h1>
-  </div>
-  <p class="gujarati-text" id="body-text" lang="gu"></p>
-  <div class="footer">
-    <span class="gujarati-text" id="location">દેવભૂમિ દ્વારકા</span>
-    <span>www.publicdayindia.com</span>
+
+  <div class="content">
+    <div class="masthead">
+      <div class="logo-badge"><span>PD</span></div>
+      <div class="brand">
+        <div class="l1">PUBLIC DAY</div>
+        <div class="l2">INDIA</div>
+      </div>
+      <div class="spacer"></div>
+      <div class="date-chip" id="date"></div>
+    </div>
+
+    <div class="breaking-banner">
+      <div class="bolt">
+        <svg viewBox="0 0 24 24" fill="#b00b26"><path d="M13 2 3 14h7l-1 8 11-13h-7l0-7z"/></svg>
+      </div>
+      <div class="txt gujarati-text" id="badge">બ્રેકિંગ ન્યુઝ</div>
+      <div class="live-dot"><i></i> LIVE</div>
+    </div>
+
+    <div class="headline-wrap">
+      <div class="headline-inner">
+        <div class="accent-bar"></div>
+        <h1 class="gujarati-text" id="headline" lang="gu"></h1>
+      </div>
+    </div>
+
+    <div class="body-card">
+      <p class="gujarati-text" id="body-text" lang="gu"></p>
+    </div>
+
+    <div class="footer">
+      <div class="loc gujarati-text">📍 <span id="location">દેવભૂમિ દ્વારકા</span></div>
+      <div class="web">www.publicdayindia.com</div>
+    </div>
   </div>
 
 <script>
-  const BADGES = { general: 'સમાચાર', breaking: 'બ્રેકિંગ ન્યુઝ',
-                   birthday: 'જન્મદિવસની શુભેચ્છા' };
+  (function sizeClass() {
+    const r = window.innerHeight / window.innerWidth;
+    document.body.classList.add(r > 1.5 ? 'story' : r > 1.1 ? 'portrait' : 'square');
+  })();
 
   function autoFit(el, maxHeight) {
     let size = parseInt(getComputedStyle(el).fontSize, 10);
-    while (el.scrollHeight > maxHeight && size > 32) {
+    while (el.scrollHeight > maxHeight && size > 34) {
       size -= 2;
       el.style.fontSize = size + 'px';
     }
   }
 
   window.renderNews = function (news) {
-    document.getElementById('channel').textContent = news.channel || 'PUBLIC DAY INDIA';
     document.getElementById('date').textContent = news.date || '';
-    document.getElementById('badge').textContent = BADGES[news.category] || BADGES.general;
     document.getElementById('headline').textContent = news.title || '';
     document.getElementById('body-text').textContent = news.body || '';
     document.getElementById('location').textContent = news.location || 'દેવભૂમિ દ્વારકા';
-    const wrap = document.querySelector('.headline-wrap');
-    autoFit(document.getElementById('headline'), wrap.clientHeight);
+    autoFit(document.getElementById('headline'),
+            document.querySelector('.headline-wrap').clientHeight);
     return true;
   };
 </script>

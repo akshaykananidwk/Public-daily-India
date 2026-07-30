@@ -11,7 +11,7 @@ from . import db, pipeline, updater
 from .bus import BUS
 from .config import load_config, save_config
 from .llm import LLM
-from .paths import WEB_DIR, STORAGE_DIR, PHOTOS_DIR
+from .paths import WEB_DIR, STORAGE_DIR, PHOTOS_DIR, FONTS_DIR
 from .scheduler import scheduler_loop
 from .updater import current_version
 
@@ -38,6 +38,7 @@ async def index():
 
 app.mount("/web", StaticFiles(directory=WEB_DIR), name="web")
 app.mount("/storage", StaticFiles(directory=STORAGE_DIR), name="storage")
+app.mount("/fonts", StaticFiles(directory=FONTS_DIR), name="fonts")
 
 
 # ── WebSocket (લાઈવ ડેશબોર્ડ) ──────────────────────────────────

@@ -11,6 +11,19 @@ from .llm import LLM
 
 _running = False
 
+BREAKING_WORDS = ("બ્રેકિંગ", "અકસ્માત", "મૃત્યુ", "આગ ", "ભૂકંપ", "હુમલો",
+                  "હુમલા", "તાત્કાલિક", "દુર્ઘટના", "ધડાકો", "ચેતવણી")
+BIRTHDAY_WORDS = ("જન્મદિવસ", "વર્ષગાંઠ", "શુભેચ્છા", "અભિનંદન")
+
+
+def detect_category(title: str, body: str = "") -> str:
+    text = f"{title} {body}"
+    if any(w in text for w in BIRTHDAY_WORDS):
+        return "birthday"
+    if any(w in text for w in BREAKING_WORDS):
+        return "breaking"
+    return "general"
+
 
 def is_running() -> bool:
     return _running
@@ -82,16 +95,18 @@ async def run_day(press_note: str | None = None):
             clean = await run_agent("proofreader", "editor", proof_fn,
                                     job_id=job_id, message="તપાસો")
 
+            category = detect_category(clean["title"], clean["body"])
             news_id = db.execute(
                 """INSERT INTO news(job_id, title, body, category, source_title,
                    source_url, status) VALUES(?,?,?,?,?,?,?)""",
-                (job_id, clean["title"], clean["body"], "general",
+                (job_id, clean["title"], clean["body"], category,
                  item.get("title", ""), item.get("url", ""), "proofread"))
             db.bump_stat(today, "news_written")
 
-            async def design_fn(progress, news_id=news_id, clean=clean, idx=idx):
+            async def design_fn(progress, news_id=news_id, clean=clean,
+                                idx=idx, category=category):
                 news = {"id": news_id, "title": clean["title"],
-                        "body": clean["body"], "category": "general",
+                        "body": clean["body"], "category": category,
                         "channel": cfg["channel_name"],
                         "location": cfg["location"],
                         "date": datetime.now().strftime("%d/%m/%Y")}
@@ -100,7 +115,7 @@ async def run_day(press_note: str | None = None):
                     await progress(
                         f"ન્યુઝ #{idx} — {size['name']} પોસ્ટર બની રહ્યું છે...")
                     results.append(await poster.render_poster(
-                        "general", news, size))
+                        category, news, size))
                     db.bump_stat(today, "posters_created")
                 return results
             await run_agent("designer", "proofreader", design_fn,

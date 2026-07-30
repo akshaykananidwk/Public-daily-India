@@ -1,11 +1,29 @@
-/* AI Newsroom ડેશબોર્ડ — WebSocket લાઈવ એનિમેશન + અપ્રુવલ + રિપોર્ટ + સેટિંગ */
+/* AI Newsroom — ડેશબોર્ડ, અપ્રુવલ, ન્યુઝ, રિપોર્ટ, સેટિંગ */
 const $ = (s) => document.querySelector(s);
-const AGENTS = ["ceo", "scout", "editor", "proofreader", "designer",
-                "photo", "publisher", "inbox", "analyst"];
 const STATE_LABEL = {
-  idle: "⚪ નિષ્ક્રિય", thinking: "🔵 વિચારે", working: "🟢 ચાલુ",
-  waiting: "🟠 રાહ", done: "✅ પૂર્ણ", error: "🔴 ભૂલ",
+  idle: "નિષ્ક્રિય", thinking: "વિચારે છે...", working: "કામ ચાલુ",
+  waiting: "અપ્રુવલ રાહ", done: "પૂર્ણ ✓", error: "ભૂલ!",
 };
+const STATUS_LABEL = {
+  pending_approval: "🟠 રાહમાં", approved: "✅ મંજૂર",
+  published: "📤 પબ્લિશ", rejected: "❌ રદ", proofread: "લખાયો",
+  draft: "ડ્રાફ્ટ",
+};
+const CAT_LABEL = { general: "સમાચાર", breaking: "બ્રેકિંગ",
+  birthday: "જન્મદિવસ" };
+const AGENT_EMOJI = { ceo: "👑", scout: "🔍", editor: "✍️",
+  proofreader: "🔤", designer: "🎨", photo: "📷", publisher: "📤",
+  inbox: "💬", analyst: "📊", updater: "🔄" };
+
+/* ── ટોસ્ટ ── */
+function toast(msg, kind = "") {
+  const t = document.createElement("div");
+  t.className = "toast " + kind;
+  t.textContent = msg;
+  $("#toasts").appendChild(t);
+  setTimeout(() => { t.style.opacity = 0; t.style.transition = "opacity .4s";
+    setTimeout(() => t.remove(), 400); }, 3800);
+}
 
 /* ── ટેબ ── */
 document.querySelectorAll(".nav-btn").forEach((b) =>
@@ -15,16 +33,19 @@ document.querySelectorAll(".nav-btn").forEach((b) =>
     b.classList.add("active");
     $("#tab-" + b.dataset.tab).classList.add("active");
     if (b.dataset.tab === "approval") loadApproval();
+    if (b.dataset.tab === "news") loadNews();
     if (b.dataset.tab === "reports") loadReports();
     if (b.dataset.tab === "settings") loadSettings();
+    if (b.dataset.tab === "dashboard") requestAnimationFrame(drawEdges);
   }));
 
 /* ── ઘડિયાળ ── */
 setInterval(() => {
-  $("#clock").textContent = new Date().toLocaleTimeString("gu-IN", { hour12: false });
+  $("#clock").textContent = new Date().toLocaleTimeString("gu-IN",
+    { hour12: false });
 }, 1000);
 
-/* ── એજન્ટ ગ્રાફ: SVG લાઈન દોરો ── */
+/* ── એજન્ટ ગ્રાફ ── */
 const EDGE_PAIRS = [
   ["ceo", "scout"], ["ceo", "editor"], ["ceo", "proofreader"],
   ["ceo", "designer"], ["ceo", "photo"], ["editor", "proofreader"],
@@ -36,22 +57,27 @@ function nodeCenter(name) {
   const r = el.getBoundingClientRect(), w = wrap.getBoundingClientRect();
   return { x: r.left + r.width / 2 - w.left, y: r.top + r.height / 2 - w.top };
 }
+function edgePath(a, b) {
+  const p1 = nodeCenter(a), p2 = nodeCenter(b);
+  const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2 - 26;
+  return `M ${p1.x} ${p1.y} Q ${mx} ${my} ${p2.x} ${p2.y}`;
+}
 function drawEdges() {
   const svg = $("#edges");
+  if (!svg || !$("#tab-dashboard").classList.contains("active")) return;
   svg.innerHTML = "";
   for (const [a, b] of EDGE_PAIRS) {
-    const p1 = nodeCenter(a), p2 = nodeCenter(b);
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("d", `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`);
+    path.setAttribute("d", edgePath(a, b));
     path.setAttribute("class", "edge");
     path.id = `edge-${a}-${b}`;
     svg.appendChild(path);
   }
 }
 window.addEventListener("resize", drawEdges);
-drawEdges();
+requestAnimationFrame(drawEdges);
 
-/* ⭐ CEO કામ વહેંચે — લાઈન પર ટપકું દોડે */
+/* CEO કામ વહેંચે — ટપકું દોડે */
 function runDot(from, to) {
   const path = $(`#edge-${from}-${to}`) || $(`#edge-${to}-${from}`);
   if (!path) return;
@@ -59,9 +85,10 @@ function runDot(from, to) {
   setTimeout(() => path.classList.remove("active"), 2500);
   const svg = $("#edges");
   const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-  dot.setAttribute("r", "6");
-  dot.setAttribute("class", "dot");
-  const anim = document.createElementNS("http://www.w3.org/2000/svg", "animateMotion");
+  dot.setAttribute("r", "7");
+  dot.setAttribute("class", "dot-run");
+  const anim = document.createElementNS("http://www.w3.org/2000/svg",
+    "animateMotion");
   anim.setAttribute("dur", "1.2s");
   anim.setAttribute("path", path.getAttribute("d"));
   anim.setAttribute("fill", "freeze");
@@ -86,15 +113,11 @@ function addLog(ev) {
   if (!ev.message) return;
   const li = document.createElement("li");
   const time = (ev.ts || "").split("T")[1] || "";
-  li.innerHTML = `<span class="t">${time}</span>${emoji(ev.agent)} ${ev.message}`;
+  li.innerHTML = `<span class="t">${time}</span>` +
+    `<span>${AGENT_EMOJI[ev.agent] || "•"} ${ev.message}</span>`;
   const log = $("#live-log");
   log.prepend(li);
   while (log.children.length > 80) log.lastChild.remove();
-}
-function emoji(agent) {
-  return { ceo: "👑", scout: "🔍", editor: "✍️", proofreader: "🔤",
-           designer: "🎨", photo: "📷", publisher: "📤", inbox: "💬",
-           analyst: "📊", updater: "🔄" }[agent] || "•";
 }
 
 /* ── WebSocket ── */
@@ -121,8 +144,9 @@ connectWS();
 async function refreshStatus() {
   try {
     const s = await (await fetch("/api/status")).json();
+    $("#ollama-dot").className = "dot" + (s.ollama ? " on" : "");
     $("#ollama-status").textContent =
-      "Ollama: " + (s.ollama ? "✅ ચાલુ" : "❌ બંધ (ડેમો મોડ)");
+      s.ollama ? "Ollama ચાલુ" : "Ollama બંધ — ડેમો મોડ";
     $("#version").textContent = "વર્ઝન: " + s.version;
     $("#pending-badge").textContent = s.pending_approval || "";
     const t = s.today || {};
@@ -136,18 +160,19 @@ async function refreshStatus() {
 refreshStatus();
 setInterval(refreshStatus, 10000);
 
-/* ── બટન: દિવસ શરૂ / પ્રેસ નોટ ── */
+/* ── રન બટન ── */
 $("#btn-run").onclick = async () => {
   const r = await (await fetch("/api/run-day", { method: "POST" })).json();
-  alert(r.message || r.error);
+  toast(r.message || r.error, r.error ? "bad" : "good");
 };
 $("#btn-press").onclick = async () => {
   const text = $("#press-text").value.trim();
-  if (!text) return alert("પ્રેસ નોટનું લખાણ લખો");
+  if (!text) return toast("પ્રેસ નોટનું લખાણ લખો", "bad");
   const fd = new FormData();
   fd.append("text", text);
-  const r = await (await fetch("/api/press-note", { method: "POST", body: fd })).json();
-  alert(r.message || r.error);
+  const r = await (await fetch("/api/press-note",
+    { method: "POST", body: fd })).json();
+  toast(r.message || r.error, r.error ? "bad" : "good");
   if (r.ok) $("#press-text").value = "";
 };
 
@@ -156,29 +181,111 @@ async function loadApproval() {
   const list = await (await fetch("/api/news?status=pending_approval")).json();
   const wrap = $("#approval-list");
   wrap.innerHTML = list.length ? "" :
-    "<p>કોઈ ન્યુઝ અપ્રુવલની રાહમાં નથી 🎉</p>";
+    '<p class="empty-note">કોઈ ન્યુઝ અપ્રુવલની રાહમાં નથી 🎉</p>';
   for (const n of list) {
-    const img = n.posters?.[0]?.url
-      ? `<img src="${n.posters[0].url}" loading="lazy">` : "";
     const div = document.createElement("div");
-    div.className = "card";
-    div.innerHTML = `${img}<h4>${n.title}</h4><p>${n.body}</p>
+    div.className = "card a-card";
+    const posters = n.posters || [];
+    const sizeNames = { "1080x1080": "પોસ્ટ", "1080x1350": "પોર્ટ્રેટ",
+      "1080x1920": "સ્ટોરી" };
+    const tabs = posters.map((p, i) =>
+      `<button class="${i === 0 ? "active" : ""}" data-url="${p.url}">` +
+      `${sizeNames[p.size] || p.size}</button>`).join("");
+    div.innerHTML = `
+      <div class="poster-frame">
+        ${posters[0]?.url ? `<img src="${posters[0].url}" loading="lazy">` : ""}
+        ${posters.length > 1 ? `<div class="size-tabs">${tabs}</div>` : ""}
+      </div>
+      <div class="meta">
+        <span class="cat-chip cat-${n.category}">${CAT_LABEL[n.category] || n.category}</span>
+        <span>${(n.created_at || "").slice(0, 16)}</span>
+      </div>
+      <h4>${n.title}</h4>
+      <p class="body-clip">${n.body}</p>
       <div class="row">
         <button class="approve">✅ મંજૂર + પબ્લિશ</button>
-        <button class="reject">❌ રદ</button>
+        <button class="reject">રદ કરો</button>
       </div>`;
+    div.querySelectorAll(".size-tabs button").forEach((b) =>
+      b.addEventListener("click", () => {
+        div.querySelectorAll(".size-tabs button").forEach((x) =>
+          x.classList.remove("active"));
+        b.classList.add("active");
+        div.querySelector("img").src = b.dataset.url;
+      }));
     div.querySelector(".approve").onclick = async () => {
-      div.style.opacity = .5;
-      await fetch(`/api/news/${n.id}/approve`, { method: "POST" });
+      div.style.opacity = .45;
+      const r = await (await fetch(`/api/news/${n.id}/approve`,
+        { method: "POST" })).json();
+      toast(r.publish?.facebook === "simulated"
+        ? "મંજૂર ✓ (ટોકન વગર — સિમ્યુલેશન પબ્લિશ)"
+        : "મંજૂર + પબ્લિશ થઈ ગયું ✓", "good");
       loadApproval(); refreshStatus();
     };
     div.querySelector(".reject").onclick = async () => {
       await fetch(`/api/news/${n.id}/reject`, { method: "POST" });
+      toast("ન્યુઝ રદ કર્યો");
       loadApproval(); refreshStatus();
     };
     wrap.appendChild(div);
   }
 }
+
+/* ── બધા ન્યુઝ ── */
+let newsFilter = "";
+document.querySelectorAll("#news-filters .chip").forEach((c) =>
+  c.addEventListener("click", () => {
+    document.querySelectorAll("#news-filters .chip").forEach((x) =>
+      x.classList.remove("active"));
+    c.classList.add("active");
+    newsFilter = c.dataset.status;
+    loadNews();
+  }));
+
+async function loadNews() {
+  const q = newsFilter ? `?status=${newsFilter}&limit=100` : "?limit=100";
+  const list = await (await fetch("/api/news" + q)).json();
+  const wrap = $("#news-list");
+  wrap.innerHTML = list.length ? "" :
+    '<p class="empty-note">કોઈ ન્યુઝ નથી</p>';
+  for (const n of list) {
+    const div = document.createElement("div");
+    div.className = "card n-row";
+    div.innerHTML = `
+      ${n.posters?.[0]?.url
+        ? `<img class="n-thumb" src="${n.posters[0].url}" loading="lazy">`
+        : '<div class="n-thumb"></div>'}
+      <div class="n-info">
+        <h4>${n.title}</h4>
+        <p>${(n.created_at || "").slice(0, 16)} •
+           ${CAT_LABEL[n.category] || n.category} • ${n.body}</p>
+      </div>
+      <span class="st-chip st-${n.status}">${STATUS_LABEL[n.status] || n.status}</span>`;
+    div.onclick = () => openNewsModal(n);
+    wrap.appendChild(div);
+  }
+}
+
+function openNewsModal(n) {
+  const posters = (n.posters || [])
+    .map((p) => `<img src="${p.url}">`).join("");
+  $("#modal-body").innerHTML = `
+    <div class="meta" style="margin-bottom:8px">
+      <span class="cat-chip cat-${n.category}">${CAT_LABEL[n.category] || ""}</span>
+      <span class="st-chip st-${n.status}">${STATUS_LABEL[n.status] || ""}</span>
+    </div>
+    <h3 style="margin-bottom:10px">${n.title}</h3>
+    <p style="color:var(--ink-2);font-size:14px">${n.body}</p>
+    ${n.source_url ? `<p style="margin-top:10px;font-size:12px">
+      સોર્સ: <a href="${n.source_url}" target="_blank"
+      style="color:var(--blue)">${n.source_title || n.source_url}</a></p>` : ""}
+    <div class="modal-posters">${posters}</div>`;
+  $("#modal").classList.remove("hidden");
+}
+$("#modal-close").onclick = () => $("#modal").classList.add("hidden");
+$("#modal").addEventListener("click", (e) => {
+  if (e.target === $("#modal")) $("#modal").classList.add("hidden");
+});
 
 /* ── રિપોર્ટ ── */
 $("#report-month").value = new Date().toISOString().slice(0, 7);
@@ -188,12 +295,23 @@ async function loadReports() {
   const r = await (await fetch("/api/reports?month=" + month)).json();
   const t = r.totals || {};
   $("#report-totals").innerHTML = `
-    <div class="tile"><b>${t.news_written || 0}</b>ન્યુઝ</div>
-    <div class="tile"><b>${t.posters_created || 0}</b>પોસ્ટર</div>
-    <div class="tile"><b>${t.approved || 0}</b>મંજૂર</div>
-    <div class="tile"><b>${t.rejected || 0}</b>રદ</div>
-    <div class="tile"><b>${t.published_fb || 0}</b>FB પોસ્ટ</div>
-    <div class="tile"><b>${t.errors || 0}</b>ભૂલ</div>`;
+    <div class="kpi"><span class="k-ic">✍️</span>
+      <b>${t.news_written || 0}</b><small>ન્યુઝ</small></div>
+    <div class="kpi"><span class="k-ic">🖼️</span>
+      <b>${t.posters_created || 0}</b><small>પોસ્ટર</small></div>
+    <div class="kpi"><span class="k-ic">✅</span>
+      <b>${t.approved || 0}</b><small>મંજૂર</small></div>
+    <div class="kpi"><span class="k-ic">📤</span>
+      <b>${t.published_fb || 0}</b><small>FB પોસ્ટ</small></div>
+    <div class="kpi"><span class="k-ic">⚠️</span>
+      <b>${t.errors || 0}</b><small>ભૂલ</small></div>`;
+  const days = (r.days || []).slice().reverse();
+  const max = Math.max(1, ...days.map((d) => d.news_written || 0));
+  $("#report-chart").innerHTML = days.map((d) =>
+    `<div class="bar" style="height:${(d.news_written || 0) / max * 100}%"
+       title="${d.date}: ${d.news_written || 0} ન્યુઝ">
+       <small>${d.date.slice(8)}</small></div>`).join("") ||
+    '<p class="empty-note">આ મહિને ડેટા નથી</p>';
   $("#report-days").innerHTML =
     "<tr><th>તારીખ</th><th>ભેગા</th><th>લખાયા</th><th>પોસ્ટર</th>" +
     "<th>મંજૂર</th><th>રદ</th><th>ભૂલ</th></tr>" +
@@ -205,8 +323,8 @@ async function loadReports() {
   $("#report-agents").innerHTML =
     "<tr><th>એજન્ટ</th><th>રન</th><th>ભૂલ</th><th>સરેરાશ સમય</th></tr>" +
     (r.agents || []).map((a) =>
-      `<tr><td>${emoji(a.agent)} ${a.agent}</td><td>${a.runs}</td>
-       <td>${a.errors}</td><td>${Math.round(a.avg_ms || 0)} ms</td></tr>`
+      `<tr><td>${AGENT_EMOJI[a.agent] || ""} ${a.agent}</td><td>${a.runs}</td>
+       <td>${a.errors}</td><td>${(a.avg_ms / 1000).toFixed(1)} સે</td></tr>`
     ).join("");
 }
 
@@ -232,7 +350,7 @@ $("#settings-form").onsubmit = async (e) => {
   await fetch("/api/settings", { method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload) });
-  alert("સેવ થઈ ગયું ✅");
+  toast("સેટિંગ સેવ થઈ ગયું ✓", "good");
 };
 $("#btn-check-update").onclick = async () => {
   $("#update-info").textContent = "ચેક થઈ રહ્યું છે...";
@@ -247,8 +365,10 @@ $("#btn-apply-update").onclick = async () => {
   $("#update-info").textContent = "અપડેટ ચાલી રહ્યું છે...";
   const r = await (await fetch("/api/update/apply", { method: "POST" })).json();
   $("#update-info").textContent = r.error || r.message;
+  toast(r.error || r.message, r.error ? "bad" : "good");
 };
 $("#btn-backup").onclick = async () => {
   const r = await (await fetch("/api/backup", { method: "POST" })).json();
   $("#update-info").textContent = "બેકઅપ: " + r.file;
+  toast("બેકઅપ લેવાઈ ગયો ✓", "good");
 };
