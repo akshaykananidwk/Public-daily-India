@@ -5,20 +5,40 @@ POST JSON: { api_key, number, message, session_id, media_url? }
 import httpx
 
 
+async def _up_litterbox(c, data) -> str:
+    r = await c.post(
+        "https://litterbox.catbox.moe/resources/internals/api.php",
+        data={"reqtype": "fileupload", "time": "72h"},
+        files={"fileToUpload": ("poster.png", data, "image/png")})
+    r.raise_for_status()
+    return r.text.strip() if r.text.startswith("http") else ""
+
+
+async def _up_uguu(c, data) -> str:
+    r = await c.post("https://uguu.se/upload.php",
+                     files={"files[]": ("poster.png", data, "image/png")})
+    r.raise_for_status()
+    return r.json()["files"][0]["url"]
+
+
 async def upload_public(file_path: str) -> str:
-    """લોકલ ફાઈલને ફ્રી હોસ્ટ પર ચડાવી જાહેર લિંક પાછી આપે (WhatsApp media માટે).
-    tmpfiles.org — ~1 કલાક રહે, WhatsApp ડિલિવરી માટે પૂરતું."""
+    """લોકલ ફાઈલને ફ્રી હોસ્ટ પર ચડાવી *ડાયરેક્ટ ઈમેજ* લિંક પાછી આપે
+    (WhatsApp media માટે). એક હોસ્ટ ફેલ થાય તો બીજો ટ્રાય કરે.
+    litterbox 72 કલાક રહે — WhatsApp ડિલિવરી માટે પૂરતું."""
     try:
-        async with httpx.AsyncClient(timeout=60) as c:
-            with open(file_path, "rb") as fh:
-                r = await c.post("https://tmpfiles.org/api/v1/upload",
-                                 files={"file": fh})
-            r.raise_for_status()
-            url = r.json()["data"]["url"]
-            # ડાયરેક્ટ ડાઉનલોડ લિંક: /dl/ ઉમેરો
-            return url.replace("tmpfiles.org/", "tmpfiles.org/dl/", 1)
+        with open(file_path, "rb") as fh:
+            data = fh.read()
     except Exception:
         return ""
+    async with httpx.AsyncClient(timeout=90) as c:
+        for uploader in (_up_litterbox, _up_uguu):
+            try:
+                url = await uploader(c, data)
+                if url and url.startswith("http"):
+                    return url
+            except Exception:
+                continue
+    return ""
 
 
 def is_configured(cfg: dict) -> bool:
