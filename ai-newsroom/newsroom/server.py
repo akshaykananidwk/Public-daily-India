@@ -279,6 +279,34 @@ async def regenerate_news(news_id: int):
     return {"ok": True, "posters": len(posters)}
 
 
+@app.post("/api/news/{news_id}/video")
+async def make_video(news_id: int, payload: dict = Body(default={})):
+    """પોસ્ટરમાંથી ટૂંકો વિડિયો (Reels/Shorts) — વૈકલ્પિક વોઈસ-ઓવર."""
+    from . import video
+    rows = db.query("SELECT * FROM news WHERE id=?", (news_id,))
+    if not rows:
+        return JSONResponse({"error": "ન્યુઝ મળ્યો નહીં"}, status_code=404)
+    n = rows[0]
+    posters = db.query(
+        "SELECT file_path FROM poster_log WHERE news_id=? ORDER BY id",
+        (news_id,))
+    if not posters:
+        return JSONResponse({"error": "પહેલા પોસ્ટર બનાવો"}, status_code=400)
+    voice = ""
+    if payload.get("voice"):
+        voice = f"{n['title']}. {n['body']}"
+    r = await video.make_video(posters[0]["file_path"],
+                               duration=payload.get("duration", 8),
+                               voice_text=voice)
+    if r.get("ok"):
+        try:
+            rel = Path(r["file"]).relative_to(STORAGE_DIR)
+            r["url"] = "/storage/" + rel.as_posix()
+        except ValueError:
+            pass
+    return r
+
+
 # ── રિપોર્ટ ─────────────────────────────────────────────────────
 @app.get("/api/reports")
 async def reports(month: str = ""):

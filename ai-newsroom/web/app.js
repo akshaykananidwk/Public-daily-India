@@ -393,10 +393,12 @@ function openNewsModal(n) {
       color:var(--ink);border-radius:10px;padding:9px;margin:4px 0 10px">
     <label style="font-size:12px;color:var(--muted)">લખાણ</label>
     <textarea id="edit-body" rows="4">${n.body || ""}</textarea>
-    <div class="row" style="display:flex;gap:10px;margin-bottom:12px">
+    <div class="row" style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
       <button class="primary small" id="btn-edit-save">💾 સેવ + પોસ્ટર ફરી બનાવો</button>
       <button class="ghost" id="btn-summarize">✨ સારાંશ</button>
+      <button class="ghost" id="btn-video">🎬 વિડિયો (Reels)</button>
     </div>
+    <div id="video-out"></div>
     ${n.source_url ? `<p style="margin-bottom:8px;font-size:12px">
       સોર્સ: <a href="${n.source_url}" target="_blank"
       style="color:var(--blue)">${n.source_title || n.source_url}</a></p>` : ""}
@@ -416,6 +418,17 @@ function openNewsModal(n) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text: $("#edit-body").value }) })).json();
     if (r.summary) $("#edit-body").value = r.summary;
+  };
+  $("#btn-video").onclick = async () => {
+    $("#video-out").textContent = "વિડિયો બની રહ્યો છે... (~10-20 સે)";
+    const voice = confirm("વોઈસ-ઓવર (અવાજ) પણ ઉમેરવો? "
+      + "(edge-tts ઈન્સ્ટોલ હોવું જોઈએ)");
+    const r = await (await fetch(`/api/news/${n.id}/video`, { method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ voice }) })).json();
+    if (r.ok) $("#video-out").innerHTML =
+      `<video src="${r.url}" controls style="width:100%;border-radius:10px;margin-top:8px"></video>`;
+    else $("#video-out").textContent = r.error || "વિડિયો ભૂલ";
   };
   $("#modal").classList.remove("hidden");
 }
