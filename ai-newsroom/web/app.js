@@ -541,6 +541,14 @@ $("#btn-logo-rm").onclick = async () => {
   $("#logo-info").textContent = "લોગો કઢાયો — ફરી PD બોક્સ આવશે";
   toast("લોગો કઢાયો");
 };
+$("#btn-tg-test").onclick = async () => {
+  $("#tg-info").textContent = "મોકલી રહ્યો છું... (પહેલા સેવ કરો)";
+  const r = await (await fetch("/api/telegram-test", { method: "POST" })).json();
+  $("#tg-info").textContent = r.error ||
+    (r.ok ? "✅ Telegram ચેનલ ચેક કરો!" : "❌ " + JSON.stringify(r.result || ""));
+  toast(r.error || (r.ok ? "Telegram ટેસ્ટ ✓" : "Telegram ભૂલ"),
+    r.ok ? "good" : "bad");
+};
 $("#btn-wa-test").onclick = async () => {
   $("#wa-info").textContent = "મોકલી રહ્યો છું... (પહેલા સેવ કરો ભૂલતા નહીં)";
   const r = await (await fetch("/api/whatsapp-test", { method: "POST" })).json();

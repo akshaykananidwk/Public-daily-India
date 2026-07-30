@@ -54,6 +54,8 @@ DEFAULTS = {
     "image_ai_local_steps": 25,
     "image_ai_local_cfg": 6,
     "image_ai_local_sampler": "DPM++ 2M",
+    "telegram_token": "",              # @BotFather થી બોટ ટોકન
+    "telegram_chat": "",               # @channel કે -100... chat id
     "whatsapp_api_url": "https://bulk.akdwk.in/api.php",
     "whatsapp_api_key": "",
     "whatsapp_session_id": "",

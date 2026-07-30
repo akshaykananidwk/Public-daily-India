@@ -343,7 +343,7 @@ async def report_whatsapp():
 
 # ── સેટિંગ ──────────────────────────────────────────────────────
 MASKED_KEYS = ("update_token", "facebook_page_token", "whatsapp_api_key",
-               "image_ai_key")
+               "image_ai_key", "telegram_token")
 
 
 @app.get("/api/settings")
@@ -381,6 +381,19 @@ async def image_test():
         return {"ok": True, "url": "/storage/" + rel.as_posix()}
     except Exception as e:
         return JSONResponse({"error": str(e)[:400]}, status_code=500)
+
+
+# ── Telegram ટેસ્ટ ──────────────────────────────────────────────
+@app.post("/api/telegram-test")
+async def telegram_test():
+    from . import telegram
+    cfg = load_config()
+    if not telegram.is_configured(cfg):
+        return JSONResponse({"error": "Telegram ટોકન + chat ભરો"},
+                            status_code=400)
+    r = await telegram.send_text(
+        cfg, f"🧪 ટેસ્ટ — {cfg['channel_name']} Telegram જોડાયું! ✅")
+    return {"ok": r.get("ok", False), "result": r}
 
 
 # ── WhatsApp ટેસ્ટ ──────────────────────────────────────────────

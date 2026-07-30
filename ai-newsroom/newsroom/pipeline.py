@@ -6,7 +6,7 @@ import httpx
 
 from pathlib import Path
 
-from . import db, scout, poster, whatsapp, imagegen, branding
+from . import db, scout, poster, whatsapp, imagegen, branding, telegram
 from .bus import BUS, run_agent
 from .config import load_config
 from .llm import LLM
@@ -370,6 +370,13 @@ async def publish_news(news_id: int) -> dict:
             results["whatsapp"] = await whatsapp.send_broadcast(
                 cfg, msg, media_url)
             db.bump_stat(today, "published_wa")
+
+        # 📢 Telegram ચેનલ પર પોસ્ટર (મફત, public URL વગર)
+        if telegram.is_configured(cfg) and posters:
+            await progress("Telegram ચેનલ પર પોસ્ટ કરી રહ્યો છું...")
+            cap = branding.build_caption(news["title"], news["body"], cfg)
+            results["telegram"] = await telegram.send_photo(
+                cfg, posters[0]["file_path"], cap)
         return results
 
     return await run_agent("publisher", "ceo", publish_fn,
