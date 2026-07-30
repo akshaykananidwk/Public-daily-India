@@ -85,6 +85,24 @@ class LLM:
             f"માત્રા સુધારો. ફક્ત સુધારેલું લખાણ આપો:\n\n{gujarati}")
         return {"title": title, "body": polished or gujarati, "demo": False}
 
+    # ── ફોટો એજન્ટ: ન્યુઝ પરથી અંગ્રેજી દ્રશ્ય-વર્ણન ─────────────
+    async def image_scene(self, title: str) -> str:
+        """હેડલાઈન પરથી ટૂંકું અંગ્રેજી દ્રશ્ય-વર્ણન (AI તસવીર માટે).
+        Ollama ન ચાલે તો ખાલી — imagegen વિષય પરથી ગોઠવી લેશે."""
+        if not await self.available():
+            return ""
+        try:
+            out = await self.generate(
+                self.model_think,
+                "You describe a photo scene for a news poster. In ONE short "
+                "English sentence, describe a realistic, relevant news photo "
+                "for this Gujarati headline. Describe only the scene/objects/"
+                "place — NO text in the image, and do NOT name or depict any "
+                "specific real person. Headline:\n\n" + title)
+            return out.strip().strip('"')[:200]
+        except Exception:
+            return ""
+
     # ── શુદ્ધિ: ચકાસણી ──────────────────────────────────────────
     async def proofread(self, title: str, body: str) -> dict:
         issues = []

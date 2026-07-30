@@ -11,11 +11,45 @@ import httpx
 from .paths import PHOTOS_DIR
 
 PROMPT_TEMPLATE = (
-    "Photorealistic editorial news photograph illustrating this Gujarati "
-    "local news headline: {title}. Setting: Devbhumi Dwarka district, "
-    "coastal Gujarat, India. Natural lighting, realistic, respectful. "
+    "Photorealistic editorial news photograph that is directly RELEVANT to "
+    "this news: {scene}. Realistic photojournalism, India, natural lighting, "
+    "respectful. Do NOT depict any specific real named person's face. "
     "STRICTLY NO text, NO letters, NO numbers, NO logos, NO watermarks "
     "anywhere in the image. {style}")
+
+# વિષય ઓળખવા — હેડલાઈનમાં આ શબ્દ હોય તો એ દ્રશ્ય (LLM ન હોય ત્યારે વપરાય)
+TOPIC_SCENES = [
+    (("સંસદ", "લોકસભા", "રાજ્યસભા", "બિલ", "વિધાનસભા", "સરકાર", "મંત્રી"),
+     "the Indian Parliament building in New Delhi, government"),
+    (("મંદિર", "દ્વારકાધીશ", "દર્શન", "આરતી", "ધાર્મિક", "પૂજા", "યાત્રા"),
+     "a Hindu temple in Gujarat with devotees"),
+    (("વરસાદ", "હવામાન", "પૂર", "વાવાઝોડું", "ચોમાસું"),
+     "monsoon rain over an Indian town, cloudy sky"),
+    (("અકસ્માત", "દુર્ઘટના", "આગ", "બચાવ"),
+     "an emergency response scene with rescue workers in India"),
+    (("શાળા", "શિક્ષણ", "વિદ્યાર્થી", "પરીક્ષા", "કોલેજ"),
+     "an Indian school building with students"),
+    (("બસ", "રસ્તો", "હાઈવે", "ટ્રાફિક", "વાહન"),
+     "an Indian road with a bus and traffic"),
+    (("દરિયો", "બીચ", "માછીમાર", "બંદર", "ઓખા"),
+     "the Gujarat coastline, sea and fishing boats"),
+    (("ખેડૂત", "પાક", "ખેતી", "વાવેતર"),
+     "an Indian farmer in a green field"),
+    (("રમત", "ક્રિકેट", "ખેલાડી", "મેચ", "ટુર્નામેન્ટ"),
+     "a sports ground in India"),
+    (("પોલીસ", "ગુનો", "ધરપકડ", "ચોરી"),
+     "Indian police officers on duty"),
+    (("આરોગ્ય", "હોસ્પિટલ", "દવા", "કેમ્પ", "રસી"),
+     "an Indian hospital or health camp"),
+]
+
+
+def topic_scene(title: str) -> str:
+    """LLM ન હોય ત્યારે — હેડલાઈનના શબ્દ પરથી યોગ્ય દ્રશ્ય."""
+    for words, scene in TOPIC_SCENES:
+        if any(w in title for w in words):
+            return scene
+    return "a relevant local news scene in Gujarat, India"
 
 
 def is_configured(cfg: dict) -> bool:
@@ -120,12 +154,15 @@ CONNECT_HELP = {
 }
 
 
-async def generate(cfg: dict, title: str) -> str | None:
-    """તસવીર બનાવીને ફાઈલ-પાથ પાછો આપે. ભૂલ પડે તો exception."""
+async def generate(cfg: dict, title: str, scene: str = "") -> str | None:
+    """તસવીર બનાવીને ફાઈલ-પાથ પાછો આપે. ભૂલ પડે તો exception.
+    scene = ન્યુઝનું અંગ્રેજી દ્રશ્ય-વર્ણન (LLM થી). ખાલી હોય તો વિષય પરથી."""
     if not is_configured(cfg):
         return None
+    if not scene:
+        scene = topic_scene(title)
     prompt = PROMPT_TEMPLATE.format(
-        title=title, style=cfg.get("image_ai_style", ""))
+        scene=scene, style=cfg.get("image_ai_style", ""))
     provider = cfg.get("image_ai_provider", "pollinations")
     try:
         if provider == "openai":
