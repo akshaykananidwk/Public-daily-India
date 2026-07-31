@@ -8,6 +8,12 @@ import json
 
 import httpx
 
+# Gemini મોડેલ — પહેલું ન ચાલે તો બીજું (Google સમયે સમયે બદલે છે)
+GEMINI_MODELS = ["gemini-2.0-flash", "gemini-flash-latest",
+                 "gemini-2.5-flash", "gemini-2.0-flash-001",
+                 "gemini-1.5-flash-latest"]
+_WORKING_GEMINI = {"text": None, "vision": None}   # જે ચાલ્યું એ યાદ રાખો
+
 
 class LLM:
     def __init__(self, cfg: dict):
@@ -48,21 +54,46 @@ class LLM:
             r.raise_for_status()
             return r.json().get("response", "").strip()
 
+    def _model_candidates(self, kind: str) -> list:
+        """ટ્રાય કરવાના મોડેલ — user નું, જે પહેલા ચાલ્યું, પછી યાદી."""
+        cands = []
+        if self.text_model:
+            cands.append(self.text_model)
+        if _WORKING_GEMINI.get(kind):
+            cands.append(_WORKING_GEMINI[kind])
+        cands += GEMINI_MODELS
+        seen, out = set(), []
+        for m in cands:
+            if m and m not in seen:
+                seen.add(m); out.append(m)
+        return out
+
+    async def _gemini_call(self, body: dict, kind: str) -> str:
+        """એક પછી એક મોડેલ ટ્રાય કરે; 404 (મોડેલ નથી) હોય તો બીજું."""
+        last = None
+        async with httpx.AsyncClient(timeout=120) as c:
+            for model in self._model_candidates(kind):
+                url = (f"https://generativelanguage.googleapis.com/v1beta/"
+                       f"models/{model}:generateContent")
+                r = await c.post(url, params={"key": self.api_key}, json=body)
+                if r.status_code == 404:
+                    last = r
+                    continue                # આ મોડેલ નથી — બીજું ટ્રાય
+                r.raise_for_status()
+                _WORKING_GEMINI[kind] = model    # ચાલ્યું — યાદ રાખો
+                data = r.json()
+                cand = (data.get("candidates") or [{}])[0]
+                parts = cand.get("content", {}).get("parts", [])
+                return "".join(p.get("text", "") for p in parts).strip()
+        if last is not None:
+            last.raise_for_status()
+        return ""
+
     async def _gemini(self, prompt, system) -> str:
-        model = self.text_model or "gemini-2.0-flash"
-        url = (f"https://generativelanguage.googleapis.com/v1beta/models/"
-               f"{model}:generateContent")
         body = {"contents": [{"parts": [{"text": prompt}]}]}
         if system:
             body["systemInstruction"] = {"parts": [{"text": system}]}
-        async with httpx.AsyncClient(timeout=120) as c:
-            r = await c.post(url, params={"key": self.api_key}, json=body)
-            r.raise_for_status()
-            data = r.json()
-        try:
-            return data["candidates"][0]["content"]["parts"][0]["text"].strip()
-        except Exception:
-            return ""
+        return await self._gemini_call(body, "text")
 
     async def _openai(self, prompt, system) -> str:
         model = self.text_model or "gpt-4o-mini"
@@ -156,19 +187,10 @@ class LLM:
         return {"title": title, "body": body}
 
     async def _gemini_vision(self, prompt, image_b64, mime="image/jpeg") -> str:
-        model = self.text_model or "gemini-1.5-flash"
-        url = (f"https://generativelanguage.googleapis.com/v1beta/models/"
-               f"{model}:generateContent")
         body = {"contents": [{"parts": [
             {"text": prompt},
             {"inlineData": {"mimeType": mime, "data": image_b64}}]}]}
-        async with httpx.AsyncClient(timeout=120) as c:
-            r = await c.post(url, params={"key": self.api_key}, json=body)
-            r.raise_for_status()
-            data = r.json()
-        cand = (data.get("candidates") or [{}])[0]
-        parts = cand.get("content", {}).get("parts", [])
-        return "".join(p.get("text", "") for p in parts).strip()
+        return await self._gemini_call(body, "vision")
 
     async def _openai_vision(self, prompt, image_b64) -> str:
         model = self.text_model or "gpt-4o-mini"
