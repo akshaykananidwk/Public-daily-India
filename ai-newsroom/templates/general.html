@@ -47,8 +47,10 @@
     word-break: keep-all; overflow-wrap: break-word; hyphens: none;
   }
 
-  /* ═══ ટોપ: લોગો + ટેગલાઈન + BREAKING NEWS ═══ */
-  .top { display: flex; gap: 20px; padding: 22px 30px 0; background: #fff; }
+  /* ═══ ટોપ: લોગો + ટેગલાઈન + BREAKING NEWS (ડાર્ક TV બેન્ડ) ═══ */
+  .top { display: flex; gap: 20px; padding: 20px 30px 12px;
+    background: linear-gradient(180deg, #16305e 0%, var(--navy) 100%);
+    border-bottom: 4px solid var(--yellow); }
   .logo-box {
     flex: none; width: 250px; border: 3px solid var(--navy);
     border-radius: 18px; overflow: hidden; background: #fff;
@@ -87,9 +89,9 @@
   .tricolor .gr { background: #138808; }
 
   .top-right { flex: 1; display: flex; flex-direction: column; }
-  .quote { text-align: center; color: var(--navy); font-weight: 700;
+  .quote { text-align: center; color: #ffe27a; font-weight: 700;
     font-size: 30px; padding: 2px 0 12px; }
-  .quote .qm { color: var(--red); font-size: 34px; font-family: serif; }
+  .quote .qm { color: #ff6b6b; font-size: 34px; font-family: serif; }
 
   .breaking { display: flex; border-radius: 12px; overflow: hidden;
     box-shadow: 0 8px 22px rgba(196, 14, 20, .4), 0 0 0 2px #ffffff22;
@@ -111,7 +113,7 @@
 
   .meta-row { display: flex; align-items: center; gap: 14px;
     padding-top: 12px; }
-  .editor { color: var(--navy); font-weight: 700; font-size: 27px; }
+  .editor { color: #fff; font-weight: 700; font-size: 27px; }
   .date-badge { margin-left: auto; background: var(--yellow);
     color: var(--navy); font-family: 'AnekGuj'; font-size: 28px;
     padding: 6px 20px; border-radius: 10px;
@@ -188,12 +190,22 @@
   .strip-follow .socials { display: flex; gap: 10px; }
   .strip-follow .disc { width: 40px; height: 40px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center; }
-  /* નીચેની ટેગલાઈન પટ્ટી */
+  /* નીચેની ટેગલાઈન પટ્ટી + LIVE બેજ — એક જ લાઈન */
   .strip-tag { background: var(--navy); color: #fff;
-    display: flex; align-items: center; justify-content: center; gap: 16px;
-    padding: 10px 26px; font-family: 'AnekGuj'; font-size: 24px; }
+    display: flex; align-items: center; gap: 14px;
+    padding: 11px 22px; font-family: 'AnekGuj'; font-size: 22px;
+    white-space: nowrap; overflow: hidden; }
+  .strip-tag .live { flex: none; background: #e0141b; color: #fff;
+    font-weight: 700; font-size: 21px; padding: 4px 13px 4px 10px;
+    border-radius: 6px; display: inline-flex; align-items: center; gap: 7px;
+    letter-spacing: 1px; }
+  .strip-tag .live .play { width: 0; height: 0;
+    border-left: 11px solid #fff; border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent; }
+  .strip-tag .tagmid { flex: 1; text-align: center; overflow: hidden;
+    text-overflow: ellipsis; }
   .strip-tag .ch { color: var(--yellow); }
-  .strip-tag .sep { color: #ffffff55; }
+  .strip-tag .sep { color: #ffffff55; margin: 0 4px; }
   .d-fb { background: #1877f2; }
   .d-ig { background: radial-gradient(circle at 30% 110%, #fdf497 0%,
     #fd5949 45%, #d6249f 60%, #285aeb 90%); }
@@ -289,8 +301,9 @@
   </div>
 
   <div class="strip-tag gujarati-text">
-    <span class="ch" id="tag-ch">PUBLIC DAILY INDIA</span>
-    <span>સચોટ સમાચાર <span class="sep">|</span> નિષ્પક્ષ વિશ્લેષણ
+    <span class="live"><span class="play"></span>LIVE</span>
+    <span class="tagmid"><span class="ch" id="tag-ch">PUBLIC DAILY INDIA</span>
+    &nbsp; સચોટ સમાચાર <span class="sep">|</span> નિષ્પક્ષ વિશ્લેષણ
     <span class="sep">|</span> તમારા હકનો અવાજ</span>
   </div>
 
