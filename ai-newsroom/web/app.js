@@ -324,8 +324,8 @@ async function loadApproval() {
     div.innerHTML = `
       <div class="poster-frame">
         ${posters[0]?.url ? `<img src="${posters[0].url}" loading="lazy">` : ""}
-        ${posters.length > 1 ? `<div class="size-tabs">${tabs}</div>` : ""}
       </div>
+      ${posters.length > 1 ? `<div class="size-tabs">${tabs}</div>` : ""}
       <div class="meta">
         <span class="cat-chip cat-${n.category}">${CAT_LABEL[n.category] || n.category}</span>
         <span>${(n.created_at || "").slice(0, 16)}</span>
