@@ -27,13 +27,50 @@ def strip_source(title: str) -> tuple[str, str]:
     return title.strip(), ""
 
 
+def clean_title(title: str) -> str:
+    """દ્વિભાષી/ક્લિકબેટ પૂંછડું કાઢો — ફક્ત મુખ્ય ગુજરાતી ભાગ રાખો.
+    દા.ત. 'રાશિફળ । Read Horoscope...' → 'રાશિફળ'."""
+    title = strip_source(title)[0]
+    # '।' પછી અંગ્રેજી અનુવાદ હોય તો કાઢો
+    for sep in ("। Read", "। read", " | Read", "। ", " Read "):
+        if sep in title:
+            title = title.split(sep)[0].strip()
+            break
+    return title.strip(" ।|-–").strip()
+
+
+# ❌ કચરો — આ શબ્દવાળા ન્યુઝ ક્યારેય પોસ્ટ ન કરવા (પૈસા ન બગડે)
+JUNK_WORDS = (
+    "રાશિફળ", "રાશિ ", "ભવિષ્ય", "પંચાંગ", "જન્માક્ષર", "જ્યોતિષ",
+    "લકી નંબર", "શુકન", "horoscope", "rashifal", "astrology", "zodiac",
+    "panchang", "numerology", "vastu tips", "લોટરી", "સટ્ટા",
+    "aaj nu rashifal", "aaj no",
+    # ક્લિકબેટ / લિસ્ટિકલ
+    "જુઓ વીડિયો", "વાયરલ વીડિયો", "જુઓ તસવીરો", "જુઓ ફોટા",
+    "આ 5 ", "આ 7 ", "આ 10 ", "these ", "top 10", "viral video",
+    "જાણો કેમ", "ચોંકાવનારો", "ધડાકો કરી",
+)
+
+
+def is_junk(title: str, block_words: list | None = None) -> bool:
+    t = title.lower()
+    for w in JUNK_WORDS:
+        if w.lower() in t:
+            return True
+    for w in (block_words or []):
+        if w.strip() and w.strip().lower() in t:
+            return True
+    return False
+
+
 def _norm(s: str) -> str:
     """સરખામણી માટે — જગ્યા/ચિહ્ન કાઢી નાની કરો."""
     return "".join(ch for ch in s.lower() if ch.isalnum())
 
 
 async def fetch_news(feeds: list[str], keyword_filter: str = "",
-                     seen_titles: set | None = None) -> list[dict]:
+                     seen_titles: set | None = None,
+                     block_words: list | None = None) -> list[dict]:
     items = []
     for feed in feeds:
         try:
@@ -45,13 +82,17 @@ async def fetch_news(feeds: list[str], keyword_filter: str = "",
                 raw = (it.findtext("title") or "").strip()
                 link = (it.findtext("link") or "").strip()
                 if raw:
-                    title, source = strip_source(raw)
+                    source = strip_source(raw)[1]
+                    title = clean_title(raw)
                     items.append({"title": title, "url": link,
                                   "source": source})
         except Exception:
             continue
     if not items:
         items = [dict(d) for d in DEMO_ITEMS]
+
+    # ❌ કચરો કાઢો (રાશિફળ/જ્યોતિષ/ક્લિકબેટ) — CEO નું પહેલું કામ
+    items = [it for it in items if not is_junk(it["title"], block_words)]
 
     # કીવર્ડ ફિલ્ટર — આપેલા શબ્દોમાંથી કોઈ એક હોય તો જ રાખો
     keywords = [k.strip() for k in keyword_filter.split(",") if k.strip()]

@@ -40,6 +40,7 @@ DEFAULTS = {
     "districts": [],                   # મલ્ટી-જિલ્લા [{name,location,contact}]
     "hashtags": "#PublicDailyIndia #Dwarka #Gujarat #GujaratiNews",
     "keyword_filter": "",              # RSS ફિલ્ટર (અલ્પવિરામથી અલગ)
+    "block_words": "",                 # આ શબ્દવાળા ન્યુઝ કાઢી નાખો (કચરો)
     # 📱 WhatsApp બ્રોડકાસ્ટ (અલ્પવિરામથી અલગ નંબર, 91 સાથે)
     "whatsapp_broadcast": "",
     "daily_report_enabled": False,     # રાત્રે રિપોર્ટ WhatsApp પર

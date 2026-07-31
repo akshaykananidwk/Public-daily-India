@@ -116,8 +116,11 @@ async def run_day(press_note: str | None = None,
                 recent = db.query(
                     "SELECT title FROM news WHERE created_at > date('now','-30 day')")
                 seen = {scout._norm(r["title"]) for r in recent}
+                block = [w for w in (cfg.get("block_words", "") or "")
+                         .replace("\n", ",").split(",") if w.strip()]
                 found = await scout.fetch_news(
-                    cfg["rss_feeds"], cfg.get("keyword_filter", ""), seen)
+                    cfg["rss_feeds"], cfg.get("keyword_filter", ""), seen,
+                    block)
                 await progress(f"{len(found)} નવા ન્યુઝ મળ્યા",
                                detail={"found": len(found)})
                 return found
@@ -166,11 +169,13 @@ async def run_day(press_note: str | None = None,
             body = dedupe_body(clean["title"], clean["body"])
             photos = list(item.get("photos", []))
             image_ai = False
+            # ડેમો મોડ (લખાણ AI નથી) → ખરો ન્યુઝ નથી, ફોટાના પૈસા ન બગડે
+            has_real_text = bool(body) and not written.get("demo")
 
             # 📷 ફોટો એજન્ટ — સાચો ફોટો ન હોય તો AI તસવીર બનાવે
-            # (જન્મદિવસમાં નહીં — વ્યક્તિનો AI ફોટો ન બનાવાય)
+            # (જન્મદિવસમાં નહીં; ડેમો/ખાલી લખાણમાં નહીં — પૈસા બચે)
             # ai_limit થી ખર્ચ કંટ્રોલ: આજની મર્યાદા પૂરી થાય પછી નહીં
-            if (not photos and category != "birthday"
+            if (not photos and category != "birthday" and has_real_text
                     and imagegen.is_configured(cfg)
                     and (ai_limit is None or ai_used < ai_limit)):
                 async def photo_fn(progress, clean=clean, idx=idx):
