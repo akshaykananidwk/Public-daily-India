@@ -309,8 +309,9 @@ async def run_from_pdf_file(pdf_path: str, reporter: str = ""):
         await BUS.job_progress(100, f"PDF ભૂલ: {e}", "ભૂલ")
         return
     if not items:
-        msg = ("PDF માંથી ન્યુઝ ન મળ્યા — " + err) if err \
-            else "PDF માંથી ન્યુઝ ન મળ્યા"
+        msg = ("PDF ભૂલ — " + err) if err else \
+            ("PDF માંથી ન્યુઝ ન મળ્યા — Gemini key/મોડેલ ચેક કરો "
+             "(સેટિંગ → ન્યુઝ લેખન AI)")
         await BUS.job_progress(100, msg, "ભૂલ")
         return
     await BUS.job_progress(15, f"{len(items)} ન્યુઝ મળ્યા — બનાવી રહ્યો છું", "PDF")
