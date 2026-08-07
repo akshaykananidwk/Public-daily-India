@@ -13,7 +13,12 @@ from .paths import PHOTOS_DIR
 
 PROMPT_TEMPLATE = (
     "Photorealistic editorial news photograph that is directly RELEVANT to "
-    "this news: {scene}. Realistic photojournalism, India, natural lighting, "
+    "this news: {scene}. Shot like a professional press photographer for a "
+    "front page: the main subject large, centred and unmistakably clear, "
+    "tack sharp focus on the subject, shallow depth of field, strong "
+    "cinematic contrast, rich saturated colour, dramatic directional "
+    "lighting, golden hour or clean daylight, wide 16:9 framing with the "
+    "subject in the upper half. Realistic photojournalism, India, "
     "respectful. Do NOT depict any specific real named person's face. "
     "STRICTLY NO text, NO letters, NO numbers, NO logos, NO watermarks "
     "anywhere in the image. {style}")
