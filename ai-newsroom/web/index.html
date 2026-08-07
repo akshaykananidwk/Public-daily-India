@@ -305,17 +305,28 @@
               AI તસવીર ચાલુ કરો</label>
             <label>સર્વિસ
               <select name="image_ai_provider">
-                <option value="local">🖥️ લોકલ (તમારા GPU પર) — કાયમ ₹0, ઈન્ટરનેટ નહીં</option>
-                <option value="pollinations">Pollinations — મફત (ઓનલાઈન, key ન જોઈએ)</option>
-                <option value="gemini">Google Gemini — ~₹3/તસવીર (ફ્રી ટિયર પણ)</option>
+                <option value="aiauto">☁️ AIAuto — તમારું પ્લેટફોર્મ (કોઈ third-party key નહીં)</option>
+                <option value="local">🖥️ લોકલ (તમારા GPU પર) — કાયમ ₹0</option>
+                <option value="pollinations">Pollinations — મફત (ઓનલાઈન)</option>
+                <option value="gemini">Google Gemini — ~₹3/તસવીર</option>
                 <option value="openai">OpenAI gpt-image-1 — ~₹3.5/તસવીર</option>
               </select></label>
             <label>API Key (Gemini કે OpenAI માટે)
               <input name="image_ai_key" type="password"
                 placeholder="Gemini: AIza...  |  OpenAI: sk-..."></label>
+            <label>☁️ AIAuto URL (તમારું પ્લેટફોર્મ)
+              <input name="aiauto_url"
+                placeholder="http://192.168.1.50:8000/api/public/v1"></label>
+            <label>☁️ AIAuto API Key
+              <input name="aiauto_key" type="password"
+                placeholder="ak_..."></label>
             <label>લોકલ SD URL (ફક્ત લોકલ માટે)
               <input name="image_ai_local_url"
                 placeholder="http://127.0.0.1:7860"></label>
+            <label>🤖 ઓટો પ્રોમ્પ્ટ — ક્વોલિટી ટૅગ (દરેક પ્રોમ્પ્ટ પાછળ)
+              <input name="image_quality_tags"></label>
+            <label>🚫 નેગેટિવ પ્રોમ્પ્ટ (શું ન જોઈએ)
+              <input name="image_negative"></label>
             <label>ક્વોલિટી
               <select name="image_ai_quality">
                 <option value="low">low — સસ્તી (~₹1/તસવીર)</option>

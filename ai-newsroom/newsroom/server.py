@@ -425,7 +425,7 @@ async def report_whatsapp():
 
 # ── સેટિંગ ──────────────────────────────────────────────────────
 MASKED_KEYS = ("update_token", "facebook_page_token", "whatsapp_api_key",
-               "image_ai_key", "telegram_token", "text_api_key")
+               "image_ai_key", "telegram_token", "text_api_key", "aiauto_key")
 
 
 @app.get("/api/settings")

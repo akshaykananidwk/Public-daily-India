@@ -17,6 +17,17 @@ PROMPT_TEMPLATE = (
     "STRICTLY NO text, NO letters, NO numbers, NO logos, NO watermarks "
     "anywhere in the image. {style}")
 
+
+def build_prompt(cfg: dict, scene: str) -> str:
+    """ઓટો પ્રોમ્પ્ટ બિલ્ડર — admin એ કંઈ ન લખવું પડે.
+    દ્રશ્ય + સ્ટાઈલ + quality tags એકસાથે જોડે."""
+    parts = [PROMPT_TEMPLATE.format(scene=scene,
+                                    style=cfg.get("image_ai_style", "")).strip()]
+    tags = (cfg.get("image_quality_tags") or "").strip()
+    if tags:
+        parts.append(tags)
+    return ", ".join(p.strip(" ,") for p in parts if p.strip())
+
 # વિષય ઓળખવા — હેડલાઈનમાં આ શબ્દ હોય તો એ દ્રશ્ય (LLM ન હોય ત્યારે વપરાય)
 TOPIC_SCENES = [
     (("સંસદ", "લોકસભા", "રાજ્યસભા", "બિલ", "વિધાનસભા", "સરકાર", "મંત્રી"),
@@ -58,7 +69,42 @@ def is_configured(cfg: dict) -> bool:
     provider = cfg.get("image_ai_provider", "pollinations")
     if provider in ("openai", "gemini"):
         return bool(cfg.get("image_ai_key"))
+    if provider == "aiauto":
+        return bool(cfg.get("aiauto_key") and cfg.get("aiauto_url"))
     return True  # pollinations / local — key વગર
+
+
+async def _aiauto(cfg: dict, prompt: str) -> bytes:
+    """AIAuto પ્લેટફોર્મ — async job: submit → poll → download.
+    (તમારું પોતાનું સેન્ટ્રલ AI પ્લેટફોર્મ; કોઈ third-party key જોઈએ નહીં.)"""
+    import asyncio
+    base = cfg["aiauto_url"].rstrip("/")
+    headers = {"X-API-Key": cfg["aiauto_key"]}
+    async with httpx.AsyncClient(timeout=60) as c:
+        r = await c.post(f"{base}/images", headers=headers,
+                         json={"prompt": prompt})
+        if r.status_code not in (200, 201):
+            raise RuntimeError(f"AIAuto submit {r.status_code}: {r.text[:150]}")
+        job_id = r.json().get("id")
+        if not job_id:
+            raise RuntimeError("AIAuto એ job id ન આપ્યો")
+        # poll — ઈમેજ 1-4 મિનિટ લે
+        for _ in range(150):                    # ~10 મિનિટ
+            await asyncio.sleep(4)
+            j = (await c.get(f"{base}/jobs/{job_id}", headers=headers)).json()
+            st = j.get("status")
+            if st == "completed":
+                imgs = [f for f in j.get("files", [])
+                        if f.get("kind") == "result_image"]
+                if not imgs:
+                    raise RuntimeError("AIAuto: પૂરું થયું પણ ઈમેજ નથી")
+                dl = await c.get(f"{base}{imgs[0]['url']}", headers=headers,
+                                 timeout=60)
+                dl.raise_for_status()
+                return dl.content
+            if st in ("failed", "cancelled"):
+                raise RuntimeError(f"AIAuto job {st}: {j.get('error')}")
+    raise RuntimeError("AIAuto: સમય પૂરો (job પૂરું ન થયું)")
 
 
 async def _local_sd(cfg: dict, prompt: str) -> bytes:
@@ -151,6 +197,8 @@ CONNECT_HELP = {
                      "કે થોડી વારે ફરી ટ્રાય કરો."),
     "gemini": "Google Gemini સાથે કનેક્ટ ન થયું — ઈન્ટરનેટ ચેક કરો.",
     "openai": "OpenAI સાથે કનેક્ટ ન થયું — ઈન્ટરનેટ ચેક કરો.",
+    "aiauto": ("AIAuto પ્લેટફોર્મ સાથે કનેક્ટ ન થયું — સર્વર ચાલુ છે? "
+               "URL/key બરાબર છે? (સેટિંગ → AI તસવીર)"),
 }
 
 
@@ -161,8 +209,8 @@ async def generate(cfg: dict, title: str, scene: str = "") -> str | None:
         return None
     if not scene:
         scene = topic_scene(title)
-    prompt = PROMPT_TEMPLATE.format(
-        scene=scene, style=cfg.get("image_ai_style", ""))
+    # ઓટો પ્રોમ્પ્ટ — admin એ કંઈ ન લખવું પડે
+    prompt = build_prompt(cfg, scene)
     provider = cfg.get("image_ai_provider", "pollinations")
     try:
         if provider == "openai":
@@ -171,6 +219,8 @@ async def generate(cfg: dict, title: str, scene: str = "") -> str | None:
             img = await _gemini(cfg, prompt)
         elif provider == "local":
             img = await _local_sd(cfg, prompt)
+        elif provider == "aiauto":
+            img = await _aiauto(cfg, prompt)
         else:
             img = await _pollinations(prompt)
     except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout) as e:
