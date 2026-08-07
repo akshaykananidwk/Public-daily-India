@@ -224,8 +224,12 @@ async def generate(cfg: dict, title: str, scene: str = "") -> str | None:
         else:
             img = await _pollinations(prompt)
     except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout) as e:
-        raise RuntimeError(CONNECT_HELP.get(
-            provider, "કનેક્ટ ન થયું — સેટિંગ ચેક કરો.")) from e
+        msg = CONNECT_HELP.get(provider, "કનેક્ટ ન થયું — સેટિંગ ચેક કરો.")
+        url = {"aiauto": cfg.get("aiauto_url"),
+               "local": cfg.get("image_ai_local_url")}.get(provider)
+        if url:
+            msg += f"\n(જ્યાં જોડાવા ગયું: {url})"
+        raise RuntimeError(msg) from e
     out = PHOTOS_DIR / f"ai_{datetime.now():%Y%m%d_%H%M%S}.png"
     out.write_bytes(img)
     return str(out)
