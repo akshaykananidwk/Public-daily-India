@@ -372,9 +372,15 @@
                 <input name="image_quality_tags"></label>
               <label>નેગેટિવ પ્રોમ્પ્ટ (શું ન જોઈએ)
                 <input name="image_negative"></label>
-              <label>વધારાની સ્ટાઈલ સૂચના (વૈકલ્પિક)
+              <label>વધારાની સ્ટાઈલ સૂચના (વૈકલ્પિક — ખાલી રાખવું સારું)
                 <input name="image_ai_style"
                   placeholder="દા.ત. drone view, golden hour light"></label>
+              <p class="hint">⚠️ અહીં કચરો લખાણ (દા.ત. "test") હોય તો ફોટો
+                ખોટો આવે — આ ખાના પ્રોમ્પ્ટમાં જોડાય છે.</p>
+              <div class="row">
+                <button type="button" id="btn-prompt-reset" class="ghost">
+                  ↩️ ડિફોલ્ટ પર રીસેટ કરો</button>
+              </div>
             </details>
 
             <div class="row">

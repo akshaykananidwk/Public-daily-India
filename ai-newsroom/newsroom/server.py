@@ -481,13 +481,17 @@ async def image_test():
         return JSONResponse(
             {"error": "પહેલા AI તસવીર ચાલુ કરી OpenAI API Key ભરી સેવ કરો"},
             status_code=400)
+    scene = "the Gujarat coastline at sunset, sea and fishing boats"
+    prompt = imagegen.build_prompt(cfg, scene)      # જે ખરેખર મોકલાય છે
     try:
         path = await imagegen.generate(
-            cfg, "દ્વારકાના દરિયાકિનારે સૂર્યાસ્તનું સુંદર દ્રશ્ય")
+            cfg, "દ્વારકાના દરિયાકિનારે સૂર્યાસ્તનું સુંદર દ્રશ્ય", scene=scene)
         rel = Path(path).relative_to(STORAGE_DIR)
-        return {"ok": True, "url": "/storage/" + rel.as_posix()}
+        return {"ok": True, "url": "/storage/" + rel.as_posix(),
+                "prompt": prompt, "provider": cfg.get("image_ai_provider")}
     except Exception as e:
-        return JSONResponse({"error": str(e)[:400]}, status_code=500)
+        return JSONResponse({"error": str(e)[:400], "prompt": prompt},
+                            status_code=500)
 
 
 # ── Telegram ટેસ્ટ ──────────────────────────────────────────────

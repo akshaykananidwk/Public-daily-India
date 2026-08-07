@@ -637,14 +637,33 @@ $("#btn-img-test").onclick = async () => {
   $("#img-info").textContent =
     "તસવીર બની રહી છે... (~30-60 સેકન્ડ, પહેલા સેવ કરો ભૂલતા નહીં)";
   const r = await (await fetch("/api/image-test", { method: "POST" })).json();
+  const promptBox = r.prompt
+    ? `<div style="margin-top:10px;font-size:11.5px;color:var(--muted);
+        background:var(--bg-2);border-radius:8px;padding:8px;
+        max-height:110px;overflow:auto">
+        <b>જે પ્રોમ્પ્ટ મોકલાયો:</b><br>${r.prompt}</div>` : "";
   if (r.ok) {
     $("#img-info").innerHTML =
-      `✅ બની ગઈ!<br><img src="${r.url}" style="width:100%;border-radius:10px;margin-top:8px">`;
+      `✅ બની ગઈ! (${r.provider || ""})` +
+      `<img src="${r.url}" style="width:100%;border-radius:10px;margin-top:8px">`
+      + promptBox;
     toast("AI તસવીર બની ✓", "good");
   } else {
-    $("#img-info").textContent = r.error;
+    $("#img-info").innerHTML = "❌ " + (r.error || "") + promptBox;
     toast("AI તસવીર ભૂલ", "bad");
   }
+};
+// એડવાન્સ ખાના ડિફોલ્ટ પર રીસેટ
+if ($("#btn-prompt-reset")) $("#btn-prompt-reset").onclick = () => {
+  const f = $("#settings-form");
+  f.image_quality_tags.value = "ultra realistic, 8K, highly detailed, " +
+    "sharp focus, cinematic lighting, HDR, professional photography, " +
+    "volumetric lighting, beautiful composition, masterpiece";
+  f.image_negative.value = "low quality, blurry, duplicate, cropped, " +
+    "bad anatomy, deformed face, extra fingers, watermark, text, letters, " +
+    "logo, noise, low resolution";
+  f.image_ai_style.value = "";
+  toast("ડિફોલ્ટ પર આવી ગયું — હવે 'સેવ કરો' દબાવો", "good");
 };
 $("#btn-logo-up").onclick = async () => {
   const f = $("#logo-file").files[0];
