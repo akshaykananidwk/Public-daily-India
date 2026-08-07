@@ -48,17 +48,17 @@
   }
 
   /* ═══ ટોપ: લોગો + ટેગલાઈન + BREAKING NEWS (ડાર્ક TV બેન્ડ) ═══ */
-  .top { display: flex; gap: 20px; padding: 20px 30px 12px;
+  .top { flex: none; display: flex; gap: 16px; padding: 12px 24px 10px;
     background: linear-gradient(180deg, #16305e 0%, var(--navy) 100%);
     border-bottom: 4px solid var(--yellow); }
   .logo-box {
-    flex: none; width: 250px; border: 3px solid var(--navy);
-    border-radius: 18px; overflow: hidden; background: #fff;
+    flex: none; width: 186px; border: 3px solid var(--navy);
+    border-radius: 14px; overflow: hidden; background: #fff;
     box-shadow: 0 6px 18px rgba(20, 41, 94, .25);
-    position: relative; text-align: center; padding-bottom: 34px;
+    position: relative; text-align: center; padding-bottom: 26px;
   }
   /* સાચો લોગો અપલોડ થાય તો ટેક્સ્ટ-લોગોને બદલે એ */
-  .logo-img { flex: none; width: 250px; border-radius: 18px;
+  .logo-img { flex: none; width: 186px; border-radius: 14px;
     object-fit: contain; background: #fff; display: none;
     box-shadow: 0 6px 18px rgba(20, 41, 94, .25); }
   body.has-logo .logo-box { display: none; }
@@ -69,14 +69,15 @@
     border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,.3); z-index: 3; }
   body.has-qr .qr { display: block; }
   .qr img { width: 100%; height: 100%; }
-  .logo-mic { position: absolute; top: 4px; right: 8px; font-size: 30px; }
-  .logo-l1 { margin: 12px 12px 0; background: var(--red); color: #fff;
-    font-family: 'AnekGuj'; font-size: 27px; padding: 5px 4px 3px;
+  .logo-mic { position: absolute; top: 3px; right: 5px; font-size: 18px;
+    opacity: .85; }
+  .logo-l1 { margin: 9px 8px 0; background: var(--red); color: #fff;
+    font-family: 'AnekGuj'; font-size: 18px; padding: 4px 3px 2px;
     border-radius: 8px; letter-spacing: .5px; }
-  .logo-l2 { color: var(--navy); font-family: 'AnekGuj'; font-size: 30px;
-    padding-top: 5px; letter-spacing: 1px; }
+  .logo-l2 { color: var(--navy); font-family: 'AnekGuj'; font-size: 20px;
+    padding-top: 4px; letter-spacing: 1px; }
   .logo-l3 { color: #fff; background: var(--green); font-family: 'AnekGuj';
-    font-size: 19px; margin: 3px 34px 0; padding: 2px 0 1px;
+    font-size: 15px; margin: 2px 26px 0; padding: 2px 0 1px;
     border-radius: 6px; letter-spacing: 3px; }
   .chakra { position: absolute; left: 10px; bottom: 6px; width: 26px;
     height: 26px; }
@@ -90,8 +91,8 @@
 
   .top-right { flex: 1; display: flex; flex-direction: column; }
   .quote { text-align: center; color: #ffe27a; font-weight: 700;
-    font-size: 30px; padding: 2px 0 12px; }
-  .quote .qm { color: #ff6b6b; font-size: 34px; font-family: serif; }
+    font-size: 23px; padding: 0 0 7px; }
+  .quote .qm { color: #ff6b6b; font-size: 28px; font-family: serif; }
 
   .breaking { display: flex; border-radius: 12px; overflow: hidden;
     box-shadow: 0 8px 22px rgba(196, 14, 20, .4), 0 0 0 2px #ffffff22;
@@ -100,103 +101,125 @@
   .breaking .brk { flex: 1.3;
     background: linear-gradient(180deg, #ff3b3b 0%, #d21016 55%, #9c0a10 100%);
     color: #fff; font-family: 'AnekGuj'; font-style: italic;
-    font-size: 54px; text-align: center; padding: 4px 0 2px;
+    font-size: 40px; text-align: center; padding: 2px 0 1px;
     letter-spacing: 1px; text-shadow: 0 3px 8px rgba(0,0,0,.4);
     box-shadow: inset 0 2px 0 rgba(255,255,255,.35); }
   .breaking .nws { flex: 1;
     background: linear-gradient(180deg, #1e3a72 0%, var(--navy) 60%, #0c1c44 100%);
-    color: #fff; font-family: 'AnekGuj'; font-style: italic; font-size: 54px;
-    text-align: center; padding: 4px 0 2px; letter-spacing: 2px;
+    color: #fff; font-family: 'AnekGuj'; font-style: italic; font-size: 40px;
+    text-align: center; padding: 2px 0 1px; letter-spacing: 2px;
     border-left: 5px solid var(--yellow);
     text-shadow: 0 3px 8px rgba(0,0,0,.4);
     box-shadow: inset 0 2px 0 rgba(255,255,255,.25); }
 
-  .meta-row { display: flex; align-items: center; gap: 14px;
-    padding-top: 12px; }
-  .editor { color: #fff; font-weight: 700; font-size: 27px; }
+  .meta-row { display: flex; align-items: center; gap: 12px;
+    padding-top: 7px; }
+  .editor { color: #fff; font-weight: 700; font-size: 21px; }
   .date-badge { margin-left: auto; background: var(--yellow);
-    color: var(--navy); font-family: 'AnekGuj'; font-size: 28px;
-    padding: 6px 20px; border-radius: 10px;
+    color: var(--navy); font-family: 'AnekGuj'; font-size: 23px;
+    padding: 4px 15px; border-radius: 9px;
     display: flex; align-items: center; gap: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, .2); }
 
   /* ═══ હેડલાઈન (સફેદ પર ઘેરો વાદળી) ═══ */
-  .headline-strip { background: #fff; padding: 18px 34px 10px; }
+  .headline-strip { flex: none; background: #fff; padding: 9px 30px 5px; }
   #headline { font-family: var(--poster-font, 'AnekGuj'), 'NotoGuj', sans-serif;
-    font-weight: 700; font-size: 55px; color: var(--navy);
-    text-align: center; line-height: 1.45; }
+    font-weight: 700; font-size: 52px; color: var(--navy);
+    text-align: center; line-height: 1.34; }
 
   /* ═══ ફોટો + બોડી (નેવી બ્લોક) ═══ */
-  .mid { flex: 1; display: flex; flex-direction: column;
+  .mid { position: relative; flex: 1; display: flex; flex-direction: column;
+    min-height: 0;
     background: linear-gradient(160deg, #1b3268 0%, var(--navy-2) 100%);
-    margin: 12px 22px 14px; border-radius: 22px; overflow: hidden;
+    margin: 4px 12px 7px; border-radius: 18px; overflow: hidden;
     border: 2px solid #2c4784; }
-  .photos { flex: 1.4; display: none; gap: 10px; padding: 16px 16px 6px;
+  /* ⭐ ફોટો આખો બ્લોક ભરે — પોસ્ટરનો મુખ્ય ભાગ (TV ન્યુઝ જેવો) */
+  .photos { flex: 1; display: none; gap: 8px; padding: 8px;
     min-height: 0; position: relative; }
-  body.has-photo .photos { display: flex; min-height: 30%; }
-  .photos .ph { border-radius: 14px; overflow: hidden;
-    border: 2.5px solid #ffffffd9; background: #0a142e; }
-  .photos img { width: 100%; height: 100%; object-fit: cover;
-    display: block; }
-  .ph-main { flex: 1.8; }
-  .ph-side { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+  body.has-photo .photos { display: flex; position: absolute; inset: 0; }
+  .photos .ph { position: relative; border-radius: 12px; overflow: hidden;
+    border: 2px solid rgba(255,255,255,.92); background: #08122a;
+    box-shadow: 0 12px 30px rgba(0,0,0,.5); min-height: 0; }
+  /* ⭐ ચહેરા કપાય નહીં: આખો ફોટો contain થી, પાછળ એ જ ફોટો ધૂંધળો ભરે */
+  .photos .ph img { position: absolute; inset: 0;
+    width: 100%; height: 100%; display: block; }
+  .photos .ph img.bg { object-fit: cover; transform: scale(1.15);
+    filter: blur(24px) brightness(.45) saturate(1.15); }
+  .photos .ph img.fg { object-fit: contain; z-index: 1; }
+  /* થોડો જ ફેર હોય તો આખું ખાનું ભરો — ક્રોપ ઉપરથી નહીં (ચહેરા બચે) */
+  .photos .ph.fill img.fg { object-fit: cover; object-position: 50% 38%; }
+  .photos .ph.fill img.bg { display: none; }
+  .ph-main { flex: 1.55; }
+  .ph-side { flex: 1; display: flex; flex-direction: column; gap: 8px;
+    min-height: 0; }
   .ph-side .ph { flex: 1; min-height: 0; }
-  .ai-tag { position: absolute; right: 26px; bottom: 14px;
-    background: rgba(0, 0, 0, .65); color: #dbe6ff; font-size: 17px;
-    padding: 5px 14px; border-radius: 999px; display: none; }
+  .ai-tag { position: absolute; right: 22px; top: 20px; z-index: 4;
+    background: rgba(0, 0, 0, .6); color: #dbe6ff; font-size: 17px;
+    padding: 4px 13px; border-radius: 999px; display: none; }
   body.image-ai .ai-tag { display: block; }
   /* વોટરમાર્ક — ફોટા પર આછું ચેનલ નામ */
-  .watermark { display: none; position: absolute; left: 24px; bottom: 14px;
-    color: rgba(255,255,255,.7); font-family: 'AnekGuj'; font-size: 22px;
-    font-weight: 700; text-shadow: 0 2px 6px rgba(0,0,0,.6);
-    letter-spacing: 1px; z-index: 2; }
+  .watermark { display: none; position: absolute; left: 22px; top: 20px;
+    color: rgba(255,255,255,.82); font-family: 'AnekGuj'; font-size: 21px;
+    font-weight: 700; text-shadow: 0 2px 8px rgba(0,0,0,.85);
+    letter-spacing: 1px; z-index: 4; }
   body.has-watermark .watermark { display: block; }
 
-  .body-sec { position: relative; padding: 16px 60px 20px;
-    text-align: center; flex: 1; min-height: 0;
+  .body-sec { position: relative; padding: 8px 52px 12px;
+    text-align: center; flex: none; min-height: 0;
     display: flex; align-items: center; justify-content: center;
     overflow: hidden; }
-  #body-text { color: #f2f6ff; font-size: 29px; font-weight: 700;
-    width: 100%; }
-  .q { position: absolute; font-family: serif; font-size: 64px;
-    color: var(--yellow); line-height: 1; }
-  .q1 { left: 20px; top: 10px; }
-  .q2 { right: 20px; bottom: 6px; }
+  body.has-photo .body-sec { position: absolute; z-index: 3;
+    left: 8px; right: 8px; bottom: 8px; border-radius: 0 0 11px 11px;
+    padding: 34px 34px 14px;
+    background: linear-gradient(180deg,
+      rgba(6, 14, 36, 0) 0%, rgba(6, 14, 36, .82) 34%,
+      rgba(6, 14, 36, .95) 100%); }
+  #body-text { color: #f2f6ff; font-size: 27px; font-weight: 700;
+    width: 100%; text-shadow: 0 2px 8px rgba(0, 0, 0, .85); }
+  .q { position: absolute; font-family: serif; font-size: 46px;
+    color: var(--yellow); line-height: 1; opacity: .85; }
+  .q1 { left: 14px; top: 2px; }
+  .q2 { right: 14px; bottom: 0; }
+  body.has-photo .q { display: none; }
   body.no-body .body-sec { display: none; }
-  body.no-body .photos { padding-bottom: 16px; }
+
+  body:not(.has-photo) .body-sec { flex: 1; padding: 22px 60px; }
 
   /* ═══ લાલ પટ્ટી — ઘટના મોકલો (મેગાફોન સાથે) ═══ */
-  .strip-red { background: linear-gradient(90deg, #e0141b, #a80b11);
-    color: #fff; text-align: center; font-weight: 700; font-size: 27px;
-    padding: 12px 26px; display: flex; align-items: center;
-    justify-content: center; gap: 14px; }
-  .strip-red .mega { font-size: 30px; flex: none; }
-  .strip-red b { color: var(--yellow); font-size: 31px; }
+  .strip-red { flex: none;
+    background: linear-gradient(90deg, #e0141b, #a80b11);
+    color: #fff; text-align: center; font-weight: 700; font-size: 23px;
+    padding: 7px 24px; display: flex; align-items: center;
+    justify-content: center; gap: 12px; }
+  .strip-red .mega { font-size: 26px; flex: none; }
+  .strip-red b { color: var(--yellow); font-size: 27px; }
 
   /* ═══ સફેદ પટ્ટી — જોડાવા સંપર્ક ═══ */
-  .strip-join { background: #fff; color: var(--navy); text-align: center;
-    font-weight: 700; font-size: 27px; padding: 10px 26px;
-    display: flex; align-items: center; justify-content: center; gap: 12px; }
-  .strip-join b { color: var(--red); font-size: 30px; }
-  .wa { width: 34px; height: 34px; border-radius: 50%; background: #25d366;
+  .strip-join { flex: none;
+    background: #fff; color: var(--navy); text-align: center;
+    font-weight: 700; font-size: 22px; padding: 6px 24px;
+    display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .strip-join b { color: var(--red); font-size: 26px; }
+  .wa { width: 29px; height: 29px; border-radius: 50%; background: #25d366;
     display: inline-flex; align-items: center; justify-content: center; }
-  .wa svg { width: 20px; height: 20px; }
+  .wa svg { width: 17px; height: 17px; }
 
   /* ═══ Follow Us ═══ */
-  .strip-follow { background: #fff; border-top: 2px solid #e4e8f2;
-    display: flex; align-items: center; justify-content: center; gap: 16px;
-    padding: 10px 26px 16px; font-family: 'AnekGuj'; font-size: 28px;
+  .strip-follow { flex: none;
+    background: #fff; border-top: 2px solid #e4e8f2;
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+    padding: 6px 24px 8px; font-family: 'AnekGuj'; font-size: 23px;
     color: #111; }
-  .strip-follow .socials { display: flex; gap: 10px; }
-  .strip-follow .disc { width: 40px; height: 40px; border-radius: 50%;
+  .strip-follow .socials { display: flex; gap: 9px; }
+  .strip-follow .disc { width: 34px; height: 34px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center; }
   /* નીચેની ટેગલાઈન પટ્ટી + LIVE બેજ — એક જ લાઈન */
-  .strip-tag { background: var(--navy); color: #fff;
-    display: flex; align-items: center; gap: 14px;
-    padding: 11px 22px; font-family: 'AnekGuj'; font-size: 22px;
+  .strip-tag { flex: none; background: var(--navy); color: #fff;
+    display: flex; align-items: center; gap: 12px;
+    padding: 7px 20px; font-family: 'AnekGuj'; font-size: 18px;
     white-space: nowrap; overflow: hidden; }
   .strip-tag .live { flex: none; background: #e0141b; color: #fff;
-    font-weight: 700; font-size: 21px; padding: 4px 13px 4px 10px;
+    font-weight: 700; font-size: 18px; padding: 3px 11px 3px 9px;
     border-radius: 6px; display: inline-flex; align-items: center; gap: 7px;
     letter-spacing: 1px; }
   .strip-tag .live .play { width: 0; height: 0;
@@ -211,18 +234,20 @@
     #fd5949 45%, #d6249f 60%, #285aeb 90%); }
   .d-yt { background: #ff0000; }
   .d-tw { background: #1da1f2; }
-  .strip-follow svg { width: 22px; height: 22px; fill: #fff; }
+  .strip-follow svg { width: 19px; height: 19px; fill: #fff; }
 
   /* ═══ સાઈઝ ═══ */
-  body.story .quote { font-size: 34px; }
-  body.story .breaking .brk, body.story .breaking .nws { font-size: 62px; }
-  body.story #headline { font-size: 66px; }
-  body.story #body-text { font-size: 36px; -webkit-line-clamp: 7; }
-  body.story .strip-red { font-size: 32px; padding: 16px 26px; }
-  body.story .strip-red b { font-size: 36px; }
-  body.story .strip-join { font-size: 32px; padding: 14px 26px; }
-  body.story .logo-box { width: 290px; }
-  body.portrait #body-text { -webkit-line-clamp: 6; }
+  body.story .quote { font-size: 30px; }
+  body.story .breaking .brk, body.story .breaking .nws { font-size: 54px; }
+  body.story #headline { font-size: 62px; }
+  body.story #body-text { font-size: 33px; }
+  body.story .strip-red { font-size: 29px; padding: 12px 26px; }
+  body.story .strip-red b { font-size: 33px; }
+  body.story .strip-join { font-size: 28px; padding: 10px 26px; }
+  body.story .strip-follow { font-size: 28px; }
+  body.story .logo-box, body.story .logo-img { width: 230px; }
+  body.story .editor { font-size: 26px; }
+  body.story .date-badge { font-size: 27px; }
 </style>
 </head>
 <body>
@@ -336,6 +361,12 @@
       .map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   }
 
+  // એક ફોટાનું ખાનું — પાછળ ધૂંધળો ભરાવ, આગળ આખો ફોટો (ક્રોપ વગર)
+  function phBox(src, cls, style) {
+    return `<div class="ph ${cls || ''}" ${style ? 'style="' + style + '"' : ''}>
+      <img class="bg" src="${src}"><img class="fg" src="${src}"></div>`;
+  }
+
   function buildPhotos(images) {
     const wrap = document.getElementById('photos');
     if (!images || !images.length) return false;
@@ -343,20 +374,31 @@
     const imgs = images.slice(0, 3);
     if (imgs.length === 1) {
       wrap.insertAdjacentHTML('afterbegin',
-        `<div class="ph ph-main" style="flex:1"><img src="${imgs[0]}"></div>`);
+        phBox(imgs[0], 'ph-main', 'flex:1'));
     } else if (imgs.length === 2) {
+      // બંને સરખા માપના, વચ્ચે ઓછું અંતર
       wrap.insertAdjacentHTML('afterbegin',
-        `<div class="ph" style="flex:1"><img src="${imgs[0]}"></div>
-         <div class="ph" style="flex:1"><img src="${imgs[1]}"></div>`);
+        phBox(imgs[0], '', 'flex:1') + phBox(imgs[1], '', 'flex:1'));
     } else {
       wrap.insertAdjacentHTML('afterbegin',
-        `<div class="ph ph-main"><img src="${imgs[0]}"></div>
-         <div class="ph-side">
-           <div class="ph"><img src="${imgs[1]}"></div>
-           <div class="ph"><img src="${imgs[2]}"></div>
-         </div>`);
+        phBox(imgs[0], 'ph-main') +
+        `<div class="ph-side">${phBox(imgs[1])}${phBox(imgs[2])}</div>`);
     }
     return true;
+  }
+
+  // ફોટાના આકાર પ્રમાણે નક્કી: ખાનું ભરી દેવું કે આખો ફોટો બતાવવો
+  // થોડો ફેર (≤1.35×) હોય તો ભરો — ફોટો મોટો દેખાય, ચહેરો કપાય નહીં.
+  // બહુ ફેર હોય તો આખો ફોટો + પાછળ એ જ ફોટો ધૂંધળો (કંઈ કપાય નહીં).
+  function fitPhotos() {
+    document.querySelectorAll('.photos .ph').forEach(ph => {
+      const img = ph.querySelector('img.fg');
+      if (!img || !img.naturalWidth || !ph.clientHeight) return;
+      const rImg = img.naturalWidth / img.naturalHeight;
+      const rBox = ph.clientWidth / ph.clientHeight;
+      const gap = Math.max(rImg / rBox, rBox / rImg);
+      if (gap <= 1.35) ph.classList.add('fill');
+    });
   }
 
   window.renderNews = function (news) {
@@ -423,18 +465,25 @@
     }
 
     const finish = () => {
+      const H = window.innerHeight;
+      // હેડલાઈન મોટી રહે પણ ફોટા માટે જગ્યા છોડે
       autoFit(document.getElementById('headline'),
-              Math.round(window.innerHeight * (hasPhotos ? 0.16 : 0.22)), 36);
-      // બોડી: ખાનામાં બરાબર બેસે — લાંબુ હોય તો નાનું, ટૂંકું હોય તો મોટું
+              Math.round(H * (hasPhotos ? 0.128 : 0.22)), 34);
+      // બોડી: ફોટો હોય તો ટૂંકા ખાનામાં — બાકીની બધી ઊંચાઈ ફોટાને
       const bt = document.getElementById('body-text');
       if (bt.textContent.trim()) {
         const box = bt.closest('.body-sec');
-        const avail = box.clientHeight - 8;
-        bt.style.fontSize = (hasPhotos ? 30 : 40) + 'px';
+        const mid = document.querySelector('.mid');
+        const pad = box.offsetHeight - box.clientHeight + 20;
+        const avail = hasPhotos
+          ? Math.round(mid.clientHeight * 0.32) - pad   // વધુમાં વધુ 32%
+          : box.clientHeight - 8;
+        bt.style.fontSize = (hasPhotos ? 27 : 40) + 'px';
         autoFit(bt, avail, 16);          // કપાય નહીં — છેક 16px સુધી નાનું
-        // હજી ઘણી જગ્યા બચે તો થોડું મોટું
-        autoGrow(bt, avail, hasPhotos ? 34 : 52);
+        autoGrow(bt, avail, hasPhotos ? 31 : 52);
       }
+      // લખાણ ગોઠવાયા પછી ફોટાનું ખાનું આખરી થાય — હવે આકાર નક્કી કરો
+      fitPhotos();
       return true;
     };
     if (hasPhotos) {
