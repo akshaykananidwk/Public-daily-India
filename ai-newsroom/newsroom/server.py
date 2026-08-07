@@ -70,6 +70,11 @@ async def index():
     return FileResponse(WEB_DIR / "index.html")
 
 
+@app.get("/favicon.ico")
+async def favicon():
+    return FileResponse(WEB_DIR / "favicon.png")
+
+
 app.mount("/web", StaticFiles(directory=WEB_DIR), name="web")
 app.mount("/storage", StaticFiles(directory=STORAGE_DIR), name="storage")
 app.mount("/fonts", StaticFiles(directory=FONTS_DIR), name="fonts")
