@@ -270,12 +270,17 @@
           <fieldset class="card"><legend>✍️ ન્યુઝ લેખન AI (રિરાઈટ)</legend>
             <p class="hint">દરેક ન્યુઝ મૌલિક રીતે રિરાઈટ થાય — કોપીરાઈટ ટાળવા.
               Ollama ન હોય તો Gemini વાપરો (તમારી key).</p>
-            <label>સર્વિસ
+            <label>સર્વિસ પસંદ કરો
               <select name="text_provider">
-                <option value="ollama">Ollama — લોકલ (તમારા GPU પર)</option>
-                <option value="gemini">Google Gemini — તમારી key</option>
-                <option value="openai">OpenAI — તમારી key</option>
+                <option value="aiauto">☁️ AIAuto — તમારું પ્લેટફોર્મ</option>
+                <option value="ollama">🖥️ Ollama — લોકલ (તમારા GPU પર)</option>
+                <option value="gemini">🔷 Google Gemini — તમારી key</option>
+                <option value="openai">🟢 OpenAI — તમારી key</option>
               </select></label>
+            <div class="txt-box" data-prov="aiauto">
+              <p class="hint">ઈમેજ વાળું એ જ AIAuto પ્લેટફોર્મ વાપરે —
+                URL/Key ઉપર "AI તસવીર" વિભાગમાં ભરેલા છે. અહીં કંઈ ભરવાનું નથી.</p>
+            </div>
             <div class="txt-box" data-prov="gemini openai">
               <label><span id="txt-key-label">API Key</span>
                 <input name="text_api_key" type="password" id="txt-key"></label>

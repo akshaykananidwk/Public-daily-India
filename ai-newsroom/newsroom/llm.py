@@ -31,6 +31,9 @@ class LLM:
     async def available(self) -> bool:
         if self.provider in ("gemini", "openai"):
             return bool(self.api_key)
+        if self.provider == "aiauto":
+            return bool(self.cfg.get("aiauto_key")
+                        and self.cfg.get("aiauto_url"))
         try:
             async with httpx.AsyncClient(timeout=3) as c:
                 r = await c.get(f"{self.base}/api/tags")
@@ -44,7 +47,36 @@ class LLM:
             return await self._gemini(prompt, system)
         if self.provider == "openai":
             return await self._openai(prompt, system)
+        if self.provider == "aiauto":
+            return await self._aiauto(prompt, system)
         return await self._ollama(model, prompt, system)
+
+    async def _aiauto(self, prompt: str, system: str = "") -> str:
+        """AIAuto પ્લેટફોર્મ — POST /text → poll /jobs/{id} → response.
+        (તમારું પોતાનું પ્લેટફોર્મ; કોઈ third-party key જોઈએ નહીં.)"""
+        import asyncio
+        base = self.cfg["aiauto_url"].rstrip("/")
+        headers = {"X-API-Key": self.cfg["aiauto_key"]}
+        full = (system + "\n\n" + prompt) if system else prompt
+        async with httpx.AsyncClient(timeout=60) as c:
+            r = await c.post(f"{base}/text", headers=headers,
+                             json={"prompt": full})
+            if r.status_code not in (200, 201):
+                raise RuntimeError(
+                    f"AIAuto text {r.status_code}: {r.text[:150]}")
+            job_id = r.json().get("id")
+            if not job_id:
+                raise RuntimeError("AIAuto એ job id ન આપ્યો")
+            for _ in range(150):                 # ~10 મિનિટ
+                await asyncio.sleep(4)
+                j = (await c.get(f"{base}/jobs/{job_id}",
+                                 headers=headers)).json()
+                st = j.get("status")
+                if st == "completed":
+                    return (j.get("response") or "").strip()
+                if st in ("failed", "cancelled"):
+                    raise RuntimeError(f"AIAuto job {st}: {j.get('error')}")
+        raise RuntimeError("AIAuto text: સમય પૂરો")
 
     async def _ollama(self, model, prompt, system) -> str:
         async with httpx.AsyncClient(timeout=600) as c:

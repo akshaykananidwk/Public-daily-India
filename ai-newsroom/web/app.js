@@ -584,9 +584,11 @@ function syncProviderBoxes() {
       (t === "openai" ? "OpenAI" : "Gemini") + " API Key";
     $("#txt-key").placeholder = t === "openai" ? "sk-..." : "AIza...";
   }
+  const TXT_LABEL = { aiauto: "AIAuto", ollama: "Ollama",
+    gemini: "Gemini", openai: "OpenAI" };
   if ($("#btn-txt-test"))
     $("#btn-txt-test").textContent =
-      `🧪 ${t === "ollama" ? "Ollama" : t === "openai" ? "OpenAI" : "Gemini"} થી લેખન ટેસ્ટ`;
+      `🧪 ${TXT_LABEL[t] || ""} થી લેખન ટેસ્ટ કરો`;
 }
 if ($("[name=image_ai_provider]"))
   $("[name=image_ai_provider]").onchange = syncProviderBoxes;
