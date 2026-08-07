@@ -173,6 +173,68 @@ async def _gemini(cfg: dict, prompt: str) -> bytes:
                        "(gemini-2.5-flash-image)")
 
 
+async def diagnose_aiauto(cfg: dict) -> list[dict]:
+    """AIAuto કનેક્શન સ્ટેપ-બાય-સ્ટેપ તપાસે — ભૂલ ક્યાં છે એ ચોક્કસ કહે.
+    દરેક સ્ટેપ: {step, ok, detail}"""
+    import socket
+    from urllib.parse import urlparse
+
+    out = []
+    url = (cfg.get("aiauto_url") or "").rstrip("/")
+    key = cfg.get("aiauto_key") or ""
+
+    # 1) સેટિંગ ભરેલા છે?
+    out.append({"step": "1. સેટિંગ", "ok": bool(url and key),
+                "detail": (f"URL: {url or '(ખાલી)'} | "
+                           f"Key: {'ભરેલી ✓' if key else '(ખાલી)'}")})
+    if not (url and key):
+        return out
+
+    # 2) કોમ્પ્યુટર/પોર્ટ સુધી પહોંચાય છે? (TCP)
+    p = urlparse(url)
+    host, port = p.hostname, (p.port or (443 if p.scheme == "https" else 80))
+    try:
+        s = socket.create_connection((host, port), timeout=5)
+        s.close()
+        out.append({"step": "2. સર્વર સુધી પહોંચ", "ok": True,
+                    "detail": f"{host}:{port} જવાબ આપે છે ✓"})
+    except Exception as e:
+        out.append({"step": "2. સર્વર સુધી પહોંચ", "ok": False,
+                    "detail": (f"{host}:{port} સુધી પહોંચાતું નથી — એ કોમ્પ્યુટર "
+                               f"ચાલુ છે? AIAuto ચાલુ છે? ({type(e).__name__})")})
+        return out
+
+    # 3) API key ચાલે છે? (GET /me)
+    try:
+        async with httpx.AsyncClient(timeout=15) as c:
+            r = await c.get(f"{url}/me", headers={"X-API-Key": key})
+        ok = r.status_code == 200
+        out.append({"step": "3. API Key", "ok": ok,
+                    "detail": (f"/me → {r.status_code} "
+                               + ("બરાબર ✓" if ok else r.text[:120]))})
+        if not ok:
+            return out
+    except Exception as e:
+        out.append({"step": "3. API Key", "ok": False,
+                    "detail": f"/me માં ભૂલ: {str(e)[:120]}"})
+        return out
+
+    # 4) ઈમેજ job સબમિટ થાય છે? (POST /images)
+    try:
+        async with httpx.AsyncClient(timeout=30) as c:
+            r = await c.post(f"{url}/images", headers={"X-API-Key": key},
+                             json={"prompt": "test connection, a simple blue sky"})
+        ok = r.status_code in (200, 201)
+        jid = r.json().get("id") if ok else None
+        out.append({"step": "4. ઈમેજ સબમિટ", "ok": bool(jid),
+                    "detail": (f"/images → {r.status_code}, job id: {jid}"
+                               if ok else f"{r.status_code}: {r.text[:150]}")})
+    except Exception as e:
+        out.append({"step": "4. ઈમેજ સબમિટ", "ok": False,
+                    "detail": str(e)[:150]})
+    return out
+
+
 async def _pollinations(prompt: str) -> bytes:
     """મફત સર્વિસ — ટેસ્ટિંગ માટે. કોઈ key નહીં, કોઈ ખર્ચ નહીં."""
     from urllib.parse import quote

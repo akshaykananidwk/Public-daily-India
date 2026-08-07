@@ -472,6 +472,14 @@ async def text_test():
             "sample": (out.get("title", "") + "\n" + out.get("body", ""))[:400]}
 
 
+# ── AIAuto કનેક્શન તપાસ (ભૂલ ક્યાં છે એ કહે) ────────────────────
+@app.post("/api/aiauto-diagnose")
+async def aiauto_diagnose():
+    from . import imagegen
+    steps = await imagegen.diagnose_aiauto(load_config())
+    return {"steps": steps, "ok": all(s["ok"] for s in steps)}
+
+
 # ── AI તસવીર ટેસ્ટ ──────────────────────────────────────────────
 @app.post("/api/image-test")
 async def image_test():

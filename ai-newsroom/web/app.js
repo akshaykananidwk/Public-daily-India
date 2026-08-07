@@ -653,6 +653,25 @@ $("#btn-img-test").onclick = async () => {
     toast("AI તસવીર ભૂલ", "bad");
   }
 };
+// 🔎 AIAuto કનેક્શન સ્ટેપ-બાય-સ્ટેપ તપાસ — ભૂલ ક્યાં છે એ કહે
+if ($("#btn-diag")) $("#btn-diag").onclick = async () => {
+  $("#img-info").textContent = "તપાસી રહ્યો છું...";
+  const r = await (await fetch("/api/aiauto-diagnose",
+    { method: "POST" })).json();
+  const rows = (r.steps || []).map((s) =>
+    `<div style="padding:6px 0;border-bottom:1px solid var(--line)">
+      ${s.ok ? "✅" : "❌"} <b>${s.step}</b><br>
+      <span style="font-size:12px;color:var(--ink-2)">${s.detail}</span></div>`
+  ).join("");
+  const verdict = r.ok
+    ? `<p style="color:var(--good);margin-top:8px"><b>બધું બરાબર —
+       API ચાલે છે.</b> હવે ટેસ્ટ તસવીર બનાવો.</p>`
+    : `<p style="color:var(--bad);margin-top:8px"><b>જ્યાં ❌ છે ત્યાં ભૂલ છે</b>
+       — એ સ્ટેપ ઠીક કરો. (સ્ટેપ 2 ❌ = AIAuto સર્વર/કોમ્પ્યુટર બંધ,
+       સ્ટેપ 3 ❌ = API Key ખોટી, સ્ટેપ 4 ❌ = API બાજુની ભૂલ)</p>`;
+  $("#img-info").innerHTML = rows + verdict;
+  toast(r.ok ? "કનેક્શન બરાબર ✓" : "કનેક્શનમાં ભૂલ મળી", r.ok ? "good" : "bad");
+};
 // એડવાન્સ ખાના ડિફોલ્ટ પર રીસેટ
 if ($("#btn-prompt-reset")) $("#btn-prompt-reset").onclick = () => {
   const f = $("#settings-form");
