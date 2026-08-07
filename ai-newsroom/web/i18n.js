@@ -229,6 +229,23 @@
     "તમારો WhatsApp નંબર (91 સાથે)": "Your WhatsApp number (with 91)",
     "બ્રોડકાસ્ટ નંબર (અલ્પવિરામથી અલગ, 91 સાથે)":
       "Broadcast numbers (comma separated, with 91)",
+    "⚡ ન્યુઝ બનતાં જ મોકલો (અપ્રુવલ પહેલાં)":
+      "⚡ Send as soon as the news is built (before approval)",
+    "ચાલુ કરો એટલે પોસ્ટર બની જાય કે તરત નીચેના કોમન નંબર કે ગ્રુપ પર જતું રહેશે — વેબસાઈટ પર અપ્રુવલ પછીથી આપી શકાય.":
+      "Turn this on and the poster goes straight to the common number or " +
+      "group below the moment it is built — you can approve it on the " +
+      "website afterwards.",
+    "કોમન નંબર કે ગ્રુપ ID": "Common number or group ID",
+    "919978123146  કે  120363...@g.us": "919978123146  or  120363...@g.us",
+    "નંબર 91 સાથે લખો. ગ્રુપમાં મોકલવું હોય તો ગ્રુપ ID આખું @g.us સાથે નાખો. ખાલી રાખશો તો ઉપરનો તમારો WhatsApp નંબર વપરાશે.":
+      "Write the number with 91. For a group, paste the full group ID " +
+      "including @g.us. Leave it empty to use your WhatsApp number above.",
+    "🧪 કોમન નંબર/ગ્રુપ ટેસ્ટ કરો": "🧪 Test the common number/group",
+    "ટેસ્ટ મોકલાયો ✓": "Test sent ✓",
+    "⚡ WhatsApp પર ગયું": "⚡ Sent on WhatsApp",
+    "WhatsApp મોકલો": "Send on WhatsApp",
+    "કોમન નંબર કે ગ્રુપ ID ભરીને સેવ કરો":
+      "Enter the common number or group ID and save",
     "રાત્રે 9 વાગ્યે રોજનો રિપોર્ટ મોકલો": "Send the daily report at 9 pm",
     "ભૂલ પડે તો WhatsApp એલર્ટ": "WhatsApp alert when something fails",
     "Public URL (વૈકલ્પિક — તમારી hosting)":
@@ -431,6 +448,10 @@
     [/^PDF ભૂલ — (.*)$/, "PDF error — $1"],
     [/^✅ લેટેસ્ટ વર્ઝન છે \((.+)\)$/, "✅ You are on the latest version ($1)"],
     [/^બેકઅપ: (.*)$/, "Backup: $1"],
+    [/^ન્યુઝ #(\d+) WhatsApp પર મોકલી રહ્યો છું\.\.\.$/,
+      "Sending news #$1 on WhatsApp..."],
+    [/^✅ મોકલાઈ ગયું — (.+) \(ગ્રુપ\) ચેક કરો!$/, "✅ Sent — check $1 (group)!"],
+    [/^✅ મોકલાઈ ગયું — (.+) \(નંબર\) ચેક કરો!$/, "✅ Sent — check $1 (number)!"],
     [/^✅ બની ગઈ! \((.*)\)$/, "✅ Created! ($1)"],
     [/^💰 આ મહિને AI તસવીર ખર્ચ \((.+)\): ≈ ₹(.+)$/,
       "💰 AI image spend this month ($1): ≈ ₹$2"],

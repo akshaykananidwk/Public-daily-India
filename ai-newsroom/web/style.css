@@ -441,3 +441,13 @@ input[type="month"] { background: var(--surface); border: 1px solid var(--line);
 ::-webkit-scrollbar { width: 9px; height: 9px; }
 ::-webkit-scrollbar-thumb { background: #223a68; border-radius: 99px; }
 ::-webkit-scrollbar-track { background: transparent; }
+
+/* સેટિંગમાં વિભાગ છૂટા પાડતી લીટી */
+hr.sep {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 14px 0 12px;
+}
+
+/* ⚡ ન્યુઝ બનતાં જ WhatsApp પર ગયો — બેજ */
+.wa-chip { background: #123c2a; color: #6ee7a8; }

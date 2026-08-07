@@ -415,6 +415,25 @@
             <label>બ્રોડકાસ્ટ નંબર (અલ્પવિરામથી અલગ, 91 સાથે)
               <input name="whatsapp_broadcast"
                 placeholder="919812345678, 918887776665"></label>
+            <hr class="sep">
+            <label class="check">
+              <input name="whatsapp_instant_enabled" type="checkbox">
+              ⚡ ન્યુઝ બનતાં જ મોકલો (અપ્રુવલ પહેલાં)</label>
+            <p class="hint">ચાલુ કરો એટલે પોસ્ટર બની જાય કે તરત નીચેના
+              કોમન નંબર કે ગ્રુપ પર જતું રહેશે — વેબસાઈટ પર અપ્રુવલ
+              પછીથી આપી શકાય.</p>
+            <label>કોમન નંબર કે ગ્રુપ ID
+              <input name="whatsapp_instant_to"
+                placeholder="919978123146  કે  120363...@g.us"></label>
+            <p class="hint">નંબર 91 સાથે લખો. ગ્રુપમાં મોકલવું હોય તો
+              ગ્રુપ ID આખું @g.us સાથે નાખો. ખાલી રાખશો તો ઉપરનો
+              તમારો WhatsApp નંબર વપરાશે.</p>
+            <div class="row">
+              <button type="button" id="btn-wa-instant-test" class="ghost">
+                🧪 કોમન નંબર/ગ્રુપ ટેસ્ટ કરો</button>
+            </div>
+            <div id="wa-instant-info"></div>
+            <hr class="sep">
             <label class="check"><input name="daily_report_enabled" type="checkbox">
               રાત્રે 9 વાગ્યે રોજનો રિપોર્ટ મોકલો</label>
             <label class="check"><input name="error_alert_enabled" type="checkbox">

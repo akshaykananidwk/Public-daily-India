@@ -529,6 +529,28 @@ async def whatsapp_test():
     return {"ok": "error" not in result, "result": result}
 
 
+@app.post("/api/whatsapp-instant-test")
+async def whatsapp_instant_test():
+    """કોમન નંબર/ગ્રુપ ID પર ટેસ્ટ — ન્યુઝ બનતાં જ જ્યાં જવાનું છે ત્યાં."""
+    cfg = load_config()
+    target = whatsapp.instant_target(cfg)
+    if not (cfg.get("whatsapp_api_url") and cfg.get("whatsapp_api_key")
+            and cfg.get("whatsapp_session_id")):
+        return JSONResponse(
+            {"error": "પહેલા WhatsApp API સેટિંગ ભરીને સેવ કરો"},
+            status_code=400)
+    if not target:
+        return JSONResponse(
+            {"error": "કોમન નંબર કે ગ્રુપ ID ભરીને સેવ કરો"}, status_code=400)
+    kind = "ગ્રુપ" if "@" in target or "-" in target else "નંબર"
+    result = await whatsapp._send_one(
+        cfg, target,
+        f"⚡ ટેસ્ટ — {cfg['channel_name']} AI Newsroom.\n"
+        f"હવેથી ન્યુઝ બનતાં જ પોસ્ટર આ {kind} પર આવી જશે. ✅")
+    return {"ok": "error" not in result, "target": target,
+            "kind": kind, "result": result}
+
+
 # ── અપડેટ ───────────────────────────────────────────────────────
 @app.post("/api/update/check")
 async def update_check():

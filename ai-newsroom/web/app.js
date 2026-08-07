@@ -331,6 +331,7 @@ async function loadApproval() {
       <div class="meta">
         <span class="cat-chip cat-${n.category}">${CAT_LABEL[n.category] || n.category}</span>
         <span>${(n.created_at || "").slice(0, 16)}</span>
+        ${n.wa_sent_at ? `<span class="cat-chip wa-chip">⚡ WhatsApp પર ગયું</span>` : ""}
       </div>
       <h4>${n.title}</h4>
       <p class="body-clip">${n.body}</p>
@@ -714,6 +715,17 @@ $("#btn-wa-test").onclick = async () => {
     (r.ok ? "✅ મોકલાઈ ગયું — તમારો WhatsApp ચેક કરો! " : "❌ ") +
     JSON.stringify(r.result || "");
   toast(r.error || (r.ok ? "WhatsApp ટેસ્ટ મોકલાયો ✓" : "WhatsApp ભૂલ"),
+    r.ok ? "good" : "bad");
+};
+$("#btn-wa-instant-test").onclick = async () => {
+  $("#wa-instant-info").textContent =
+    "મોકલી રહ્યો છું... (પહેલા સેવ કરો ભૂલતા નહીં)";
+  const r = await (await fetch("/api/whatsapp-instant-test",
+    { method: "POST" })).json();
+  $("#wa-instant-info").textContent = r.error ||
+    (r.ok ? `✅ મોકલાઈ ગયું — ${r.target} (${r.kind}) ચેક કરો!`
+          : "❌ " + JSON.stringify(r.result || ""));
+  toast(r.error || (r.ok ? "ટેસ્ટ મોકલાયો ✓" : "WhatsApp ભૂલ"),
     r.ok ? "good" : "bad");
 };
 $("#btn-backup").onclick = async () => {

@@ -261,8 +261,30 @@ async def run_day(press_note: str | None = None,
                         template, news, size))
                     db.bump_stat(today, "posters_created")
                 return results
-            await run_agent("designer", "proofreader", design_fn,
-                            job_id=job_id, message="પોસ્ટર બનાવો")
+            posters = await run_agent("designer", "proofreader", design_fn,
+                                      job_id=job_id, message="પોસ્ટર બનાવો")
+
+            # ⚡ ન્યુઝ બનતાં જ કોમન નંબર/ગ્રુપ પર WhatsApp — અપ્રુવલ પહેલાં
+            if whatsapp.instant_ready(cfg) and posters:
+                async def instant_fn(progress, posters=posters, idx=idx,
+                                     clean=clean, body=body,
+                                     news_id=news_id):
+                    await progress(
+                        f"ન્યુઝ #{idx} WhatsApp પર મોકલી રહ્યો છું...")
+                    link = await whatsapp.poster_link(cfg, posters[0]["file"])
+                    cap = branding.build_caption(clean["title"], body, cfg)
+                    r = await whatsapp.send_instant(cfg, cap, link)
+                    if r.get("status") == 200:
+                        db.execute(
+                            "UPDATE news SET wa_sent_at=CURRENT_TIMESTAMP "
+                            "WHERE id=?", (news_id,))
+                        db.bump_stat(today, "wa_instant")
+                    return r
+                try:
+                    await run_agent("publisher", "designer", instant_fn,
+                                    job_id=job_id, message="WhatsApp મોકલો")
+                except Exception:
+                    pass          # મોકલાય નહીં તો ન્યુઝ અટકવો ન જોઈએ
 
             db.execute("UPDATE news SET status='pending_approval', "
                        "updated_at=CURRENT_TIMESTAMP WHERE id=?", (news_id,))

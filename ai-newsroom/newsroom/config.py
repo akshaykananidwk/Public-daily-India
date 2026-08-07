@@ -75,6 +75,10 @@ DEFAULTS = {
     "whatsapp_api_key": "",
     "whatsapp_session_id": "",
     "whatsapp_number": "",
+    # ⚡ ન્યુઝ બનતાં જ (અપ્રુવલ પહેલાં) અહીં પોસ્ટર મોકલો —
+    #    કોમન નંબર (919978123146) કે ગ્રુપ ID (1203...@g.us)
+    "whatsapp_instant_enabled": False,
+    "whatsapp_instant_to": "",
     "public_base_url": "",
     "update_repo": "",                 # દા.ત. akshaykananidwk/Public-daily-India
     "update_branch": "main",
