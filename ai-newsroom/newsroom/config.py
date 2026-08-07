@@ -83,6 +83,16 @@ DEFAULTS = {
 }
 
 
+def clean_key(raw: str) -> str:
+    """API key ને HTTP header માં મૂકતાં પહેલાં સાફ કરે.
+    કોપી-પેસ્ટ સાથે ✅, ઈમોજી, space કે newline આવી જાય તો httpx
+    'ascii codec can't encode' ભૂલ આપે — એ અહીં જ અટકાવીએ."""
+    s = (raw or "").strip()
+    # ઈમોજી/ગુજરાતી/કોઈ પણ non-ASCII અક્ષર કાઢી નાખો
+    s = "".join(ch for ch in s if 32 < ord(ch) < 127)
+    return s
+
+
 def load_config() -> dict:
     cfg = dict(DEFAULTS)
     if CONFIG_PATH.exists():
@@ -98,6 +108,9 @@ def save_config(cfg: dict) -> dict:
     merged = load_config()
     for k, v in cfg.items():
         if k in DEFAULTS:
+            # key/token વાળા ખાનામાં કોપી-પેસ્ટનો કચરો સેવ કરતાં જ સાફ કરો
+            if isinstance(v, str) and (k.endswith("_key") or k.endswith("_token")):
+                v = clean_key(v)
             merged[k] = v
     CONFIG_PATH.write_text(
         json.dumps(merged, ensure_ascii=False, indent=2), encoding="utf-8")

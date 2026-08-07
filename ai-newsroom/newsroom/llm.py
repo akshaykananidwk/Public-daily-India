@@ -8,6 +8,8 @@ import json
 
 import httpx
 
+from .config import clean_key
+
 # Gemini મોડેલ — પહેલું ન ચાલે તો બીજું (Google સમયે સમયે બદલે છે)
 GEMINI_MODELS = ["gemini-2.0-flash", "gemini-flash-latest",
                  "gemini-2.5-flash", "gemini-2.0-flash-001",
@@ -56,7 +58,7 @@ class LLM:
         (તમારું પોતાનું પ્લેટફોર્મ; કોઈ third-party key જોઈએ નહીં.)"""
         import asyncio
         base = self.cfg["aiauto_url"].rstrip("/")
-        headers = {"X-API-Key": self.cfg["aiauto_key"]}
+        headers = {"X-API-Key": clean_key(self.cfg["aiauto_key"])}
         full = (system + "\n\n" + prompt) if system else prompt
         async with httpx.AsyncClient(timeout=60) as c:
             r = await c.post(f"{base}/text", headers=headers,

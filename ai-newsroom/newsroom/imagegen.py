@@ -8,6 +8,7 @@ from datetime import datetime
 
 import httpx
 
+from .config import clean_key
 from .paths import PHOTOS_DIR
 
 PROMPT_TEMPLATE = (
@@ -95,7 +96,7 @@ async def _aiauto(cfg: dict, prompt: str, on_wait=None) -> bytes:
     બધા job એક પછી એક ચાલે — એક ઈમેજને 1-4 મિનિટ (queue હોય તો વધુ)."""
     import asyncio
     base = cfg["aiauto_url"].rstrip("/")
-    headers = {"X-API-Key": cfg["aiauto_key"]}
+    headers = {"X-API-Key": clean_key(cfg["aiauto_key"])}
     async with httpx.AsyncClient(timeout=60) as c:
         r = await c.post(f"{base}/images", headers=headers,
                          json={"prompt": prompt})
@@ -204,12 +205,17 @@ async def diagnose_aiauto(cfg: dict) -> list[dict]:
 
     out = []
     url = (cfg.get("aiauto_url") or "").rstrip("/")
-    key = cfg.get("aiauto_key") or ""
+    raw_key = cfg.get("aiauto_key") or ""
+    key = clean_key(raw_key)
 
     # 1) સેટિંગ ભરેલા છે?
+    note = ""
+    if raw_key.strip() != key:
+        note = ("  ⚠️ Key માં ઈમોજી/space જેવો કચરો હતો — સાફ કરીને વાપર્યો. "
+                "સેટિંગમાં ફક્ત ak_... વાળો key જ પેસ્ટ કરો.")
     out.append({"step": "1. સેટિંગ", "ok": bool(url and key),
                 "detail": (f"URL: {url or '(ખાલી)'} | "
-                           f"Key: {'ભરેલી ✓' if key else '(ખાલી)'}")})
+                           f"Key: {'ભરેલી ✓' if key else '(ખાલી)'}" + note)})
     if not (url and key):
         return out
 
