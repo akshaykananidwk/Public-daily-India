@@ -7,7 +7,7 @@ const STATE_LABEL = {
 const STATUS_LABEL = {
   pending_approval: "🟠 રાહમાં", approved: "✅ મંજૂર",
   published: "📤 પબ્લિશ", rejected: "❌ રદ", proofread: "લખાયો",
-  draft: "ડ્રાફ્ટ",
+  draft: "ડ્રાફ્ટ", duplicate: "🔁 ડુપ્લિકેટ",
 };
 const CAT_LABEL = { general: "સમાચાર", breaking: "બ્રેકિંગ",
   birthday: "જન્મદિવસ", tribute: "શ્રદ્ધાંજલિ" };

@@ -7,6 +7,7 @@ import httpx
 from pathlib import Path
 
 from . import (db, scout, poster, whatsapp, imagegen, branding, telegram,
+               duplicate,
                instagram, accountant)
 from .bus import BUS, run_agent
 from .config import load_config
@@ -167,6 +168,25 @@ async def run_day(press_note: str | None = None,
 
             category = detect_category(clean["title"], clean["body"])
             body = dedupe_body(clean["title"], clean["body"])
+
+            # 🔁 એક ઘટના = એક જ પોસ્ટર. આજે આ ન્યુઝ પહેલેથી બન્યો હોય તો
+            # અહીં જ અટકો — ફોટો/પોસ્ટરનો ખર્ચ પણ ન થાય.
+            dup = duplicate.find_duplicate(cfg, clean["title"], body, today)
+            if dup:
+                db.execute(
+                    "INSERT INTO news(job_id, title, body, category, "
+                    "source_title, source_url, status, reporter, duplicate_of) "
+                    "VALUES(?,?,?,?,?,?,?,?,?)",
+                    (job_id, clean["title"], body, category,
+                     item.get("source", "") or item.get("title", ""),
+                     item.get("url", ""), "duplicate", reporter, dup["id"]))
+                db.bump_stat(today, "duplicates")
+                await BUS.emit(
+                    "ceo", "", "progress", job_id=job_id, status="working",
+                    message=(f"🔁 ન્યુઝ #{idx} ડુપ્લિકેટ — આજે આ સમાચાર "
+                             f"પહેલેથી બની ગયા છે: {dup['title'][:60]}"),
+                    log_db=True)
+                continue
             photos = list(item.get("photos", []))
             image_ai = False
             # ડેમો મોડ (લખાણ AI નથી) → ખરો ન્યુઝ નથી, ફોટાના પૈસા ન બગડે

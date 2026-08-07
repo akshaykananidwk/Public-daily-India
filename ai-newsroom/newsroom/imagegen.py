@@ -12,23 +12,45 @@ from .config import clean_key
 from .paths import PHOTOS_DIR
 
 PROMPT_TEMPLATE = (
-    "Photorealistic editorial news photograph that is directly RELEVANT to "
-    "this news: {scene}. Shot like a professional press photographer for a "
-    "front page: the main subject large, centred and unmistakably clear, "
-    "tack sharp focus on the subject, shallow depth of field, strong "
-    "cinematic contrast, rich saturated colour, dramatic directional "
-    "lighting, golden hour or clean daylight, wide 16:9 framing with the "
-    "subject in the upper half. Realistic photojournalism, India, "
-    "respectful. Do NOT depict any specific real named person's face. "
-    "STRICTLY NO text, NO letters, NO numbers, NO logos, NO watermarks "
-    "anywhere in the image. {style}")
+    "Ultra realistic editorial NEWS PHOTOGRAPH, shot on a professional DSLR "
+    "by a press photojournalist, of exactly this scene: {scene}. "
+    "{variant} "
+    "The main subject is large, centred and unmistakably clear, tack sharp "
+    "focus on the subject with shallow depth of field, natural lighting, "
+    "realistic shadows and realistic perspective, strong cinematic "
+    "contrast, HDR, 8K, ultra detailed, wide 16:9 framing with the subject "
+    "in the upper half. Setting is India. "
+    "This is a PHOTOGRAPH — absolutely NOT an illustration, NOT a painting, "
+    "NOT a drawing, NOT a cartoon, NOT a 3D render, NOT a poster or "
+    "collage. Any people must be anonymous ordinary people; never depict a "
+    "real politician, celebrity or any identifiable public figure. "
+    "STRICTLY NO text, NO letters, NO numbers, NO logos, NO watermarks, "
+    "no random unrelated objects anywhere in the image. {style}")
+
+# દરેક ન્યુઝનું દ્રશ્ય જુદું લાગે — એક જ કમ્પોઝિશન વારંવાર ન આવે
+VARIANTS = [
+    "Eye-level wide establishing shot, morning light.",
+    "Low angle looking slightly up, late afternoon golden light.",
+    "Slightly elevated three-quarter angle, bright overcast daylight.",
+    "Tight mid-shot from the side, warm evening light.",
+    "Wide environmental shot with strong foreground depth, midday light.",
+    "Over-the-shoulder documentary angle, soft diffused light.",
+    "Straight-on centred composition, dramatic side lighting.",
+    "Off-centre rule-of-thirds framing, long shadows at dusk.",
+]
 
 
-def build_prompt(cfg: dict, scene: str) -> str:
+def _variant(seed: str) -> str:
+    """એક જ પ્રકારના ન્યુઝમાં પણ કેમેરા-એંગલ/પ્રકાશ બદલાય."""
+    return VARIANTS[sum(ord(c) for c in (seed or "x")) % len(VARIANTS)]
+
+
+def build_prompt(cfg: dict, scene: str, seed: str = "") -> str:
     """ઓટો પ્રોમ્પ્ટ બિલ્ડર — admin એ કંઈ ન લખવું પડે.
-    દ્રશ્ય + સ્ટાઈલ + quality tags એકસાથે જોડે."""
-    parts = [PROMPT_TEMPLATE.format(scene=scene,
-                                    style=cfg.get("image_ai_style", "")).strip()]
+    દ્રશ્ય + કેમેરા વેરિએન્ટ + સ્ટાઈલ + quality tags એકસાથે જોડે."""
+    parts = [PROMPT_TEMPLATE.format(
+        scene=scene, variant=_variant(seed or scene),
+        style=cfg.get("image_ai_style", "")).strip()]
     tags = (cfg.get("image_quality_tags") or "").strip()
     if tags:
         parts.append(tags)
@@ -36,28 +58,56 @@ def build_prompt(cfg: dict, scene: str) -> str:
 
 # વિષય ઓળખવા — હેડલાઈનમાં આ શબ્દ હોય તો એ દ્રશ્ય (LLM ન હોય ત્યારે વપરાય)
 TOPIC_SCENES = [
-    (("સંસદ", "લોકસભા", "રાજ્યસભા", "બિલ", "વિધાનસભા", "સરકાર", "મંત્રી"),
-     "the Indian Parliament building in New Delhi, government"),
+    (("સંસદ", "લોકસભા", "રાજ્યસભા", "બિલ", "વિધાનસભા", "ચૂંટણી", "મતદાન"),
+     "the Indian Parliament / state assembly building, political press "
+     "conference setting, microphones and podium"),
+    (("સરકાર", "મંત્રી", "કલેક્ટર", "અધિકારી", "બેઠક"),
+     "an official Indian government meeting room, officials seated at a "
+     "long table with files"),
     (("મંદિર", "દ્વારકાધીશ", "દર્શન", "આરતી", "ધાર્મિક", "પૂજા", "યાત્રા"),
-     "a Hindu temple in Gujarat with devotees"),
-    (("વરસાદ", "હવામાન", "પૂર", "વાવાઝોડું", "ચોમાસું"),
-     "monsoon rain over an Indian town, cloudy sky"),
-    (("અકસ્માત", "દુર્ઘટના", "આગ", "બચાવ"),
-     "an emergency response scene with rescue workers in India"),
-    (("શાળા", "શિક્ષણ", "વિદ્યાર્થી", "પરીક્ષા", "કોલેજ"),
-     "an Indian school building with students"),
-    (("બસ", "રસ્તો", "હાઈવે", "ટ્રાફિક", "વાહન"),
-     "an Indian road with a bus and traffic"),
-    (("દરિયો", "બીચ", "માછીમાર", "બંદર", "ઓખા"),
-     "the Gujarat coastline, sea and fishing boats"),
-    (("ખેડૂત", "પાક", "ખેતી", "વાવેતર"),
-     "an Indian farmer in a green field"),
-    (("રમત", "ક્રિકેट", "ખેલાડી", "મેચ", "ટુર્નામેન્ટ"),
-     "a sports ground in India"),
-    (("પોલીસ", "ગુનો", "ધરપકડ", "ચોરી"),
-     "Indian police officers on duty"),
-    (("આરોગ્ય", "હોસ્પિટલ", "દવા", "કેમ્પ", "રસી"),
-     "an Indian hospital or health camp"),
+     "a Hindu temple in Gujarat, carved architecture, devotees offering "
+     "prayers, oil lamps"),
+    (("ઉત્સવ", "તહેવાર", "જન્માષ્ટમી", "નવરાત્રી", "દિવાળી", "ગણેશ",
+      "રંગોળી", "શોભાયાત્રા"),
+     "a vibrant Indian festival celebration, decorations, marigold "
+     "garlands, festive crowd"),
+    (("વરસાદ", "હવામાન", "પૂર", "વાવાઝોડું", "ચોમાસું", "એલર્ટ"),
+     "heavy monsoon rain over a Gujarat town, dark storm clouds, wet "
+     "roads, people with umbrellas"),
+    (("અકસ્માત", "દુર્ઘટના", "ટક્કર", "પલટી"),
+     "the aftermath of a road accident in India, damaged vehicle on the "
+     "roadside, police and onlookers"),
+    (("આગ", "બચાવ", "રાહત", "ફાયર"),
+     "an emergency rescue operation in India, fire brigade and rescue "
+     "workers in action"),
+    (("શાળા", "શિક્ષણ", "વિદ્યાર્થી", "પરીક્ષા", "કોલેજ", "પરિણામ"),
+     "an Indian school, students in uniform in a classroom or courtyard"),
+    (("આરોગ્ય", "હોસ્પિટલ", "દવા", "કેમ્પ", "રસી", "રોગ", "દર્દી"),
+     "an Indian hospital ward, doctors in white coats and medical "
+     "equipment, clean clinical lighting"),
+    (("પોલીસ", "ગુનો", "ધરપકડ", "ચોરી", "લૂંટ", "હત્યા", "તપાસ"),
+     "Indian police officers at an investigation scene, uniformed "
+     "personnel and a cordoned area"),
+    (("ઉદ્યોગ", "કારખાનું", "ફેક્ટરી", "વેપાર", "બજાર", "ધંધો", "રોકાણ",
+      "ભાવ"),
+     "an Indian factory floor or busy market, workers and machinery, "
+     "commerce activity"),
+    (("રમત", "ક્રિકેટ", "ખેલાડી", "મેચ", "ટુર્નામેન્ટ", "સ્પર્ધા"),
+     "a sports stadium in India during play, athletes in action on the "
+     "field, floodlights"),
+    (("બસ", "રસ્તો", "હાઈવે", "ટ્રાફિક", "વાહન", "પુલ"),
+     "an Indian highway with traffic and a bus, roadside infrastructure"),
+    (("દરિયો", "બીચ", "માછીમાર", "બંદર", "ઓખા", "બોટ"),
+     "the Gujarat coastline, fishing boats at a harbour, sea and sky"),
+    (("ખેડૂત", "પાક", "ખેતી", "વાવેતર", "સિંચાઈ"),
+     "an Indian farmer working in a green crop field, agricultural "
+     "landscape"),
+    (("પાણી", "પુરવઠો", "નળ", "બોર", "ડેમ"),
+     "a water supply scheme in rural India, pipeline or village water tap"),
+    (("લોકાર્પણ", "ઉદ્ઘાટન", "ખાતમુહૂર્ત", "શિલાન્યાસ", "યોજના", "વિકાસ",
+      "સામાનઘર"),
+     "an inauguration ceremony of a new public building in India, ribbon "
+     "cutting, dignitaries and a crowd"),
 ]
 
 
@@ -247,7 +297,7 @@ async def generate(cfg: dict, title: str, scene: str = "",
     if not scene:
         scene = topic_scene(title)
     # ઓટો પ્રોમ્પ્ટ — admin એ કંઈ ન લખવું પડે
-    prompt = build_prompt(cfg, scene)
+    prompt = build_prompt(cfg, scene, seed=title)
     provider = cfg.get("image_ai_provider", "aiauto")
     try:
         if provider == "gemini":

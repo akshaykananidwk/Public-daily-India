@@ -451,3 +451,6 @@ hr.sep {
 
 /* ⚡ ન્યુઝ બનતાં જ WhatsApp પર ગયો — બેજ */
 .wa-chip { background: #123c2a; color: #6ee7a8; }
+
+/* 🔁 ડુપ્લિકેટ ન્યુઝ — બન્યો નહીં, ફક્ત નોંધ */
+.st-duplicate { background: #3a2f10; color: #e8c66a; }
