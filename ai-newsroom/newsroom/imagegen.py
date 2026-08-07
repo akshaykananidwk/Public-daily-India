@@ -74,6 +74,22 @@ def is_configured(cfg: dict) -> bool:
     return True  # pollinations / local — key વગર
 
 
+def _file_url(base: str, f: dict) -> str:
+    """ફાઈલ ડાઉનલોડનું સાચું URL — url ગમે તે રીતે આવે તો પણ ચાલે:
+    પૂરું http, '/api/public/v1/files/42' (host સાથે જોડો), કે '/files/42'."""
+    from urllib.parse import urlparse
+    u = (f.get("url") or "").strip()
+    if not u:
+        return f"{base}/files/{f.get('id')}"
+    if u.startswith("http"):
+        return u
+    p = urlparse(base)
+    origin = f"{p.scheme}://{p.netloc}"
+    if u.startswith("/api/"):          # host + પૂરો path
+        return origin + u
+    return base + ("" if u.startswith("/") else "/") + u
+
+
 async def _aiauto(cfg: dict, prompt: str) -> bytes:
     """AIAuto પ્લેટફોર્મ — async job: submit → poll → download.
     (તમારું પોતાનું સેન્ટ્રલ AI પ્લેટફોર્મ; કોઈ third-party key જોઈએ નહીં.)"""
@@ -95,10 +111,10 @@ async def _aiauto(cfg: dict, prompt: str) -> bytes:
             st = j.get("status")
             if st == "completed":
                 imgs = [f for f in j.get("files", [])
-                        if f.get("kind") == "result_image"]
+                        if f.get("kind") == "result_image"] or j.get("files", [])
                 if not imgs:
                     raise RuntimeError("AIAuto: પૂરું થયું પણ ઈમેજ નથી")
-                dl = await c.get(f"{base}{imgs[0]['url']}", headers=headers,
+                dl = await c.get(_file_url(base, imgs[0]), headers=headers,
                                  timeout=60)
                 dl.raise_for_status()
                 return dl.content
