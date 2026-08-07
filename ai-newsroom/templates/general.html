@@ -48,17 +48,17 @@
   }
 
   /* ═══ ટોપ: લોગો + ટેગલાઈન + BREAKING NEWS (ડાર્ક TV બેન્ડ) ═══ */
-  .top { flex: none; display: flex; gap: 12px; padding: 8px 20px 7px;
+  .top { flex: none; display: flex; gap: 11px; padding: 6px 18px 5px;
     background: linear-gradient(180deg, #16305e 0%, var(--navy) 100%);
     border-bottom: 3px solid var(--yellow); }
   .logo-box {
-    flex: none; width: 140px; border: 3px solid var(--navy);
+    flex: none; width: 122px; border: 3px solid var(--navy);
     border-radius: 14px; overflow: hidden; background: #fff;
     box-shadow: 0 6px 18px rgba(20, 41, 94, .25);
-    position: relative; text-align: center; padding-bottom: 22px;
+    position: relative; text-align: center; padding-bottom: 19px;
   }
   /* સાચો લોગો અપલોડ થાય તો ટેક્સ્ટ-લોગોને બદલે એ */
-  .logo-img { flex: none; width: 140px; border-radius: 14px;
+  .logo-img { flex: none; width: 122px; border-radius: 14px;
     object-fit: contain; background: #fff; display: none;
     box-shadow: 0 6px 18px rgba(20, 41, 94, .25); }
   body.has-logo .logo-box { display: none; }
@@ -69,18 +69,18 @@
     border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,.3); z-index: 3; }
   body.has-qr .qr { display: block; }
   .qr img { width: 100%; height: 100%; }
-  .logo-l1 { margin: 8px 8px 0; background: var(--red); color: #fff;
-    font-family: 'AnekGuj'; font-size: 15px; padding: 3px 3px 2px;
+  .logo-l1 { margin: 6px 6px 0; background: var(--red); color: #fff;
+    font-family: 'AnekGuj'; font-size: 13px; padding: 2px 3px 1px;
     border-radius: 8px; letter-spacing: .5px; }
-  .logo-l2 { color: var(--navy); font-family: 'AnekGuj'; font-size: 17px;
-    padding-top: 3px; letter-spacing: 1px; }
+  .logo-l2 { color: var(--navy); font-family: 'AnekGuj'; font-size: 15px;
+    padding-top: 2px; letter-spacing: 1px; }
   .logo-l3 { color: #fff; background: var(--green); font-family: 'AnekGuj';
-    font-size: 13px; margin: 2px 22px 0; padding: 1px 0;
+    font-size: 11px; margin: 2px 18px 0; padding: 1px 0;
     border-radius: 6px; letter-spacing: 3px; }
-  .chakra { position: absolute; left: 10px; bottom: 6px; width: 26px;
-    height: 26px; }
-  .tricolor { position: absolute; right: 12px; bottom: 8px; width: 44px;
-    height: 20px; border-radius: 4px; overflow: hidden;
+  .chakra { position: absolute; left: 8px; bottom: 5px; width: 22px;
+    height: 22px; }
+  .tricolor { position: absolute; right: 9px; bottom: 6px; width: 38px;
+    height: 17px; border-radius: 4px; overflow: hidden;
     border: 1px solid #ccc; }
   .tricolor i { display: block; height: 33.4%; }
   .tricolor .sa { background: #ff9933; }
@@ -89,47 +89,56 @@
 
   .top-right { flex: 1; display: flex; flex-direction: column; }
   .quote { text-align: center; color: #ffe27a; font-weight: 700;
-    font-size: 20px; padding: 0 0 5px; }
-  .quote .qm { color: #ff6b6b; font-size: 28px; font-family: serif; }
+    font-size: 18px; padding: 0 0 4px; }
+  .quote .qm { color: #ff6b6b; font-size: 23px; font-family: serif; }
 
-  .breaking { display: flex; border-radius: 12px; overflow: hidden;
-    box-shadow: 0 8px 22px rgba(196, 14, 20, .4), 0 0 0 2px #ffffff22;
-    transform: skewX(-4deg); }
-  .breaking > span { transform: skewX(4deg); display: block; }
+  .breaking { position: relative; display: flex; border-radius: 12px;
+    overflow: hidden; transform: skewX(-4deg);
+    box-shadow: 0 0 26px rgba(255, 60, 60, .55),
+                0 8px 22px rgba(196, 14, 20, .45),
+                0 0 0 2px rgba(255, 255, 255, .28); }
+  .breaking > span { transform: skewX(4deg); display: block;
+    position: relative; z-index: 1; }
+  /* ઉપરથી નીચે ચમક — કાચ જેવો TV લુક */
+  .breaking::after { content: ''; position: absolute; inset: 0; z-index: 2;
+    pointer-events: none;
+    background: linear-gradient(105deg,
+      rgba(255,255,255,0) 34%, rgba(255,255,255,.30) 47%,
+      rgba(255,255,255,0) 60%); }
   .breaking .brk { flex: 1.3;
     background: linear-gradient(180deg, #ff3b3b 0%, #d21016 55%, #9c0a10 100%);
     color: #fff; font-family: 'AnekGuj'; font-style: italic;
-    font-size: 34px; text-align: center; padding: 2px 0 0;
+    font-size: 29px; text-align: center; padding: 1px 0 0;
     letter-spacing: 1px; text-shadow: 0 3px 8px rgba(0,0,0,.4);
     box-shadow: inset 0 2px 0 rgba(255,255,255,.35); }
   .breaking .nws { flex: 1;
     background: linear-gradient(180deg, #1e3a72 0%, var(--navy) 60%, #0c1c44 100%);
-    color: #fff; font-family: 'AnekGuj'; font-style: italic; font-size: 34px;
-    text-align: center; padding: 2px 0 0; letter-spacing: 2px;
+    color: #fff; font-family: 'AnekGuj'; font-style: italic; font-size: 29px;
+    text-align: center; padding: 1px 0 0; letter-spacing: 2px;
     border-left: 5px solid var(--yellow);
     text-shadow: 0 3px 8px rgba(0,0,0,.4);
     box-shadow: inset 0 2px 0 rgba(255,255,255,.25); }
 
-  .meta-row { display: flex; align-items: center; gap: 10px;
-    padding-top: 6px; }
-  .editor { color: #fff; font-weight: 700; font-size: 19px; }
+  .meta-row { display: flex; align-items: center; gap: 9px;
+    padding-top: 5px; }
+  .editor { color: #fff; font-weight: 700; font-size: 17px; }
   .date-badge { margin-left: auto; background: var(--yellow);
-    color: var(--navy); font-family: 'AnekGuj'; font-size: 20px;
-    padding: 3px 13px; border-radius: 8px;
-    display: flex; align-items: center; gap: 10px;
+    color: var(--navy); font-family: 'AnekGuj'; font-size: 18px;
+    padding: 2px 11px; border-radius: 7px;
+    display: flex; align-items: center; gap: 7px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, .2); }
 
   /* ═══ હેડલાઈન (સફેદ પર ઘેરો વાદળી) ═══ */
-  .headline-strip { flex: none; background: #fff; padding: 5px 26px 2px; }
+  .headline-strip { flex: none; background: #fff; padding: 3px 24px 1px; }
   #headline { font-family: var(--poster-font, 'AnekGuj'), 'NotoGuj', sans-serif;
     font-weight: 700; font-size: 52px; color: var(--navy);
-    text-align: center; line-height: 1.34; }
+    text-align: center; line-height: 1.28; }
 
   /* ═══ ફોટો + બોડી (નેવી બ્લોક) ═══ */
   .mid { position: relative; flex: 1; display: flex; flex-direction: column;
     min-height: 0;
     background: linear-gradient(160deg, #1b3268 0%, var(--navy-2) 100%);
-    margin: 3px 10px 5px; border-radius: 16px; overflow: hidden;
+    margin: 2px 9px 4px; border-radius: 15px; overflow: hidden;
     border: 2px solid #2c4784; }
   /* ⭐ ફોટો આખો બ્લોક ભરે — પોસ્ટરનો મુખ્ય ભાગ (TV ન્યુઝ જેવો) */
   .photos { flex: 1; display: none; gap: 6px; padding: 6px;
@@ -137,14 +146,22 @@
   body.has-photo .photos { display: flex; }
   .photos .ph { position: relative; border-radius: 12px; overflow: hidden;
     border: 2px solid rgba(255,255,255,.92); background: #08122a;
-    box-shadow: 0 12px 30px rgba(0,0,0,.5); min-height: 0; }
+    box-shadow: 0 14px 34px rgba(0,0,0,.55),
+                0 0 0 1px rgba(255,255,255,.10) inset;
+    min-height: 0; }
+  /* આછો vignette — વચ્ચેનો વિષય વધુ ઉપસે (HDR જેવો) */
+  .photos .ph::after { content: ''; position: absolute; inset: 0; z-index: 2;
+    pointer-events: none; border-radius: 10px;
+    background: radial-gradient(ellipse at 50% 40%,
+      rgba(0,0,0,0) 52%, rgba(0,0,0,.22) 100%); }
   /* ⭐ ચહેરા કપાય નહીં: આખો ફોટો contain થી, પાછળ એ જ ફોટો ધૂંધળો ભરે */
   .photos .ph img { position: absolute; inset: 0;
     width: 100%; height: 100%; display: block; }
   /* ⭐ ડિફોલ્ટ: ફોટો આખું ખાનું ભરે — કાળી પટ્ટી ક્યાંય નહીં.
      ક્રોપ ઉપરની બાજુ કેન્દ્રિત, જેથી ચહેરા કપાય નહીં. */
   .photos .ph img.bg { display: none; }
-  .photos .ph img.fg { object-fit: cover; object-position: 50% 32%; z-index: 1; }
+  .photos .ph img.fg { object-fit: cover; object-position: 50% 32%; z-index: 1;
+    filter: contrast(1.10) saturate(1.14) brightness(1.03); }
   /* ફક્ત આકાર બહુ જ જુદો હોય (2×થી વધુ) ત્યારે આખો ફોટો + ધૂંધળો ભરાવ */
   .photos .ph.letterbox img.fg { object-fit: contain; }
   .photos .ph.letterbox img.bg { display: block; object-fit: cover;
@@ -153,9 +170,12 @@
   .ph-side { flex: 1; display: flex; flex-direction: column; gap: 8px;
     min-height: 0; }
   .ph-side .ph { flex: 1; min-height: 0; }
-  .ai-tag { position: absolute; right: 22px; top: 20px; z-index: 4;
-    background: rgba(0, 0, 0, .6); color: #dbe6ff; font-size: 17px;
-    padding: 4px 13px; border-radius: 999px; display: none; }
+  .ai-tag { position: absolute; right: 16px; top: 14px; z-index: 4;
+    background: rgba(8, 16, 38, .38); color: rgba(255, 255, 255, .78);
+    font-size: 13px; font-weight: 400; letter-spacing: .3px;
+    padding: 2px 10px; border-radius: 999px; display: none;
+    border: 1px solid rgba(255, 255, 255, .18);
+    backdrop-filter: blur(6px); }
   body.image-ai .ai-tag { display: block; }
   /* વોટરમાર્ક — ફોટા પર આછું ચેનલ નામ */
   .watermark { display: none; position: absolute; left: 22px; top: 20px;
@@ -168,7 +188,7 @@
     text-align: center; flex: none; min-height: 0;
     display: flex; align-items: center; justify-content: center;
     overflow: hidden; }
-  body.has-photo .body-sec { padding: 9px 26px 11px; }
+  body.has-photo .body-sec { padding: 7px 24px 9px; }
   #body-text { color: #f2f6ff; font-size: 27px; font-weight: 700;
     width: 100%; }
   .q { position: absolute; font-family: serif; font-size: 46px;
@@ -181,33 +201,27 @@
 
   body:not(.has-photo) .body-sec { flex: 1; padding: 22px 60px; }
 
-  /* ═══ લાલ પટ્ટી — ઘટના મોકલો (મેગાફોન સાથે) ═══ */
-  .strip-red { flex: none;
-    background: linear-gradient(90deg, #e0141b, #a80b11);
-    color: #fff; text-align: center; font-weight: 700; font-size: 21px;
-    padding: 4px 20px; display: flex; align-items: center;
-    justify-content: center; gap: 10px; }
-  .strip-red .mega { font-size: 23px; flex: none; }
-  .strip-red b { color: var(--yellow); font-size: 24px; }
-
-  /* ═══ સફેદ પટ્ટી — જોડાવા સંપર્ક ═══ */
-  /* જોડાવા + Follow Us — એક જ પાતળી સફેદ પટ્ટીમાં */
-  .strip-join { flex: none;
-    background: #fff; color: var(--navy); text-align: center;
-    font-weight: 700; font-size: 19px; padding: 4px 18px;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    white-space: nowrap; }
-  .strip-join b { color: var(--red); font-size: 23px; }
-  .strip-join .divide { width: 2px; height: 22px; background: #d8dfec;
-    margin: 0 4px; flex: none; }
-  .strip-join .fol { font-family: 'AnekGuj'; font-size: 20px; color: #111; }
-  .wa { width: 27px; height: 27px; border-radius: 50%; background: #25d366;
+  /* ═══ એક જ પાતળું footer — ઘટના મોકલો + સંપર્ક + સોશિયલ ═══ */
+  .strip-foot { flex: none;
+    background: linear-gradient(90deg, #e0141b 0%, #c00f16 55%, #9c0a10 100%);
+    color: #fff; font-weight: 700; font-size: 20px;
+    padding: 5px 20px; display: flex; align-items: center;
+    justify-content: center; gap: 9px; white-space: nowrap; }
+  .strip-foot .mega { font-size: 21px; flex: none; }
+  .strip-foot b { color: var(--yellow); font-size: 23px; }
+  .strip-foot .divide { width: 2px; height: 20px; flex: none;
+    background: rgba(255,255,255,.4); margin: 0 5px; }
+  .strip-foot .fol { font-family: 'AnekGuj'; font-size: 19px; }
+  .wa { width: 26px; height: 26px; border-radius: 50%; background: #25d366;
     display: inline-flex; align-items: center; justify-content: center;
     flex: none; }
-  .wa svg { width: 16px; height: 16px; }
-  .socials { display: flex; gap: 7px; }
-  .disc { width: 29px; height: 29px; border-radius: 50%; flex: none;
-    display: flex; align-items: center; justify-content: center; }
+  .wa svg { width: 15px; height: 15px; }
+  .socials { display: flex; gap: 6px; }
+  .disc { width: 27px; height: 27px; border-radius: 50%; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,.35); }
+  .socials svg { width: 16px; height: 16px; fill: #fff; }
+
   /* નીચેની ટેગલાઈન પટ્ટી + LIVE બેજ — એક જ લાઈન */
   .strip-tag { flex: none; background: var(--navy); color: #fff;
     display: flex; align-items: center; gap: 10px;
@@ -236,10 +250,14 @@
   body.story .breaking .brk, body.story .breaking .nws { font-size: 54px; }
   body.story #headline { font-size: 62px; }
   body.story #body-text { font-size: 33px; }
-  body.story .strip-red { font-size: 29px; padding: 12px 26px; }
-  body.story .strip-red b { font-size: 33px; }
-  body.story .strip-join { font-size: 28px; padding: 10px 26px; }
-  body.story .logo-box, body.story .logo-img { width: 230px; }
+  body.story .strip-foot { font-size: 24px; padding: 7px 16px; }
+  body.story .strip-foot b { font-size: 27px; }
+  body.story .strip-foot .fol { font-size: 23px; }
+  body.story .disc { width: 34px; height: 34px; }
+  body.story .socials svg { width: 20px; height: 20px; }
+  body.story .wa { width: 33px; height: 33px; }
+  body.story .wa svg { width: 19px; height: 19px; }
+  body.story .logo-box, body.story .logo-img { width: 200px; }
   body.story .editor { font-size: 26px; }
   body.story .date-badge { font-size: 27px; }
 </style>
@@ -296,15 +314,10 @@
   <div class="watermark" id="watermark"></div>
   <div class="qr" id="qr"><img id="qr-img" alt="QR"></div>
 
-  <div class="strip-red gujarati-text">
+  <div class="strip-foot gujarati-text">
     <span class="mega">📢</span>
-    <span>તમારી આસપાસ બનતી કોઈપણ ઘટના, સમાચાર, સમસ્યા કે તસ્વીર
+    <span class="footmsg">તમારી આસપાસ બનતી ઘટના, સમાચાર કે તસ્વીર
     <b id="contact1"></b> પર મોકલો</span>
-  </div>
-
-  <div class="strip-join gujarati-text">
-    <span id="join-name">Public Daily India</span> સાથે જોડાવા
-    <b id="contact2"></b> પર સંપર્ક કરો
     <span class="wa"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5s.8 1.9.8 2c.1.1.1.3 0 .5l-.4.6c-.1.2-.3.4-.1.7.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.8-1c.2-.2.4-.2.6-.1l1.9.9c.2.1.4.2.4.3.1.1.1.7-.1 1.3z"/></svg></span>
     <span class="divide"></span>
     <span class="fol">Follow Us :</span>
@@ -314,6 +327,7 @@
       <span class="disc d-yt"><svg viewBox="0 0 24 24"><path d="M22 8.2s-.2-1.5-.8-2.1c-.8-.8-1.6-.8-2-.9C16.4 5 12 5 12 5s-4.4 0-7.2.2c-.4.1-1.2.1-2 .9C2.2 6.7 2 8.2 2 8.2S1.8 10 1.8 11.8v1.6C1.8 15.2 2 17 2 17s.2 1.5.8 2.1c.8.8 1.8.8 2.2.9 1.6.1 7 .2 7 .2s4.4 0 7.2-.2c.4-.1 1.2-.1 2-.9.6-.6.8-2.1.8-2.1s.2-1.8.2-3.6v-1.6C22.2 10 22 8.2 22 8.2zM9.8 14.9V8.7l5.8 3.1-5.8 3.1z"/></svg></span>
       <span class="disc d-tw"><svg viewBox="0 0 24 24"><path d="M23 5.1c-.8.4-1.7.6-2.6.8a4.5 4.5 0 0 0 2-2.5c-.9.5-1.9.9-2.9 1.1a4.5 4.5 0 0 0-7.7 4.1A12.8 12.8 0 0 1 2.5 4a4.5 4.5 0 0 0 1.4 6 4.4 4.4 0 0 1-2-.5v.1a4.5 4.5 0 0 0 3.6 4.4c-.7.2-1.4.2-2 .1a4.5 4.5 0 0 0 4.2 3.1A9 9 0 0 1 1 19.1a12.7 12.7 0 0 0 6.9 2c8.3 0 12.8-6.9 12.8-12.8v-.6c.9-.6 1.6-1.4 2.3-2.6z"/></svg></span>
     </div>
+    <span hidden id="join-name"></span><span hidden id="contact2"></span>
   </div>
 
   <div class="strip-tag gujarati-text">
@@ -452,7 +466,7 @@
     const hasPic = !!((news.images && news.images.length) || news.image);
     if (body && hasPic) {
       const r = window.innerHeight / window.innerWidth;
-      body = shortBody(body, r > 1.5 ? 340 : r > 1.1 ? 300 : 250);
+      body = shortBody(body, r > 1.5 ? 260 : r > 1.1 ? 230 : 195);
     }
     if (body) document.getElementById('body-text').textContent = body;
     else document.body.classList.add('no-body');
