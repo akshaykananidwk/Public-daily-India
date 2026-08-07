@@ -276,15 +276,24 @@
                 <option value="gemini">Google Gemini — તમારી key</option>
                 <option value="openai">OpenAI — તમારી key</option>
               </select></label>
-            <label>API Key (Gemini/OpenAI માટે)
-              <input name="text_api_key" type="password"
-                placeholder="Gemini: AIza...  |  OpenAI: sk-..."></label>
-            <label>મોડેલ (ખાલી = ડિફોલ્ટ)
-              <input name="text_model"
-                placeholder="gemini-2.0-flash / gpt-4o-mini"></label>
-            <label>Ollama URL <input name="ollama_url"></label>
-            <label>Ollama વિચાર મોડેલ <input name="model_think"></label>
-            <label>Ollama લેખન મોડેલ <input name="model_write"></label>
+            <div class="txt-box" data-prov="gemini openai">
+              <label><span id="txt-key-label">API Key</span>
+                <input name="text_api_key" type="password" id="txt-key"></label>
+              <label>મોડેલ (ખાલી = ડિફોલ્ટ)
+                <input name="text_model"
+                  placeholder="gemini-2.0-flash / gpt-4o-mini"></label>
+            </div>
+            <div class="txt-box" data-prov="ollama">
+              <p class="hint">Ollama તમારા કોમ્પ્યુટર પર ચાલુ હોવું જોઈએ.</p>
+              <label>Ollama URL <input name="ollama_url"></label>
+              <label>વિચાર મોડેલ <input name="model_think"></label>
+              <label>લેખન મોડેલ <input name="model_write"></label>
+            </div>
+            <div class="row">
+              <button type="button" id="btn-txt-test" class="ghost">
+                🧪 લેખન ટેસ્ટ કરો</button>
+            </div>
+            <div id="txt-info"></div>
           </fieldset>
         </div>
         <div class="two-col">
@@ -297,45 +306,71 @@
             <p class="hint">Instagram માટે: IG Business એકાઉન્ટ FB Page સાથે
               જોડાયેલું + ટોકનમાં instagram_content_publish permission.</p>
           </fieldset>
-          <fieldset class="card"><legend>🖼️ AI તસવીર (OpenAI API)</legend>
+          <fieldset class="card"><legend>🖼️ AI તસવીર</legend>
             <p class="hint">સાચો ફોટો ન હોય ત્યારે હેડલાઈન પરથી AI તસવીર
-              આપોઆપ બને અને પોસ્ટરમાં લાગે. ChatGPT નું જ ઈમેજ એન્જિન —
-              સત્તાવાર API થી. Key: platform.openai.com → API keys.</p>
+              આપોઆપ બને. પ્રોમ્પ્ટ સિસ્ટમ પોતે બનાવે — તમારે કંઈ લખવાનું નહીં.</p>
             <label class="check"><input name="image_ai_enabled" type="checkbox">
               AI તસવીર ચાલુ કરો</label>
-            <label>સર્વિસ
-              <select name="image_ai_provider">
-                <option value="aiauto">☁️ AIAuto — તમારું પ્લેટફોર્મ (કોઈ third-party key નહીં)</option>
-                <option value="local">🖥️ લોકલ (તમારા GPU પર) — કાયમ ₹0</option>
-                <option value="pollinations">Pollinations — મફત (ઓનલાઈન)</option>
-                <option value="gemini">Google Gemini — ~₹3/તસવીર</option>
-                <option value="openai">OpenAI gpt-image-1 — ~₹3.5/તસવીર</option>
+            <label>સર્વિસ પસંદ કરો
+              <select name="image_ai_provider" id="img-provider">
+                <option value="aiauto">☁️ AIAuto — તમારું પ્લેટફોર્મ</option>
+                <option value="local">🖥️ લોકલ SD (તમારા GPU પર) — ₹0</option>
+                <option value="pollinations">🆓 Pollinations — મફત (ઓનલાઈન)</option>
+                <option value="gemini">🔷 Google Gemini</option>
+                <option value="openai">🟢 OpenAI gpt-image-1</option>
               </select></label>
-            <label>API Key (Gemini કે OpenAI માટે)
-              <input name="image_ai_key" type="password"
-                placeholder="Gemini: AIza...  |  OpenAI: sk-..."></label>
-            <label>☁️ AIAuto URL (તમારું પ્લેટફોર્મ)
-              <input name="aiauto_url"
-                placeholder="http://192.168.1.50:8000/api/public/v1"></label>
-            <label>☁️ AIAuto API Key
-              <input name="aiauto_key" type="password"
-                placeholder="ak_..."></label>
-            <label>લોકલ SD URL (ફક્ત લોકલ માટે)
-              <input name="image_ai_local_url"
-                placeholder="http://127.0.0.1:7860"></label>
-            <label>🤖 ઓટો પ્રોમ્પ્ટ — ક્વોલિટી ટૅગ (દરેક પ્રોમ્પ્ટ પાછળ)
-              <input name="image_quality_tags"></label>
-            <label>🚫 નેગેટિવ પ્રોમ્પ્ટ (શું ન જોઈએ)
-              <input name="image_negative"></label>
-            <label>ક્વોલિટી
-              <select name="image_ai_quality">
-                <option value="low">low — સસ્તી (~₹1/તસવીર)</option>
-                <option value="medium">medium — સારી (~₹3.5/તસવીર)</option>
-                <option value="high">high — શ્રેષ્ઠ (~₹14/તસવીર)</option>
-              </select></label>
-            <label>વધારાની સ્ટાઈલ સૂચના (વૈકલ્પિક)
-              <input name="image_ai_style"
-                placeholder="દા.ત. drone view, golden hour light"></label>
+
+            <!-- ☁️ AIAuto -->
+            <div class="prov-box" data-prov="aiauto">
+              <p class="hint">તમારું પોતાનું પ્લેટફોર્મ — કોઈ third-party key નહીં.</p>
+              <label>AIAuto URL
+                <input name="aiauto_url"
+                  placeholder="http://192.168.1.50:8000/api/public/v1"></label>
+              <label>AIAuto API Key
+                <input name="aiauto_key" type="password" placeholder="ak_..."></label>
+            </div>
+
+            <!-- 🖥️ લોકલ SD -->
+            <div class="prov-box" data-prov="local">
+              <p class="hint">Stable Diffusion / Forge <b>--api</b> સાથે ચાલુ હોવું જોઈએ.</p>
+              <label>લોકલ SD URL
+                <input name="image_ai_local_url"
+                  placeholder="http://127.0.0.1:7860"></label>
+            </div>
+
+            <!-- 🆓 Pollinations -->
+            <div class="prov-box" data-prov="pollinations">
+              <p class="hint">મફત, કોઈ key જોઈએ નહીં — ફક્ત ઈન્ટરનેટ. ટેસ્ટિંગ માટે સારું.</p>
+            </div>
+
+            <!-- 🔷 Gemini / 🟢 OpenAI (key બંને માટે એક જ ખાનું) -->
+            <div class="prov-box" data-prov="gemini openai">
+              <p class="hint" id="img-key-hint"></p>
+              <label><span id="img-key-label">API Key</span>
+                <input name="image_ai_key" type="password" id="img-key"></label>
+            </div>
+            <div class="prov-box" data-prov="openai">
+              <label>ક્વોલિટી
+                <select name="image_ai_quality">
+                  <option value="low">low — ~₹1/તસવીર</option>
+                  <option value="medium">medium — ~₹3.5/તસવીર</option>
+                  <option value="high">high — ~₹14/તસવીર</option>
+                </select></label>
+            </div>
+
+            <details style="margin-top:10px">
+              <summary style="cursor:pointer;color:var(--muted);font-size:13px">
+                🤖 એડવાન્સ — ઓટો પ્રોમ્પ્ટ નિયમો (સામાન્ય રીતે બદલવાની જરૂર નથી)
+              </summary>
+              <label>ક્વોલિટી ટૅગ (દરેક પ્રોમ્પ્ટ પાછળ આપોઆપ)
+                <input name="image_quality_tags"></label>
+              <label>નેગેટિવ પ્રોમ્પ્ટ (શું ન જોઈએ)
+                <input name="image_negative"></label>
+              <label>વધારાની સ્ટાઈલ સૂચના (વૈકલ્પિક)
+                <input name="image_ai_style"
+                  placeholder="દા.ત. drone view, golden hour light"></label>
+            </details>
+
             <div class="row">
               <button type="button" id="btn-img-test" class="ghost">
                 🧪 ટેસ્ટ તસવીર બનાવો</button>

@@ -554,7 +554,54 @@ async function loadSettings() {
     if (el.type === "checkbox") el.checked = !!cfg[el.name];
     else el.value = cfg[el.name];
   }
+  syncProviderBoxes();          // પસંદ કરેલા પ્રોવાઈડરના જ ખાના બતાવો
 }
+/* ── પ્રોવાઈડર પ્રમાણે જ ખાના બતાવો ── */
+const IMG_LABEL = { aiauto: "AIAuto", local: "લોકલ SD",
+  pollinations: "Pollinations", gemini: "Gemini", openai: "OpenAI" };
+const KEY_HINT = {
+  gemini: "aistudio.google.com/apikey પરથી key લો. ~₹3/તસવીર.",
+  openai: "platform.openai.com → API keys. બિલિંગ અલગ છે.",
+};
+function syncProviderBoxes() {
+  const p = $("[name=image_ai_provider]") ? $("[name=image_ai_provider]").value : "";
+  document.querySelectorAll(".prov-box").forEach((b) =>
+    b.classList.toggle("show", b.dataset.prov.split(" ").includes(p)));
+  if ($("#img-key-label")) {
+    $("#img-key-label").textContent =
+      (p === "openai" ? "OpenAI" : "Gemini") + " API Key";
+    $("#img-key").placeholder = p === "openai" ? "sk-..." : "AIza...";
+    $("#img-key-hint").textContent = KEY_HINT[p] || "";
+  }
+  if ($("#btn-img-test"))
+    $("#btn-img-test").textContent = `🧪 ${IMG_LABEL[p] || ""} થી ટેસ્ટ તસવીર બનાવો`;
+  // ટેક્સ્ટ AI
+  const t = $("[name=text_provider]") ? $("[name=text_provider]").value : "";
+  document.querySelectorAll(".txt-box").forEach((b) =>
+    b.classList.toggle("show", b.dataset.prov.split(" ").includes(t)));
+  if ($("#txt-key-label")) {
+    $("#txt-key-label").textContent =
+      (t === "openai" ? "OpenAI" : "Gemini") + " API Key";
+    $("#txt-key").placeholder = t === "openai" ? "sk-..." : "AIza...";
+  }
+  if ($("#btn-txt-test"))
+    $("#btn-txt-test").textContent =
+      `🧪 ${t === "ollama" ? "Ollama" : t === "openai" ? "OpenAI" : "Gemini"} થી લેખન ટેસ્ટ`;
+}
+if ($("[name=image_ai_provider]"))
+  $("[name=image_ai_provider]").onchange = syncProviderBoxes;
+if ($("[name=text_provider]"))
+  $("[name=text_provider]").onchange = syncProviderBoxes;
+
+$("#btn-txt-test").onclick = async () => {
+  $("#txt-info").textContent = "લખાવી રહ્યો છું... (પહેલા સેવ કરો)";
+  const r = await (await fetch("/api/text-test", { method: "POST" })).json();
+  $("#txt-info").textContent = r.error
+    ? "❌ " + r.error
+    : "✅ " + (r.provider || "") + " ચાલે છે:\n" + (r.sample || "");
+  toast(r.error || "લેખન ટેસ્ટ પાસ ✓", r.error ? "bad" : "good");
+};
+
 $("#settings-form").onsubmit = async (e) => {
   e.preventDefault();
   const form = e.target, payload = {};

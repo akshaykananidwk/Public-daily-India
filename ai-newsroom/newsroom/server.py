@@ -447,6 +447,26 @@ async def set_settings(payload: dict, _=Depends(require_admin)):
     return {"ok": True}
 
 
+# ── ન્યુઝ લેખન AI ટેસ્ટ (પસંદ કરેલા પ્રોવાઈડરનું જ) ──────────────
+@app.post("/api/text-test")
+async def text_test():
+    cfg = load_config()
+    llm = LLM(cfg)
+    if not await llm.available():
+        return JSONResponse(
+            {"error": f"{llm.provider} ઉપલબ્ધ નથી — key/URL ચેક કરી સેવ કરો"},
+            status_code=400)
+    try:
+        out = await llm.write_news(
+            {"title": "દ્વારકામાં નવા બસ સ્ટેન્ડનું લોકાર્પણ"})
+    except Exception as e:
+        return JSONResponse({"error": str(e)[:300]}, status_code=500)
+    if not out.get("body"):
+        return JSONResponse({"error": "AI એ ખાલી જવાબ આપ્યો"}, status_code=500)
+    return {"ok": True, "provider": llm.provider,
+            "sample": (out.get("title", "") + "\n" + out.get("body", ""))[:400]}
+
+
 # ── AI તસવીર ટેસ્ટ ──────────────────────────────────────────────
 @app.post("/api/image-test")
 async def image_test():
