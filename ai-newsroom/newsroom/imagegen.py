@@ -222,9 +222,16 @@ async def diagnose_aiauto(cfg: dict) -> list[dict]:
         out.append({"step": "2. સર્વર સુધી પહોંચ", "ok": True,
                     "detail": f"{host}:{port} જવાબ આપે છે ✓"})
     except Exception as e:
+        if host in ("127.0.0.1", "localhost", "::1"):
+            hint = ("⚠️ 127.0.0.1 એટલે 'આ જ કોમ્પ્યુટર'. AIAuto જો બીજા "
+                    "કોમ્પ્યુટર પર ચાલે છે તો એનું સાચું IP લખો — "
+                    "દા.ત. http://192.168.10.7:8000/api/public/v1")
+        else:
+            hint = ("એ કોમ્પ્યુટર ચાલુ છે? AIAuto ચાલુ છે? "
+                    "એક જ WiFi/નેટવર્ક પર છો? Firewall બંધ છે?")
         out.append({"step": "2. સર્વર સુધી પહોંચ", "ok": False,
-                    "detail": (f"{host}:{port} સુધી પહોંચાતું નથી — એ કોમ્પ્યુટર "
-                               f"ચાલુ છે? AIAuto ચાલુ છે? ({type(e).__name__})")})
+                    "detail": (f"{host}:{port} સુધી પહોંચાતું નથી "
+                               f"({type(e).__name__}). {hint}")})
         return out
 
     # 3) API key ચાલે છે? (GET /me)
