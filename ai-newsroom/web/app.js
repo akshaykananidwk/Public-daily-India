@@ -255,13 +255,15 @@ function updateRunCost() {
   const n = +$("#run-ai").value || 0;
   const per = IMG_COST[imgProvider] ?? 0;
   const cost = n * per;
-  $("#run-cost").textContent = !imgEnabled && n > 0
-    ? "⚠️ સેટિંગમાં AI તસવીર બંધ છે — પહેલા ચાલુ કરો"
-    : n === 0
-      ? "AI તસવીર નહીં બને — ખર્ચ ₹0"
-      : per === 0
-        ? `${n} AI તસવીર (Pollinations — મફત) — ખર્ચ ₹0`
-        : `અંદાજિત ખર્ચ: ${n} તસવીર × ₹${per} ≈ ₹${cost.toFixed(0)}`;
+  let txt;
+  if (!imgEnabled && n > 0) txt = "⚠️ સેટિંગમાં AI તસવીર બંધ છે — પહેલા ચાલુ કરો";
+  else if (n === 0) txt = "AI તસવીર નહીં બને — ખર્ચ ₹0";
+  else if (imgProvider === "aiauto")
+    txt = `${n} AI તસવીર (AIAuto — ₹0). ⏱️ એક પછી એક બને, દરેકને 1-4 મિનિટ — `
+        + `અંદાજે ${n * 1}-${n * 4} મિનિટ લાગશે.`;
+  else if (per === 0) txt = `${n} AI તસવીર (મફત) — ખર્ચ ₹0`;
+  else txt = `અંદાજિત ખર્ચ: ${n} તસવીર × ₹${per} ≈ ₹${cost.toFixed(0)}`;
+  $("#run-cost").textContent = txt;
 }
 $("#run-ai").oninput = updateRunCost;
 $("#btn-run").onclick = openRunModal;

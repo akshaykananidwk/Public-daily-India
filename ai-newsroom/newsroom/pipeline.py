@@ -180,11 +180,19 @@ async def run_day(press_note: str | None = None,
                     and (ai_limit is None or ai_used < ai_limit)):
                 async def photo_fn(progress, clean=clean, idx=idx):
                     await progress(
-                        f"ન્યુઝ #{idx} માટે AI તસવીર બની રહી છે... (~30 સે)")
+                        f"ન્યુઝ #{idx} માટે AI તસવીર બની રહી છે...")
+
+                    async def on_wait(status, pct, queue_pos, secs):
+                        msg = f"ન્યુઝ #{idx} તસવીર — {status or 'રાહમાં'}"
+                        if queue_pos:
+                            msg += f", queue માં {queue_pos} નંબરે"
+                        msg += f" ({secs} સેકન્ડ થયા)"
+                        await progress(msg, pct=pct)
+
                     # ન્યુઝના વિષય પ્રમાણે દ્રશ્ય (LLM હોય તો સચોટ)
                     scene = await llm.image_scene(clean["title"])
                     return await imagegen.generate(
-                        cfg, clean["title"], scene=scene)
+                        cfg, clean["title"], scene=scene, on_wait=on_wait)
                 try:
                     p = await run_agent("photo", "ceo", photo_fn,
                                         job_id=job_id, message="AI તસવીર")

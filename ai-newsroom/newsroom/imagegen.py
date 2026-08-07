@@ -90,25 +90,31 @@ def _file_url(base: str, f: dict) -> str:
     return base + ("" if u.startswith("/") else "/") + u
 
 
-async def _aiauto(cfg: dict, prompt: str) -> bytes:
+async def _aiauto(cfg: dict, prompt: str, on_wait=None) -> bytes:
     """AIAuto પ્લેટફોર્મ — async job: submit → poll → download.
-    (તમારું પોતાનું સેન્ટ્રલ AI પ્લેટફોર્મ; કોઈ third-party key જોઈએ નહીં.)"""
+    બધા job એક પછી એક ચાલે — એક ઈમેજને 1-4 મિનિટ (queue હોય તો વધુ)."""
     import asyncio
     base = cfg["aiauto_url"].rstrip("/")
     headers = {"X-API-Key": cfg["aiauto_key"]}
     async with httpx.AsyncClient(timeout=60) as c:
         r = await c.post(f"{base}/images", headers=headers,
                          json={"prompt": prompt})
+        if r.status_code == 429:
+            raise RuntimeError("AIAuto: બહુ ઝડપથી request (rate limit) — "
+                               "થોડી વાર પછી ટ્રાય કરો")
         if r.status_code not in (200, 201):
             raise RuntimeError(f"AIAuto submit {r.status_code}: {r.text[:150]}")
         job_id = r.json().get("id")
         if not job_id:
             raise RuntimeError("AIAuto એ job id ન આપ્યો")
-        # poll — ઈમેજ 1-4 મિનિટ લે
-        for _ in range(150):                    # ~10 મિનિટ
+        # poll — ઈમેજ 1-4 મિનિટ લે; 15 મિનિટ સુધી રાહ (ગાઈડ મુજબ)
+        for i in range(225):                    # 225 × 4s ≈ 15 મિનિટ
             await asyncio.sleep(4)
             j = (await c.get(f"{base}/jobs/{job_id}", headers=headers)).json()
             st = j.get("status")
+            if on_wait and i % 5 == 0:          # દર ~20 સેકન્ડે જાણ
+                qp = j.get("queue_position")
+                await on_wait(st, j.get("progress"), qp, i * 4)
             if st == "completed":
                 imgs = [f for f in j.get("files", [])
                         if f.get("kind") == "result_image"] or j.get("files", [])
@@ -120,7 +126,8 @@ async def _aiauto(cfg: dict, prompt: str) -> bytes:
                 return dl.content
             if st in ("failed", "cancelled"):
                 raise RuntimeError(f"AIAuto job {st}: {j.get('error')}")
-    raise RuntimeError("AIAuto: સમય પૂરો (job પૂરું ન થયું)")
+    raise RuntimeError("AIAuto: 15 મિનિટમાં job પૂરું ન થયું — "
+                       "queue લાંબી હોઈ શકે, પછી ટ્રાય કરો")
 
 
 async def _local_sd(cfg: dict, prompt: str) -> bytes:
@@ -280,7 +287,8 @@ CONNECT_HELP = {
 }
 
 
-async def generate(cfg: dict, title: str, scene: str = "") -> str | None:
+async def generate(cfg: dict, title: str, scene: str = "",
+                   on_wait=None) -> str | None:
     """તસવીર બનાવીને ફાઈલ-પાથ પાછો આપે. ભૂલ પડે તો exception.
     scene = ન્યુઝનું અંગ્રેજી દ્રશ્ય-વર્ણન (LLM થી). ખાલી હોય તો વિષય પરથી."""
     if not is_configured(cfg):
@@ -298,7 +306,7 @@ async def generate(cfg: dict, title: str, scene: str = "") -> str | None:
         elif provider == "local":
             img = await _local_sd(cfg, prompt)
         elif provider == "aiauto":
-            img = await _aiauto(cfg, prompt)
+            img = await _aiauto(cfg, prompt, on_wait)
         else:
             img = await _pollinations(prompt)
     except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout) as e:
