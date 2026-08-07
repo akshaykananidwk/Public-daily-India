@@ -5,7 +5,7 @@ from datetime import date
 from . import db
 
 # પ્રતિ AI તસવીર અંદાજિત ખર્ચ (₹)
-IMG_RATE = {"local": 0, "pollinations": 0, "gemini": 3, "openai": 3.5}
+IMG_RATE = {"aiauto": 0, "gemini": 3}
 
 
 def month_cost(month: str, provider: str) -> float:

@@ -182,23 +182,15 @@
 
     // --- સેટિંગ: AI તસવીર ---
     "🖼️ AI તસવીર": "🖼️ AI Images",
+    "Gemini API Key": "Gemini API Key",
+    "🔷 Google Gemini": "🔷 Google Gemini",
     "સાચો ફોટો ન હોય ત્યારે હેડલાઈન પરથી AI તસવીર આપોઆપ બને. પ્રોમ્પ્ટ સિસ્ટમ પોતે બનાવે — તમારે કંઈ લખવાનું નહીં.":
       "When there is no real photo, an AI image is built from the " +
       "headline automatically. The system writes the prompt — you don't " +
       "have to write anything.",
     "AI તસવીર ચાલુ કરો": "Enable AI images",
-    "🖥️ લોકલ SD (તમારા GPU પર) — ₹0": "🖥️ Local SD (on your GPU) — ₹0",
-    "🆓 Pollinations — મફત (ઓનલાઈન)": "🆓 Pollinations — free (online)",
     "તમારું પોતાનું પ્લેટફોર્મ — કોઈ third-party key નહીં.":
       "Your own platform — no third-party key needed.",
-    "સાથે ચાલુ હોવું જોઈએ.": "must be running.",
-    "લોકલ SD URL": "Local SD URL",
-    "મફત, કોઈ key જોઈએ નહીં — ફક્ત ઈન્ટરનેટ. ટેસ્ટિંગ માટે સારું.":
-      "Free, no key needed — just internet. Good for testing.",
-    "ક્વોલિટી": "Quality",
-    "low — ~₹1/તસવીર": "low — ~₹1/image",
-    "medium — ~₹3.5/તસવીર": "medium — ~₹3.5/image",
-    "high — ~₹14/તસવીર": "high — ~₹14/image",
     "🤖 એડવાન્સ — ઓટો પ્રોમ્પ્ટ નિયમો (સામાન્ય રીતે બદલવાની જરૂર નથી)":
       "🤖 Advanced — auto prompt rules (you normally don't need these)",
     "ક્વોલિટી ટૅગ (દરેક પ્રોમ્પ્ટ પાછળ આપોઆપ)":
@@ -212,11 +204,8 @@
     "↩️ ડિફોલ્ટ પર રીસેટ કરો": "↩️ Reset to defaults",
     "🧪 ટેસ્ટ તસવીર બનાવો": "🧪 Generate a test image",
     "🔎 કનેક્શન તપાસો": "🔎 Check connection",
-    "લોકલ SD": "Local SD",
     "aistudio.google.com/apikey પરથી key લો. ~₹3/તસવીર.":
       "Get a key from aistudio.google.com/apikey. ~₹3/image.",
-    "platform.openai.com → API keys. બિલિંગ અલગ છે.":
-      "platform.openai.com → API keys. Billing is separate.",
     "જે પ્રોમ્પ્ટ મોકલાયો:": "Prompt that was sent:",
 
     // --- સેટિંગ: Telegram / WhatsApp ---
@@ -414,7 +403,6 @@
     "AIAuto એ job id ન આપ્યો": "AIAuto did not return a job id",
     "AIAuto: પૂરું થયું પણ ઈમેજ નથી":
       "AIAuto: finished, but there is no image",
-    "લોકલ SD એ ઈમેજ ન આપી": "Local SD returned no image",
     "1. સેટિંગ": "1. Settings",
     "2. સર્વર સુધી પહોંચ": "2. Reaching the server",
     "3. API Key": "3. API key",
@@ -486,9 +474,6 @@
       "Could not connect to the AIAuto platform — is the server running? " +
       "Are the URL and key right? (Settings → AI Images)$1"],
     [/^\(જ્યાં જોડાવા ગયું: (.+)\)$/, "(tried to connect to: $1)"],
-    [/^Pollinations સાથે કનેક્ટ ન થયું — ઈન્ટરનેટ ચેક કરો, કે થોડી વારે ફરી ટ્રાય કરો\.$/,
-      "Could not reach Pollinations — check your internet, or try again " +
-      "in a moment."],
     [/^Google Gemini સાથે કનેક્ટ ન થયું — ઈન્ટરનેટ ચેક કરો\.$/,
       "Could not reach Google Gemini — check your internet."],
     [/^OpenAI સાથે કનેક્ટ ન થયું — ઈન્ટરનેટ ચેક કરો\.$/,

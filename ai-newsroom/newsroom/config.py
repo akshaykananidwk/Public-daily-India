@@ -49,10 +49,9 @@ DEFAULTS = {
     "facebook_page_id": "",
     "instagram_account_id": "",
     "image_ai_enabled": False,
-    "image_ai_provider": "pollinations",  # pollinations|gemini|openai|local|aiauto
-    "image_ai_key": "",                # OpenAI/Gemini API key
-    "image_ai_model": "gpt-image-1",
-    "image_ai_quality": "medium",      # low | medium | high (OpenAI)
+    "image_ai_provider": "aiauto",     # aiauto | gemini
+    "image_ai_key": "",                # Gemini API key
+    "image_ai_model": "gemini-2.5-flash-image",
     "image_ai_style": "",              # વધારાની સ્ટાઈલ સૂચના
     # 🤖 ઓટો પ્રોમ્પ્ટ બિલ્ડર — admin એ પ્રોમ્પ્ટ ન લખવો પડે
     "image_quality_tags": ("ultra realistic, 8K, highly detailed, sharp focus, "
@@ -64,11 +63,6 @@ DEFAULTS = {
     # ☁️ AIAuto પ્લેટફોર્મ (તમારું પોતાનું async job API)
     "aiauto_url": "http://127.0.0.1:8000/api/public/v1",
     "aiauto_key": "",                  # ak_... (X-API-Key)
-    # 🖥️ લોકલ Stable Diffusion (તમારા GPU પર)
-    "image_ai_local_url": "http://127.0.0.1:7860",
-    "image_ai_local_steps": 25,
-    "image_ai_local_cfg": 6,
-    "image_ai_local_sampler": "DPM++ 2M",
     "telegram_token": "",              # @BotFather થી બોટ ટોકન
     "telegram_chat": "",               # @channel કે -100... chat id
     "whatsapp_api_url": "https://bulk.akdwk.in/api.php",
@@ -97,6 +91,10 @@ def clean_key(raw: str) -> str:
     return s
 
 
+# ઈમેજ માટે હવે ફક્ત આ બે — જૂની સેટિંગ (pollinations/local/openai) આપોઆપ બદલાય
+IMAGE_PROVIDERS = ("aiauto", "gemini")
+
+
 def load_config() -> dict:
     cfg = dict(DEFAULTS)
     if CONFIG_PATH.exists():
@@ -105,6 +103,8 @@ def load_config() -> dict:
             cfg.update(saved)
         except Exception:
             pass
+    if cfg.get("image_ai_provider") not in IMAGE_PROVIDERS:
+        cfg["image_ai_provider"] = "aiauto"
     return cfg
 
 

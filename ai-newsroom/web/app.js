@@ -237,14 +237,14 @@ setInterval(refreshStatus, 10000);
 })();
 
 /* ── રન બટન — પહેલા પૂછે: કેટલા ન્યુઝ, કેટલી AI તસવીર ── */
-const IMG_COST = { aiauto: 0, local: 0, pollinations: 0, gemini: 3, openai: 3.5 };
-let imgProvider = "pollinations", imgEnabled = false;
+const IMG_COST = { aiauto: 0, gemini: 3 };
+let imgProvider = "aiauto", imgEnabled = false;
 
 async function openRunModal() {
   try {
     const cfg = await (await fetch("/api/settings")).json();
     $("#run-count").value = cfg.daily_news_count || 5;
-    imgProvider = cfg.image_ai_provider || "pollinations";
+    imgProvider = cfg.image_ai_provider || "aiauto";
     imgEnabled = !!cfg.image_ai_enabled;
     $("#run-ai").value = imgEnabled ? ($("#run-count").value) : 0;
   } catch {}
@@ -261,7 +261,6 @@ function updateRunCost() {
   else if (imgProvider === "aiauto")
     txt = `${n} AI તસવીર (AIAuto — ₹0). ⏱️ એક પછી એક બને, દરેકને 1-4 મિનિટ — `
         + `અંદાજે ${n * 1}-${n * 4} મિનિટ લાગશે.`;
-  else if (per === 0) txt = `${n} AI તસવીર (મફત) — ખર્ચ ₹0`;
   else txt = `અંદાજિત ખર્ચ: ${n} તસવીર × ₹${per} ≈ ₹${cost.toFixed(0)}`;
   $("#run-cost").textContent = txt;
 }
@@ -560,24 +559,19 @@ async function loadSettings() {
   syncProviderBoxes();          // પસંદ કરેલા પ્રોવાઈડરના જ ખાના બતાવો
 }
 /* ── પ્રોવાઈડર પ્રમાણે જ ખાના બતાવો ── */
-const IMG_LABEL = { aiauto: "AIAuto", local: "લોકલ SD",
-  pollinations: "Pollinations", gemini: "Gemini", openai: "OpenAI" };
+const IMG_LABEL = { aiauto: "AIAuto", gemini: "Gemini" };
 const KEY_HINT = {
   gemini: "aistudio.google.com/apikey પરથી key લો. ~₹3/તસવીર.",
-  openai: "platform.openai.com → API keys. બિલિંગ અલગ છે.",
 };
 function syncProviderBoxes() {
   const p = $("[name=image_ai_provider]") ? $("[name=image_ai_provider]").value : "";
   document.querySelectorAll(".prov-box").forEach((b) =>
     b.classList.toggle("show", b.dataset.prov.split(" ").includes(p)));
-  if ($("#img-key-label")) {
-    $("#img-key-label").textContent =
-      (p === "openai" ? "OpenAI" : "Gemini") + " API Key";
-    $("#img-key").placeholder = p === "openai" ? "sk-..." : "AIza...";
-    $("#img-key-hint").textContent = KEY_HINT[p] || "";
-  }
+  if ($("#img-key-hint")) $("#img-key-hint").textContent = KEY_HINT[p] || "";
   if ($("#btn-img-test"))
     $("#btn-img-test").textContent = `🧪 ${IMG_LABEL[p] || ""} થી ટેસ્ટ તસવીર બનાવો`;
+  // કનેક્શન તપાસ ફક્ત AIAuto માટે છે
+  if ($("#btn-diag")) $("#btn-diag").style.display = p === "aiauto" ? "" : "none";
   // ટેક્સ્ટ AI
   const t = $("[name=text_provider]") ? $("[name=text_provider]").value : "";
   document.querySelectorAll(".txt-box").forEach((b) =>

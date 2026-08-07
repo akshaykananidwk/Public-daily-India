@@ -320,10 +320,7 @@
             <label>સર્વિસ પસંદ કરો
               <select name="image_ai_provider" id="img-provider">
                 <option value="aiauto">☁️ AIAuto — તમારું પ્લેટફોર્મ</option>
-                <option value="local">🖥️ લોકલ SD (તમારા GPU પર) — ₹0</option>
-                <option value="pollinations">🆓 Pollinations — મફત (ઓનલાઈન)</option>
                 <option value="gemini">🔷 Google Gemini</option>
-                <option value="openai">🟢 OpenAI gpt-image-1</option>
               </select></label>
 
             <!-- ☁️ AIAuto -->
@@ -336,32 +333,12 @@
                 <input name="aiauto_key" type="password" placeholder="ak_..."></label>
             </div>
 
-            <!-- 🖥️ લોકલ SD -->
-            <div class="prov-box" data-prov="local">
-              <p class="hint">Stable Diffusion / Forge <b>--api</b> સાથે ચાલુ હોવું જોઈએ.</p>
-              <label>લોકલ SD URL
-                <input name="image_ai_local_url"
-                  placeholder="http://127.0.0.1:7860"></label>
-            </div>
-
-            <!-- 🆓 Pollinations -->
-            <div class="prov-box" data-prov="pollinations">
-              <p class="hint">મફત, કોઈ key જોઈએ નહીં — ફક્ત ઈન્ટરનેટ. ટેસ્ટિંગ માટે સારું.</p>
-            </div>
-
-            <!-- 🔷 Gemini / 🟢 OpenAI (key બંને માટે એક જ ખાનું) -->
-            <div class="prov-box" data-prov="gemini openai">
+            <!-- 🔷 Google Gemini -->
+            <div class="prov-box" data-prov="gemini">
               <p class="hint" id="img-key-hint"></p>
-              <label><span id="img-key-label">API Key</span>
-                <input name="image_ai_key" type="password" id="img-key"></label>
-            </div>
-            <div class="prov-box" data-prov="openai">
-              <label>ક્વોલિટી
-                <select name="image_ai_quality">
-                  <option value="low">low — ~₹1/તસવીર</option>
-                  <option value="medium">medium — ~₹3.5/તસવીર</option>
-                  <option value="high">high — ~₹14/તસવીર</option>
-                </select></label>
+              <label><span id="img-key-label">Gemini API Key</span>
+                <input name="image_ai_key" type="password" id="img-key"
+                  placeholder="AIza..."></label>
             </div>
 
             <details style="margin-top:10px">

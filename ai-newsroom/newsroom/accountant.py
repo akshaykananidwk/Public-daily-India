@@ -4,7 +4,7 @@ from datetime import date
 from . import db
 
 # અંદાજિત દર (₹)
-IMAGE_RATE = {"local": 0.0, "pollinations": 0.0, "gemini": 3.0, "openai": 3.5}
+IMAGE_RATE = {"aiauto": 0.0, "gemini": 3.0}
 TEXT_RATE = {"ollama": 0.0, "gemini": 0.3, "openai": 0.5}  # પ્રતિ ન્યુઝ અંદાજ
 
 

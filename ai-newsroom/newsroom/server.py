@@ -399,7 +399,7 @@ async def report_cost(month: str = ""):
     from . import reports
     cfg = load_config()
     month = month or date.today().strftime("%Y-%m")
-    provider = cfg.get("image_ai_provider", "pollinations")
+    provider = cfg.get("image_ai_provider", "aiauto")
     return {"month": month, "provider": provider,
             "cost": reports.month_cost(month, provider)}
 

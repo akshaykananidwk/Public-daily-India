@@ -1,4 +1,4 @@
-"""AI તસવીર જનરેશન — OpenAI ની સત્તાવાર API થી (ChatGPT નું જ ઈમેજ એન્જિન).
+"""AI તસવીર જનરેશન — AIAuto પ્લેટફોર્મ કે Google Gemini થી.
 
 ન્યુઝમાં સાચો ફોટો ન હોય ત્યારે હેડલાઈન પરથી પ્રતીકાત્મક તસવીર બનાવે.
 લખાણ ક્યારેય ઈમેજમાં નહીં — બધું લખાણ HTML+CSS થી જ.
@@ -72,12 +72,10 @@ def topic_scene(title: str) -> str:
 def is_configured(cfg: dict) -> bool:
     if not cfg.get("image_ai_enabled"):
         return False
-    provider = cfg.get("image_ai_provider", "pollinations")
-    if provider in ("openai", "gemini"):
+    provider = cfg.get("image_ai_provider", "aiauto")
+    if provider == "gemini":
         return bool(cfg.get("image_ai_key"))
-    if provider == "aiauto":
-        return bool(cfg.get("aiauto_key") and cfg.get("aiauto_url"))
-    return True  # pollinations / local — key વગર
+    return bool(cfg.get("aiauto_key") and cfg.get("aiauto_url"))
 
 
 def _file_url(base: str, f: dict) -> str:
@@ -134,50 +132,6 @@ async def _aiauto(cfg: dict, prompt: str, on_wait=None) -> bytes:
                 raise RuntimeError(f"AIAuto job {st}: {j.get('error')}")
     raise RuntimeError("AIAuto: 15 મિનિટમાં job પૂરું ન થયું — "
                        "queue લાંબી હોઈ શકે, પછી ટ્રાય કરો")
-
-
-async def _local_sd(cfg: dict, prompt: str) -> bytes:
-    """લોકલ Stable Diffusion (AUTOMATIC1111 / Forge / SD.Next નું API).
-    તમારા GPU પર ચાલે — કોઈ ઈન્ટરનેટ નહીં, કાયમ ₹0."""
-    base = (cfg.get("image_ai_local_url")
-            or "http://127.0.0.1:7860").rstrip("/")
-    steps = int(cfg.get("image_ai_local_steps") or 25)
-    negative = ("text, letters, words, numbers, watermark, logo, "
-                "caption, signature, blurry, distorted, low quality")
-    async with httpx.AsyncClient(timeout=300) as c:
-        r = await c.post(f"{base}/sdapi/v1/txt2img", json={
-            "prompt": prompt,
-            "negative_prompt": negative,
-            "width": 1024, "height": 704,
-            "steps": steps,
-            "cfg_scale": float(cfg.get("image_ai_local_cfg") or 6),
-            "sampler_name": cfg.get("image_ai_local_sampler") or "DPM++ 2M",
-        })
-        if r.status_code != 200:
-            raise RuntimeError(
-                f"લોકલ SD ભૂલ {r.status_code}: {r.text[:200]}")
-        data = r.json().get("images")
-        if not data:
-            raise RuntimeError("લોકલ SD એ ઈમેજ ન આપી")
-        return base64.b64decode(data[0])
-
-
-async def _openai(cfg: dict, prompt: str) -> bytes:
-    async with httpx.AsyncClient(timeout=240) as c:
-        r = await c.post(
-            "https://api.openai.com/v1/images/generations",
-            headers={"Authorization": f"Bearer {cfg['image_ai_key']}"},
-            json={
-                "model": cfg.get("image_ai_model") or "gpt-image-1",
-                "prompt": prompt,
-                "size": "1536x1024",          # પોસ્ટર માટે લેન્ડસ્કેપ
-                "quality": cfg.get("image_ai_quality") or "medium",
-                "n": 1,
-            })
-        if r.status_code != 200:
-            raise RuntimeError(
-                f"OpenAI ઈમેજ API ભૂલ {r.status_code}: {r.text[:200]}")
-        return base64.b64decode(r.json()["data"][0]["b64_json"])
 
 
 async def _gemini(cfg: dict, prompt: str) -> bytes:
@@ -276,30 +230,9 @@ async def diagnose_aiauto(cfg: dict) -> list[dict]:
     return out
 
 
-async def _pollinations(prompt: str) -> bytes:
-    """મફત સર્વિસ — ટેસ્ટિંગ માટે. કોઈ key નહીં, કોઈ ખર્ચ નહીં."""
-    from urllib.parse import quote
-    url = (f"https://image.pollinations.ai/prompt/{quote(prompt[:400])}"
-           f"?width=1536&height=1024&nologo=true&model=flux&enhance=true")
-    async with httpx.AsyncClient(timeout=240, follow_redirects=True) as c:
-        r = await c.get(url, headers={"User-Agent": "ai-newsroom"})
-        if r.status_code != 200:
-            raise RuntimeError(
-                f"Pollinations ભૂલ {r.status_code}: {r.text[:150]}")
-        if len(r.content) < 5000:   # ઈમેજ નહીં પણ error-page આવ્યું હોય
-            raise RuntimeError("Pollinations એ ઈમેજ ન આપી")
-        return r.content
-
-
 # કનેક્શન ન થાય ત્યારે સાફ ગુજરાતી સૂચના
 CONNECT_HELP = {
-    "local": ("લોકલ Stable Diffusion સાથે કનેક્ટ ન થયું — Forge/WebUI ચાલુ "
-              "છે? `--api` સાથે ચલાવ્યું છે? URL બરાબર છે "
-              "(http://127.0.0.1:7860)?"),
-    "pollinations": ("Pollinations સાથે કનેક્ટ ન થયું — ઈન્ટરનેટ ચેક કરો, "
-                     "કે થોડી વારે ફરી ટ્રાય કરો."),
     "gemini": "Google Gemini સાથે કનેક્ટ ન થયું — ઈન્ટરનેટ ચેક કરો.",
-    "openai": "OpenAI સાથે કનેક્ટ ન થયું — ઈન્ટરનેટ ચેક કરો.",
     "aiauto": ("AIAuto પ્લેટફોર્મ સાથે કનેક્ટ ન થયું — સર્વર ચાલુ છે? "
                "URL/key બરાબર છે? (સેટિંગ → AI તસવીર)"),
 }
@@ -315,24 +248,16 @@ async def generate(cfg: dict, title: str, scene: str = "",
         scene = topic_scene(title)
     # ઓટો પ્રોમ્પ્ટ — admin એ કંઈ ન લખવું પડે
     prompt = build_prompt(cfg, scene)
-    provider = cfg.get("image_ai_provider", "pollinations")
+    provider = cfg.get("image_ai_provider", "aiauto")
     try:
-        if provider == "openai":
-            img = await _openai(cfg, prompt)
-        elif provider == "gemini":
+        if provider == "gemini":
             img = await _gemini(cfg, prompt)
-        elif provider == "local":
-            img = await _local_sd(cfg, prompt)
-        elif provider == "aiauto":
-            img = await _aiauto(cfg, prompt, on_wait)
         else:
-            img = await _pollinations(prompt)
+            img = await _aiauto(cfg, prompt, on_wait)
     except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout) as e:
         msg = CONNECT_HELP.get(provider, "કનેક્ટ ન થયું — સેટિંગ ચેક કરો.")
-        url = {"aiauto": cfg.get("aiauto_url"),
-               "local": cfg.get("image_ai_local_url")}.get(provider)
-        if url:
-            msg += f"\n(જ્યાં જોડાવા ગયું: {url})"
+        if provider != "gemini" and cfg.get("aiauto_url"):
+            msg += f"\n(જ્યાં જોડાવા ગયું: {cfg['aiauto_url']})"
         raise RuntimeError(msg) from e
     out = PHOTOS_DIR / f"ai_{datetime.now():%Y%m%d_%H%M%S}.png"
     out.write_bytes(img)
